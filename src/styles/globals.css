@@ -2,38 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom global styles */
-
-html,
-body {
+/* Textured green background for table */
+body, html, #__next {
   height: 100%;
   margin: 0;
-  background-color: #064e3b; /* Tailwind emerald-900 */
+  background-color: #065f46; /* Tailwind emerald-800 */
+  background-image: 
+    radial-gradient(circle at 1px 1px, #064e3b 1px, transparent 2px),
+    radial-gradient(circle at 3px 3px, #064e3b 1px, transparent 2px);
+  background-size: 4px 4px;
   font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-button {
-  cursor: pointer;
-  background: none;
-  border: none;
-  padding: 0;
-  outline-offset: 2px;
-}
-
+/* Card styles */
 .card {
   width: 80px;
   height: 120px;
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+  border: 2px solid #374151; /* Tailwind gray-700 */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   user-select: none;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 1.25rem;
-  transition: transform 0.3s ease;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px;
+  font-weight: 700;
+  font-size: 1.2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card.face-up {
@@ -42,19 +37,67 @@ button {
 }
 
 .card.face-down {
-  background-color: #047857; /* Tailwind emerald-700 */
+  background-color: #1e3a8a; /* Tailwind blue-900 */
   color: transparent;
-  background-image: linear-gradient(45deg, #065f46 25%, transparent 25%),
-    linear-gradient(-45deg, #065f46 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #065f46 75%),
-    linear-gradient(-45deg, transparent 75%, #065f46 75%);
-  background-size: 16px 16px;
-  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    #2563eb 0,
+    #2563eb 2px,
+    #1e3a8a 2px,
+    #1e3a8a 6px
+  );
 }
 
+/* Tableau pile card vertical spacing */
 .tableau-pile {
-  width: 80px;
-  min-height: 120px;
+  width: 80px; /* match card width */
+  height: 400px; /* enough height for stacking cards */
   position: relative;
 }
 
+.tableau-pile > * {
+  margin-top: 0 !important;
+}
+
+/* Adjust card position stacking */
+.tableau-pile > div {
+  position: absolute;
+  left: 0;
+}
+
+/* Stock and Waste piles styling */
+.stock-pile, .waste-pile {
+  width: 80px;
+  height: 120px;
+  border-radius: 8px;
+  border: 2px solid #374151;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background-color: #064e3b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.stock-pile.empty, .waste-pile.empty {
+  background-color: #1f2937; /* Tailwind gray-800 */
+  cursor: default;
+}
+
+/* Foundation pile styling */
+.foundation-pile {
+  width: 80px;
+  height: 120px;
+  border-radius: 8px;
+  border: 2px solid #374151;
+  background-color: #064e3b;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Header spacing fix */
+main.pt-32 {
+  padding-top: 8rem !important; /* Ensures spacing below fixed header */
+}

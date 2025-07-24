@@ -5,30 +5,32 @@ interface HeaderProps {
   onNewGame: () => void;
 }
 
-const formatTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+const formatTime = (seconds: number) => {
+  const mins = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const secs = (seconds % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
 };
 
 const Header: React.FC<HeaderProps> = ({ timeElapsed, onNewGame }) => {
   return (
-    <header className="flex items-center justify-between p-4 bg-green-700 text-white">
-      <h1 className="text-xl font-bold">Alcorn Solitaire</h1>
-      <div className="flex items-center space-x-4">
-        <span aria-live="polite" aria-atomic="true" className="font-mono">
-          {formatTime(timeElapsed)}
-        </span>
-        <button
-          onClick={onNewGame}
-          className="px-3 py-1 bg-green-900 rounded hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-400"
-          aria-label="Start a new game"
-        >
-          New Game
-        </button>
+    <header className="w-full fixed top-0 left-0 bg-gray-900 text-white shadow-md z-50">
+      <div className="max-w-6xl mx-auto flex justify-between items-center px-6 py-4">
+        <h1 className="text-3xl font-semibold">Alcorn Solitaire</h1>
+        <div className="flex items-center space-x-8">
+          <div className="text-lg">Time: {formatTime(timeElapsed)}</div>
+          <button
+            onClick={onNewGame}
+            className="bg-green-700 hover:bg-green-800 px-5 py-2 rounded-md text-lg"
+            aria-label="Start a new game"
+          >
+            New Game
+          </button>
+        </div>
       </div>
     </header>
   );
 };
 
-export default React.memo(Header);
+export default Header;

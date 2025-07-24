@@ -1,26 +1,31 @@
 import React from 'react';
-import { Card as CardType } from '../types'; // Assuming you have a types file
-import Card from './Card';
+import { Card } from '@/types';
 
 interface StockPileProps {
-  cards: CardType[];
-  onDraw: () => void;
+  cards: Card[];
+  onDrawCard?: () => void;
+  disabled?: boolean;
 }
 
-const StockPile: React.FC<StockPileProps> = ({ cards, onDraw }) => {
+const StockPile: React.FC<StockPileProps> = ({ cards, onDrawCard, disabled }) => {
+  const isEmpty = cards.length === 0;
+
   return (
     <button
-      onClick={onDraw}
-      disabled={cards.length === 0}
-      aria-label={cards.length === 0 ? 'Stock pile empty' : 'Draw a card from stock pile'}
-      className={`stock-pile w-16 h-24 rounded border-2 border-green-800 bg-green-700 ${
-        cards.length === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+      type="button"
+      className={`stock-pile w-20 h-28 rounded-md border ${
+        isEmpty ? 'bg-gray-700 cursor-default' : 'bg-green-700 cursor-pointer'
       }`}
+      aria-label={isEmpty ? 'Empty stock pile' : 'Stock pile, click to draw a card'}
+      onClick={() => {
+        if (!disabled && !isEmpty && onDrawCard) onDrawCard();
+      }}
+      disabled={disabled || isEmpty}
     >
-      {cards.length > 0 ? (
-        <div className="card-back" />
+      {isEmpty ? (
+        <div className="empty-pile text-gray-400">Empty</div>
       ) : (
-        <div className="empty-stock text-center text-green-300 mt-8">Empty</div>
+        <div className="card-back" />
       )}
     </button>
   );
