@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background-color: #064e3b; /* Tailwind emerald-900 */
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  outline-offset: 2px;
+}
+
+.card {
+  width: 80px;
+  height: 120px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.card.face-up {
+  background-color: white;
+  color: black;
+}
+
+.card.face-down {
+  background-color: #047857; /* Tailwind emerald-700 */
+  color: transparent;
+  background-image: linear-gradient(45deg, #065f46 25%, transparent 25%),
+    linear-gradient(-45deg, #065f46 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #065f46 75%),
+    linear-gradient(-45deg, transparent 75%, #065f46 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
+
+.tableau-pile {
+  width: 80px;
+  min-height: 120px;
+  position: relative;
+}
+
