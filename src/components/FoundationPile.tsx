@@ -1,29 +1,53 @@
 import React from 'react';
-import { Card as CardType } from '../types';
-import Card from './Card';
+import { Card } from '@/types';
 
 interface FoundationPileProps {
-  pile: CardType[];
-  suit: CardType['suit'];
-  onDropCard: (card: CardType) => void;
+  cards: Card[];
+  onCardClick?: (cardId: string) => void;
+  onDrop?: (cardId: string) => void;
 }
 
-const FoundationPile: React.FC<FoundationPileProps> = ({ pile, suit, onDropCard }) => {
-  const topCard = pile.length > 0 ? pile[pile.length - 1] : null;
-
+const FoundationPile: React.FC<FoundationPileProps> = ({
+  cards,
+  onCardClick,
+  onDrop,
+}) => {
   return (
-    <section
-      className="foundation-pile w-16 h-24 border-2 border-green-800 rounded bg-green-700"
-      aria-label={`Foundation pile for ${suit}`}
+    <div
+      className="foundation-pile w-20 h-28 border rounded-md bg-green-700 flex flex-col items-center justify-center"
       role="list"
-      tabIndex={0}
+      aria-label="Foundation pile"
+      onDrop={(e) => {
+        e.preventDefault();
+        const cardId = e.dataTransfer.getData('text/plain');
+        onDrop && onDrop(cardId);
+      }}
+      onDragOver={(e) => e.preventDefault()}
     >
-      {topCard ? (
-        <Card {...topCard} />
+      {cards.length === 0 ? (
+        <div className="empty-pile text-gray-400">Empty</div>
       ) : (
-        <div className="empty-pile flex items-center justify-center text-green-300">Empty</div>
+        cards.map((card) => (
+          <button
+            key={card.id}
+            type="button"
+            draggable={card.faceUp}
+            onClick={() => onCardClick && onCardClick(card.id)}
+            aria-label={`${card.rank} of ${card.suit}`}
+            role="listitem"
+            className={`card ${card.faceUp ? 'face-up' : 'face-down'}`}
+          >
+            {card.faceUp ? (
+              <span>
+                {card.rank} {card.suit}
+              </span>
+            ) : (
+              <span className="card-back" />
+            )}
+          </button>
+        ))
       )}
-    </section>
+    </div>
   );
 };
 
