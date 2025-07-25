@@ -14,7 +14,8 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDra
     {cards.map((card, index) => (
       <div
         key={card.id}
-        style={{ position: 'absolute', top: `${index * 32}px`, left: 0, right: 0 }}
+        className="tableau-card-position"
+        style={{ '--card-index': index } as React.CSSProperties}
       >
         <Card
           suit={card.suit}

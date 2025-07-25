@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
         <div className="flex items-center gap-3">
-          <img src="/solitaire/alcorn-logo.svg" alt="Alcorn Solitaire Logo" className="h-10 sm:h-12 lg:h-14 w-auto" />
+          <img src="./alcorn-logo.svg" alt="Alcorn Solitaire Logo" className="h-10 sm:h-12 lg:h-14 w-auto" />
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
         </div>
         <div className="flex items-center gap-2 sm:gap-4">

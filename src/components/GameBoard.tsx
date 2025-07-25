@@ -143,9 +143,9 @@ const GameBoard: React.FC = () => {
         settings={gameState.settings}
         onSettingsChange={updateSettings}
       />
-      <div className={`pt-32 sm:pt-28 w-full flex flex-col items-center bg-transparent ${!isClient ? 'hydration-loading' : ''}`}>
+      <div className={`pt-40 sm:pt-28 w-full flex flex-col items-center bg-transparent ${!isClient ? 'hydration-loading' : ''}`}>
         <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-          <div className="card-playing-area flex flex-col gap-4 sm:gap-8 w-full py-4 sm:py-6 pb-48 sm:pb-20">
+          <div className="card-playing-area flex flex-col gap-4 sm:gap-8 w-full py-4 sm:py-6 pb-bottom-responsive">
 
             {/* Stock, Waste, and Foundations - Desktop Layout */}
             <div className="hidden md:flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
@@ -314,16 +314,17 @@ const GameBoard: React.FC = () => {
               ))}
             </div>
             
-            {/* Mobile-only layout for tableau piles (below 768px) */}
+            {/* Mobile-only layout for tableau piles (below 992px) */}
             <div className="mobile-tableau mt-8" style={{ gap: '4px', flexDirection: 'column' }}>
               {/* First row - 4 piles */}
-              <div className="grid grid-cols-4 w-full gap-1">
+              <div className="flex justify-between w-full">
                 {gameState.tableauPiles.slice(0, 4).map((pile, i) => (
                   <div 
                     key={i} 
                     data-drop-zone
                     data-pile-type="tableau"
                     data-pile-index={i}
+                    className="flex-1 max-w-[calc(25%-3px)]"
                   >
                     <TableauPile 
                       cards={pile}
@@ -348,8 +349,8 @@ const GameBoard: React.FC = () => {
                 ))}
               </div>
               
-              {/* Second row - 3 piles centered */}
-              <div className="grid grid-cols-3 w-full gap-1 justify-center mb-8">
+              {/* Second row - 3 piles right-aligned */}
+              <div className="flex justify-end w-full gap-1">
                 {gameState.tableauPiles.slice(4).map((pile, i) => {
                   const actualIndex = i + 4;
                   return (
@@ -358,6 +359,7 @@ const GameBoard: React.FC = () => {
                       data-drop-zone
                       data-pile-type="tableau"
                       data-pile-index={actualIndex}
+                      className="flex-1 max-w-[calc(33.333%-2px)]"
                     >
                       <TableauPile 
                         cards={pile}

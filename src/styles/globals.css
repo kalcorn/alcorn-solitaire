@@ -18,11 +18,11 @@ body {
   overflow: hidden;
 }
 
-/* Mobile-specific body adjustments */
-@media (max-width: 768px) {
+/* Mobile and tablet-specific body adjustments */
+@media (max-width: 991px) {
   body {
-    background-attachment: scroll; /* Better performance on mobile */
-    overflow: auto; /* Allow scrolling on mobile */
+    background-attachment: scroll; /* Better performance on mobile/tablet */
+    overflow: auto; /* Allow scrolling on mobile/tablet */
     height: auto; /* Allow body to expand */
     min-height: 100vh; /* Maintain minimum height */
   }
@@ -120,10 +120,11 @@ body {
   overflow: hidden;
 }
 
-/* Tableau pile with 8px grid alignment */
+/* Tableau pile with responsive height for optimal card stacking */
 .tableau-pile {
-  width: 128px;
-  height: 608px; /* 8px grid alignment (76 * 8) */
+  width: 100%;
+  max-width: 128px;
+  height: 512px; /* Optimized for 13-card max: 128px + (12 × 32px) */
   position: relative;
 }
 
@@ -131,10 +132,12 @@ body {
   margin-top: 0 !important;
 }
 
-/* Adjust card position stacking */
-.tableau-pile > div {
+/* Responsive card position stacking */
+.tableau-card-position {
   position: absolute;
   left: 0;
+  right: 0;
+  top: calc(var(--card-index) * 32px); /* Default desktop/tablet stacking */
 }
 
 /* Container classes for layout stability */
@@ -475,8 +478,9 @@ main.pt-32 {
   }
   
   .tableau-pile {
-    width: 112px;
-    height: 520px;
+    width: 100%;
+    max-width: 112px;
+    height: 496px; /* Optimized for 13-card max: 112px + (12 × 32px) */
   }
   
   .stock-pile, .waste-pile, .foundation-pile {
@@ -489,6 +493,17 @@ main.pt-32 {
   .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
     width: 112px;
     height: 160px;
+  }
+  
+  /* Fix face-down card overflow at tablet resolutions */
+  .card.face-down::after {
+    font-size: 1rem;
+    letter-spacing: 0.25rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 1rem;
+    letter-spacing: 0.25rem;
   }
 }
 
@@ -505,8 +520,14 @@ main.pt-32 {
   }
   
   .tableau-pile {
-    width: 88px;
-    height: 350px;
+    width: 100%;
+    max-width: 88px;  
+    height: 380px; /* Optimized for mobile with 24px stacking: 88 + (12×24) + buffer */
+  }
+  
+  /* Tighter card stacking for mobile */
+  .tableau-card-position {
+    top: calc(var(--card-index) * 24px); /* Reduced stacking for mobile space efficiency */
   }
   
   .stock-pile, .waste-pile, .foundation-pile {
@@ -571,8 +592,14 @@ main.pt-32 {
   }
   
   .tableau-pile {
-    width: 76px;
-    height: 300px;
+    width: 100%;
+    max-width: 76px;
+    height: 340px; /* Optimized for small mobile with tighter stacking */
+  }
+  
+  /* Even tighter card stacking for very small screens */
+  .tableau-card-position {
+    top: calc(var(--card-index) * 20px); /* Very tight stacking for small screens */
   }
   
   .stock-pile, .waste-pile, .foundation-pile {
@@ -670,6 +697,11 @@ main.pt-32 {
   transition: none;
 }
 
+/* Responsive bottom padding for game area */
+.pb-bottom-responsive {
+  padding-bottom: 12rem; /* 192px - extra space for mobile/tablet */
+}
+
 /* Force mutually exclusive tableau layouts */
 .desktop-tableau {
   display: none !important;
@@ -679,12 +711,26 @@ main.pt-32 {
   display: flex !important;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
+  .pb-bottom-responsive {
+    padding-bottom: 5rem; /* 80px - reduced space for desktop */
+  }
+  
   .desktop-tableau {
     display: flex !important;
   }
   
   .mobile-tableau {
     display: none !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .desktop-tableau {
+    display: none !important;
+  }
+  
+  .mobile-tableau {
+    display: flex !important;
   }
 }
