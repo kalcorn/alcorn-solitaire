@@ -24,7 +24,7 @@ interface ParticleEffectsProps {
 
 const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number>(0);
   const particleIdRef = useRef(0);
 
   const colors = {

@@ -9,7 +9,6 @@ import ParticleEffects from './ParticleEffects';
 import SubtleHints from './SubtleHints';
 import { useGameState } from '@/hooks/useGameState';
 import { useDragAndDrop } from '@/hooks/useDragAndDrop';
-import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { Card, CardPosition } from '@/types';
 
 const GameBoard: React.FC = () => {
@@ -26,7 +25,6 @@ const GameBoard: React.FC = () => {
     handleStockFlip,
     handleAutoMoveToFoundation,
     selectCards,
-    deselectCards,
     getMovableCards,
     updateSettings
   } = useGameState();
@@ -317,7 +315,7 @@ const GameBoard: React.FC = () => {
             </div>
             
             {/* Mobile-only layout for tableau piles (below 768px) */}
-            <div className="mobile-tableau" style={{ gap: '4px', flexDirection: 'column' }}>
+            <div className="mobile-tableau mt-8" style={{ gap: '4px', flexDirection: 'column' }}>
               {/* First row - 4 piles */}
               <div className="grid grid-cols-4 w-full gap-1">
                 {gameState.tableauPiles.slice(0, 4).map((pile, i) => (

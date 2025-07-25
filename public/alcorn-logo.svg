@@ -1,0 +1,78 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f1f5f9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="aceCardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:1" />
+    </linearGradient>
+    <filter id="cardShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="3" stdDeviation="2" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+    <filter id="aceShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="1" dy="2" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle for contrast -->
+  <circle cx="32" cy="32" r="30" fill="#1e293b" stroke="#334155" stroke-width="2" opacity="0.95"/>
+  
+  <!-- Card stack -->
+  <g transform="translate(16, 12)">
+    <!-- Card 1 (back left) -->
+    <rect x="0" y="4" width="20" height="28" rx="3" ry="3" 
+          fill="url(#cardGradient)" 
+          stroke="#64748b" 
+          stroke-width="1.5" 
+          filter="url(#cardShadow)"
+          transform="rotate(-25 10 18)" />
+    
+    <!-- Card 2 (middle) -->
+    <rect x="6" y="2" width="20" height="28" rx="3" ry="3" 
+          fill="url(#cardGradient)" 
+          stroke="#64748b" 
+          stroke-width="1.5" 
+          filter="url(#cardShadow)"
+          transform="rotate(-8 16 16)" />
+    
+    <!-- Card 3 (front - Ace of Spades) -->
+    <rect x="12" y="0" width="20" height="28" rx="3" ry="3" 
+          fill="url(#aceCardGradient)" 
+          stroke="#334155" 
+          stroke-width="2" 
+          filter="url(#aceShadow)" />
+    
+    <!-- Ace symbol -->
+    <text x="22" y="10" 
+          font-family="serif" 
+          font-size="7" 
+          font-weight="bold" 
+          fill="#0f172a" 
+          text-anchor="middle">A</text>
+    
+    <!-- Large Spade symbol (more detailed) -->
+    <g transform="translate(22, 12)">
+      <path d="M0 0 C-3 3, -3 7, 0 9 C3 7, 3 3, 0 0 Z" 
+            fill="#0f172a" />
+      <path d="M-1.5 9 L1.5 9 L1 11 L-1 11 Z" 
+            fill="#0f172a" />
+      <rect x="-0.5" y="11" width="1" height="3" 
+            fill="#0f172a" />
+    </g>
+    
+    <!-- Small corner symbols -->
+    <text x="32" y="26" 
+          font-family="serif" 
+          font-size="4" 
+          font-weight="bold" 
+          fill="#0f172a" 
+          text-anchor="middle"
+          transform="rotate(180 32 26)">A</text>
+    <g transform="translate(32, 23) rotate(180)">
+      <path d="M0 0 C-1 1, -1 2.5, 0 3 C1 2.5, 1 1, 0 0 Z" 
+            fill="#0f172a" />
+    </g>
+  </g>
+</svg>

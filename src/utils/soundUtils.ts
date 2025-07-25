@@ -9,12 +9,17 @@ class SoundManager {
 
   constructor() {
     // Initialize AudioContext only on user interaction to avoid Chrome warnings
-    this.initializeAudioContext();
+    // Skip during SSR
+    if (typeof window !== 'undefined') {
+      this.initializeAudioContext();
+    }
   }
 
   private initializeAudioContext() {
     try {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (typeof window !== 'undefined') {
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
     } catch (error) {
       console.warn('Web Audio API not supported:', error);
     }

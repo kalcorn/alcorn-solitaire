@@ -9,6 +9,9 @@ const Home: NextPage = () => {
         <title>Alcorn Solitaire</title>
         <meta name="description" content="Play classic Solitaire online" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/solitaire/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/solitaire/favicon.svg" />
+        <meta name="theme-color" content="#1e293b" />
       </Head>
       <main className="min-h-screen flex flex-col items-center justify-center" suppressHydrationWarning>
         <GameBoard />
