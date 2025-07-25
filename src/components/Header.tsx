@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ timeElapsed, onNewGame }) => (
   <header className="w-full bg-gray-900 text-white py-3 flex justify-between items-center">
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-full">
       <div className="flex flex-col">
-        <h1 className="text-3xl font-bold text-white drop-shadow-sm mb-1">Solitaire</h1>
+        <h1 className="text-3xl font-bold text-white drop-shadow-sm mb-1">Alcorn Solitaire</h1>
         <span className="text-sm text-gray-200">{formatTime(timeElapsed)}</span>
       </div>
       <button
