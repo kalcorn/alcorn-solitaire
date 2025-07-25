@@ -3,59 +3,124 @@
 @tailwind utilities;
 
 body {
-  min-height: 100vh;
+  height: 100vh;
   margin: 0;
   padding: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  background:
-    radial-gradient(circle, rgba(60,100,45,0.23) 0%, rgba(35,97,28,0.8) 100%),
-    repeating-linear-gradient(120deg, rgba(55,129,32,0.07) 0px, rgba(55,129,32,0.07) 2px, transparent 2px, transparent 18px),
-    repeating-linear-gradient(60deg, rgba(37,145,26,0.07) 0px, rgba(37,145,26,0.07) 2px, transparent 2px, transparent 18px),
-    #23611c;
-  background-blend-mode: multiply;
-  background-size: cover, 120px 120px, 120px 120px, cover;
+  background: 
+    radial-gradient(circle at center, #1a5e35 0%, #0d3e22 60%, #0a2f1a 100%),
+    radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.04) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 70%, rgba(0,0,0,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(26,94,53,0.3) 0%, transparent 70%);
+  background-size: 100% 100%, 600px 400px, 800px 600px, 1200px 900px;
+  background-position: center, 20% 30%, 80% 70%, center;
+  background-attachment: fixed;
+  overflow: hidden;
 }
 
-/* Card styles */
+/* Mobile-specific body adjustments */
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll; /* Better performance on mobile */
+  }
+}
+
+/* Card styles with enhanced shadows and 8px grid */
 .card {
-  /*width: 80px;*/
-  /*height: 120px;*/
+  width: 128px;
+  height: 184px; /* 8px grid alignment */
   border-radius: 8px;
-  border: 2px solid #374151; /* Tailwind gray-700 */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border: 1px solid #374151;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   user-select: none;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 8px;
   font-weight: 700;
-  font-size: 1.2rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  cursor: pointer;
 }
 
-/* Ensure face-up cards are always white */
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 16px 32px rgba(0, 0, 0, 0.45),
+    0 8px 16px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.card.playable {
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.card.selected {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 15px 30px rgba(0, 0, 0, 0.5),
+    0 8px 15px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(59, 130, 246, 0.8);
+}
+
+/* Enhanced face-up cards with improved contrast and accessibility */
 .card.face-up {
-  background-color: white !important;
-  color: black;
+  background-color: #fefdf8 !important;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(0,0,0,0.025) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.02) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+  color: #1f2937;
+  border-width: 1px;
+  border-color: #d1d5db;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .card.face-down {
-  background-color: #1e3a8a; /* Tailwind blue-900 */
+  background: linear-gradient(135deg, #7c2d12 0%, #991b1b 50%, #7c2d12 100%);
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(217, 119, 6, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(217, 119, 6, 0.2) 0%, transparent 50%),
+    repeating-linear-gradient(45deg, rgba(217, 119, 6, 0.1) 0px, rgba(217, 119, 6, 0.1) 2px, transparent 2px, transparent 12px),
+    repeating-linear-gradient(-45deg, rgba(217, 119, 6, 0.08) 0px, rgba(217, 119, 6, 0.08) 2px, transparent 2px, transparent 12px);
   color: transparent;
-  background-image: repeating-linear-gradient(
-    45deg,
-    #2563eb 0,
-    #2563eb 2px,
-    #1e3a8a 2px,
-    #1e3a8a 6px
-  );
+  border-width: 1px;
+  border-color: #a16207;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.4),
+    0 3px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(217, 119, 6, 0.2);
+  position: relative;
 }
 
-/* Tableau pile card vertical spacing */
+.card.face-down::after {
+  content: '♠ ♥ ♦ ♣';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: rgba(217, 119, 6, 0.3);
+  letter-spacing: 0.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Tableau pile with 8px grid alignment */
 .tableau-pile {
-  /*width: 80px; /* match card width */
-  height: 400px; /* enough height for stacking cards */
+  width: 128px;
+  height: 608px; /* 8px grid alignment (76 * 8) */
   position: relative;
 }
 
@@ -69,18 +134,87 @@ body {
   left: 0;
 }
 
-/* Stock and Waste piles styling */
+/* Container classes for layout stability */
+.stock-pile-container, .waste-pile-container {
+  display: block;
+  position: static;
+  flex-shrink: 0;
+}
+
+/* Responsive container sizes */
+.stock-pile-responsive, .waste-pile-responsive {
+  width: 128px;
+  height: 184px;
+}
+
+.foundation-pile-responsive {
+  width: 128px;
+  height: 184px;
+}
+
+/* Stock and Waste piles with 8px grid alignment and enhanced styling */
 .stock-pile, .waste-pile {
-  width: 80px;
-  height: 120px;
+  width: 128px;
+  height: 184px; /* 8px grid alignment */
   border-radius: 8px;
   border: 2px solid #374151;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  background-color: #064e3b;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.stock-pile::before, .waste-pile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
+  pointer-events: none;
+}
+
+/* When stock pile has face-down styling */
+.stock-pile.face-down {
+  background: linear-gradient(135deg, #7c2d12 0%, #991b1b 50%, #7c2d12 100%);
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(217, 119, 6, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(217, 119, 6, 0.2) 0%, transparent 50%),
+    repeating-linear-gradient(45deg, rgba(217, 119, 6, 0.1) 0px, rgba(217, 119, 6, 0.1) 2px, transparent 2px, transparent 12px),
+    repeating-linear-gradient(-45deg, rgba(217, 119, 6, 0.08) 0px, rgba(217, 119, 6, 0.08) 2px, transparent 2px, transparent 12px);
+  border-color: #a16207;
+  position: relative;
+}
+
+.stock-pile.face-down::after {
+  content: '♠ ♥ ♦ ♣';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: rgba(217, 119, 6, 0.3);
+  letter-spacing: 0.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.stock-pile:hover, .waste-pile:hover:not(.empty) {
+  box-shadow: 
+    0 12px 28px rgba(0, 0, 0, 0.4),
+    0 6px 12px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border-color: #059669;
+}
+
+.stock-pile.face-down:hover {
+  border-color: #d97706;
 }
 
 .stock-pile.empty, .waste-pile.empty {
@@ -88,17 +222,163 @@ body {
   cursor: default;
 }
 
-/* Foundation pile styling */
+/* Foundation pile with consistent 8px grid and enhanced interactivity */
 .foundation-pile {
-  width: 80px;
-  height: 120px;
+  width: 128px;
+  height: 184px; /* 8px grid alignment */
   border-radius: 8px;
   border: 2px solid #374151;
-  background-color: #064e3b;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.foundation-pile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
+  pointer-events: none;
+}
+
+/* Removed hover effects from foundation piles for cleaner look */
+
+.foundation-pile.drop-zone {
+  border-color: #10b981;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.15),
+    0 0 0 2px rgba(16, 185, 129, 0.6),
+    inset 0 2px 4px rgba(16, 185, 129, 0.1);
+  background-color: #065f46;
+}
+
+/* Enhanced drop zone styling for active zones */
+.drop-zone-active {
+  position: relative;
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+.drop-zone-active::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px dashed #10b981;
+  border-radius: 12px;
+  background-color: rgba(16, 185, 129, 0.15);
+  pointer-events: none;
+  z-index: 1;
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.7;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+  }
+}
+
+/* Card selection states */
+.card.selected {
+  box-shadow: 
+    0 15px 30px rgba(0, 0, 0, 0.5),
+    0 8px 15px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(59, 130, 246, 0.8);
+  transform: translateY(-4px);
+}
+
+/* Enhanced drag preview styling with smooth animations */
+.drag-preview {
+  pointer-events: none;
+  z-index: 1000;
+  will-change: transform;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease-out;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4));
+}
+
+.drag-preview.over-dropzone {
+  transform: rotate(3deg) scale(1.05);
+  opacity: 0.9;
+}
+
+.drag-preview.dragging {
+  transform: rotate(5deg) scale(1);
+  opacity: 0.8;
+}
+
+/* Card stacking depth effect */
+.card-stack {
+  position: relative;
+}
+
+.card-stack::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: -2px;
+  bottom: -2px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  z-index: -1;
+}
+
+/* Subtle glow for playable cards */
+.card.playable {
+  animation: subtle-glow 2s ease-in-out infinite;
+}
+
+@keyframes subtle-glow {
+  0%, 100% { 
+    box-shadow: 
+      0 8px 20px rgba(0, 0, 0, 0.3),
+      0 3px 6px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 2px rgba(59, 130, 246, 0.5);
+  }
+  50% { 
+    box-shadow: 
+      0 8px 20px rgba(0, 0, 0, 0.3),
+      0 3px 6px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 2px rgba(59, 130, 246, 0.7),
+      0 0 8px rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Game completion celebration */
+.win-celebration {
+  animation: celebration 0.8s ease-out;
+}
+
+@keyframes celebration {
+  0% { 
+    opacity: 0; 
+    transform: scale(0.8) rotateY(-180deg);
+  }
+  50% {
+    transform: scale(1.1) rotateY(0deg);
+  }
+  100% { 
+    opacity: 1; 
+    transform: scale(1) rotateY(0deg);
+  }
 }
 
 /* Header spacing fix */
@@ -106,13 +386,132 @@ main.pt-32 {
   padding-top: 8rem !important; /* Ensures spacing below fixed header */
 }
 
-/* --- Blue linen texture for card backs (NEW) --- */
-.blue-linen-texture {
-  background-color: #225b9c;
-  background-image:
-    repeating-linear-gradient(45deg, #3490dc 0px, #3490dc 1px, transparent 1px, transparent 6px),
-    repeating-linear-gradient(-45deg, #1465a2 0px, #1465a2 1px, transparent 1px, transparent 6px);
-  background-size: 12px 12px;
-  border-radius: 0.75rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+
+/* --- Card playing area with 8px grid system --- */
+.card-playing-area {
+  border-radius: 0;
+  padding: 0; /* Remove padding to align with header */
+  background: transparent;
+}
+
+/* Responsive spacing adjustments for mobile */
+@media (max-width: 768px) {
+  .card-playing-area {
+    padding: 0; /* Remove padding to align with header */
+  }
+  
+  .card {
+    width: 88px;
+    height: 126px;
+    font-size: 0.75rem;
+  }
+  
+  .tableau-pile {
+    width: 88px;
+    height: 350px;
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 88px;
+    height: 126px;
+    min-width: 88px;
+    min-height: 126px;
+  }
+  
+  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
+    width: 88px;
+    height: 126px;
+  }
+  
+  /* Improve mobile touch targets */
+  .card {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px; /* Minimum touch target size */
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
+  }
+  
+  /* Better mobile text sizing */
+  .card .rank, .card .suit {
+    font-size: 0.7rem;
+  }
+  
+  /* Fix face-down card overflow on mobile */
+  .card.face-down::after {
+    font-size: 0.8rem;
+    letter-spacing: 0.2rem;
+  }
+  
+  /* Improve button sizes for mobile */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Extra small mobile adjustments */
+@media (max-width: 480px) {
+  .card-playing-area {
+    gap: 12px;
+  }
+  
+  .card {
+    width: 76px;
+    height: 110px;
+    font-size: 0.65rem;
+  }
+  
+  .tableau-pile {
+    width: 76px;
+    height: 300px;
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 76px;
+    height: 110px;
+  }
+  
+  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
+    width: 76px;
+    height: 110px;
+  }
+  
+  /* Smaller text for very small screens */
+  .card .rank, .card .suit {
+    font-size: 0.6rem;
+  }
+  
+  /* Further adjust face-down cards for very small screens */
+  .card.face-down::after {
+    font-size: 0.6rem;
+    letter-spacing: 0.1rem;
+  }
+}
+
+/* Enhanced accessibility and contrast */
+@media (prefers-reduced-motion: reduce) {
+  .card, .stock-pile, .waste-pile, .foundation-pile {
+    transition: none;
+  }
+  
+  .card:hover, .stock-pile:hover, .waste-pile:hover, .foundation-pile:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card.face-up {
+    border-color: #000000;
+    color: #000000;
+  }
+  
+  .card.face-down {
+    border-color: #ffffff;
+  }
 }

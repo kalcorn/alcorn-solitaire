@@ -7,6 +7,8 @@ interface CardProps {
   rank: number;
   faceUp: boolean;
   onClick?: () => void;
+  onMouseDown?: (event: React.MouseEvent) => void;
+  onTouchStart?: (event: React.TouchEvent) => void;
 }
 
 const suitIcons = {
@@ -20,7 +22,7 @@ const rankMap = {
   1: "A", 11: "J", 12: "Q", 13: "K"
 };
 
-const Card: React.FC<CardProps> = ({ suit, rank, faceUp, onClick }) => {
+const Card: React.FC<CardProps> = ({ suit, rank, faceUp, onClick, onMouseDown, onTouchStart }) => {
   const SuitIcon = suitIcons[suit];
   const displayRank = rankMap[rank as keyof typeof rankMap] || rank;
 
@@ -28,12 +30,14 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, onClick }) => {
 
   return (
     <div
-      className={`card w-100 h-28 rounded-xl border-2 border-gray-300 shadow-lg
+      className={`card rounded-lg shadow-xl
         flex items-center justify-center select-none cursor-pointer
-        transition-transform duration-150 active:scale-95
-        ${faceUp ? "bg-white face-up" : "blue-linen-texture border-blue-800"}`
+        transition-all duration-200 hover:shadow-2xl hover:-translate-y-1 active:scale-95
+        ${faceUp ? "face-up" : "face-down"}`
       }
       onClick={onClick}
+      onMouseDown={onMouseDown}
+      onTouchStart={onTouchStart}
       style={{
         userSelect: 'none',
         touchAction: 'manipulation',
@@ -43,18 +47,18 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, onClick }) => {
       {faceUp ? (
         <div className="relative w-full h-full">
           {/* Top-left corner */}
-          <div className="absolute top-1 left-1 flex flex-col items-start">
-            <span className={`${suitColor} text-xs font-bold`}>{displayRank}</span>
-            <SuitIcon className={`${suitColor} text-base`} />
+          <div className="absolute top-2 left-2 flex flex-col items-start">
+            <span className={`${suitColor} text-lg font-bold leading-none`}>{displayRank}</span>
+            <SuitIcon className={`${suitColor} text-2xl mt-1`} />
           </div>
           {/* Bottom-right corner (rotated) */}
-          <div className="absolute bottom-1 right-1 flex flex-col items-end rotate-180">
-            <span className={`${suitColor} text-xs font-bold`}>{displayRank}</span>
-            <SuitIcon className={`${suitColor} text-base`} />
+          <div className="absolute bottom-2 right-2 flex flex-col items-end rotate-180">
+            <span className={`${suitColor} text-lg font-bold leading-none`}>{displayRank}</span>
+            <SuitIcon className={`${suitColor} text-2xl mt-1`} />
           </div>
-          {/* Center large faded suit */}
+          {/* Center large faded suit with subtle glow */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <SuitIcon className={`${suitColor} opacity-20 text-5xl`} />
+            <SuitIcon className={`${suitColor} opacity-25 text-8xl drop-shadow-sm`} />
           </div>
         </div>
       ) : (

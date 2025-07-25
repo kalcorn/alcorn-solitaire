@@ -10,7 +10,7 @@ const Home: NextPage = () => {
         <meta name="description" content="Play classic Solitaire online" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <main className="min-h-screen bg-green-900 flex flex-col items-center justify-center">
+      <main className="min-h-screen flex flex-col items-center justify-center" suppressHydrationWarning>
         <GameBoard />
       </main>
     </>

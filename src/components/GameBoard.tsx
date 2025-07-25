@@ -1,118 +1,394 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Header from './Header';
 import TableauPile from './TableauPile';
 import FoundationPile from './FoundationPile';
 import StockPile from './StockPile';
 import WastePile from './WastePile';
-import { Card as CardType, Suit } from '@/types';
-
-// --- 7 tableau piles: classic deal, last card faceUp
-const initialTableau: CardType[][] = [
-  [ { id: 'H1', suit: 'hearts', rank: 1, faceUp: true } ],
-  [
-    { id: 'C2', suit: 'clubs', rank: 2, faceUp: false },
-    { id: 'D2', suit: 'diamonds', rank: 2, faceUp: true },
-  ],
-  [
-    { id: 'S3a', suit: 'spades', rank: 3, faceUp: false },
-    { id: 'H3a', suit: 'hearts', rank: 3, faceUp: false },
-    { id: 'C3a', suit: 'clubs', rank: 3, faceUp: true },
-  ],
-  [
-    { id: 'D4a', suit: 'diamonds', rank: 4, faceUp: false },
-    { id: 'S4a', suit: 'spades', rank: 4, faceUp: false },
-    { id: 'H4a', suit: 'hearts', rank: 4, faceUp: false },
-    { id: 'C4a', suit: 'clubs', rank: 4, faceUp: true },
-  ],
-  [
-    { id: 'S5a', suit: 'spades', rank: 5, faceUp: false },
-    { id: 'D5a', suit: 'diamonds', rank: 5, faceUp: false },
-    { id: 'H5a', suit: 'hearts', rank: 5, faceUp: false },
-    { id: 'C5a', suit: 'clubs', rank: 5, faceUp: false },
-    { id: 'S5b', suit: 'spades', rank: 5, faceUp: true },
-  ],
-  [
-    { id: 'H6a', suit: 'hearts', rank: 6, faceUp: false },
-    { id: 'D6a', suit: 'diamonds', rank: 6, faceUp: false },
-    { id: 'C6a', suit: 'clubs', rank: 6, faceUp: false },
-    { id: 'S6a', suit: 'spades', rank: 6, faceUp: false },
-    { id: 'H6b', suit: 'hearts', rank: 6, faceUp: false },
-    { id: 'D6b', suit: 'diamonds', rank: 6, faceUp: true },
-  ],
-  [
-    { id: 'C7a', suit: 'clubs', rank: 7, faceUp: false },
-    { id: 'S7a', suit: 'spades', rank: 7, faceUp: false },
-    { id: 'H7a', suit: 'hearts', rank: 7, faceUp: false },
-    { id: 'D7a', suit: 'diamonds', rank: 7, faceUp: false },
-    { id: 'C7b', suit: 'clubs', rank: 7, faceUp: false },
-    { id: 'S7b', suit: 'spades', rank: 7, faceUp: false },
-    { id: 'H7b', suit: 'hearts', rank: 7, faceUp: true },
-  ],
-];
-
-// --- Dummy 4 foundation piles (empty for now) ---
-const initialFoundation: CardType[][] = [[], [], [], []];
-
-// --- 24-card stock pile, face down ---
-const initialStock: CardType[] = Array.from({ length: 24 }, (_, i) => ({
-  id: `stock-${i + 1}`,
-  suit: (['hearts', 'diamonds', 'clubs', 'spades'] as Suit[])[i % 4],
-  rank: ((i % 13) + 1),
-  faceUp: false
-}));
-
-const initialWaste: CardType[] = [];
+import DragPreview from './DragPreview';
+import { useGameState } from '@/hooks/useGameState';
+import { useDragAndDrop } from '@/hooks/useDragAndDrop';
+import { Card, CardPosition } from '@/types';
 
 const GameBoard: React.FC = () => {
-  const [tableauPiles, setTableauPiles] = useState<CardType[][]>(initialTableau);
-  const [foundationPiles, setFoundationPiles] = useState<CardType[][]>(initialFoundation);
-  const [stockPile, setStockPile] = useState<CardType[]>(initialStock);
-  const [wastePile, setWastePile] = useState<CardType[]>(initialWaste);
-  const [timeElapsed, setTimeElapsed] = useState(0);
+  const [isClient, setIsClient] = React.useState(false);
+  const {
+    gameState,
+    timeElapsed,
+    startNewGame,
+    moveCards,
+    handleStockFlip,
+    handleAutoMoveToFoundation,
+    selectCards,
+    deselectCards,
+    getMovableCards,
+    updateSettings
+  } = useGameState();
 
-  useEffect(() => {
-    const timer = setInterval(() => setTimeElapsed((t) => t + 1), 1000);
-    return () => clearInterval(timer);
+  // Ensure client-side rendering for consistent hydration
+  React.useEffect(() => {
+    setIsClient(true);
   }, []);
 
-  const handleNewGame = () => {
-    setTimeElapsed(0);
-    // TODO: Reset logic for piles here
+  const {
+    dragState,
+    startDrag,
+    updateDrag,
+    endDrag,
+    isZoneHovered,
+    getDragPreviewStyle,
+    hoveredZone
+  } = useDragAndDrop();
+
+  const handleCardClick = (cardId: string, pileType: 'tableau' | 'foundation' | 'waste', pileIndex: number, cardIndex: number) => {
+    // Double-click to auto-move to foundation
+    const card = getCardById(cardId);
+    if (card) {
+      const result = handleAutoMoveToFoundation(card);
+      if (result.success) {
+        return;
+      }
+    }
+
+    // Single click for selection
+    const movableCards = getMovableCards({ pileType, pileIndex, cardIndex });
+    if (movableCards.length > 0) {
+      selectCards({ pileType, pileIndex, cardIndex }, movableCards);
+    }
   };
 
-  return (
-    <>
-      <Header timeElapsed={timeElapsed} onNewGame={handleNewGame} />
-      <main className="pt-24 min-h-screen w-full flex flex-col items-center">
-        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-6 w-full">
-            {/* Stock, Waste, Foundations */}
-            <div className="flex flex-row items-center justify-between w-full gap-8 mb-6">
-              <div className="flex flex-row items-center gap-4">
-                <StockPile cards={stockPile} />
-                <WastePile cards={wastePile} />
+  const handleDrop = (source: CardPosition, target: CardPosition, cards: Card[]) => {
+    const result = moveCards(source, target, cards);
+    if (!result.success) {
+      console.warn('Move failed:', result.error);
+    }
+  };
+
+  const getCardById = (cardId: string): Card | null => {
+    // Search all piles for the card
+    for (const pile of gameState.tableauPiles) {
+      const card = pile.find(c => c.id === cardId);
+      if (card) return card;
+    }
+    for (const pile of gameState.foundationPiles) {
+      const card = pile.find(c => c.id === cardId);
+      if (card) return card;
+    }
+    const wasteCard = gameState.wastePile.find(c => c.id === cardId);
+    if (wasteCard) return wasteCard;
+    return null;
+  };
+
+  // Global mouse/touch event handlers for drag and drop
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      updateDrag(e as any);
+    };
+
+    const handleMouseUp = () => {
+      endDrag(handleDrop);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      updateDrag(e as any);
+    };
+
+    const handleTouchEnd = () => {
+      endDrag(handleDrop);
+    };
+
+    if (dragState.isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [dragState.isDragging, updateDrag, endDrag]);
+
+  // Show loading state during hydration to prevent mismatches
+  if (!isClient) {
+    return (
+      <>
+        <Header 
+          timeElapsed={0}
+          moves={0}
+          score={0}
+          onNewGame={() => {}}
+          settings={{
+            deckCyclingLimit: 0,
+            drawCount: 1,
+            autoMoveToFoundation: true,
+            showTimer: true
+          }}
+          onSettingsChange={() => {}}
+        />
+        <div className="pt-20 sm:pt-24 w-full flex flex-col items-center bg-transparent" style={{ height: 'calc(100vh - 0px)' }}>
+          <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex-1 overflow-hidden">
+            <div className="card-playing-area flex flex-col gap-6 sm:gap-8 w-full h-full mt-6">
+
+              {/* Placeholder content during hydration */}
+              <div className="flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
+                <div className="flex flex-row items-center gap-4 sm:gap-6 flex-shrink-0">
+                  <div className="stock-pile opacity-50"></div>
+                  <div className="waste-pile opacity-50"></div>
+                </div>
+                <div className="flex flex-row items-center gap-2 sm:gap-3 flex-shrink-0">
+                  {[0, 1, 2, 3].map(i => (
+                    <div key={i} className="foundation-pile opacity-50"></div>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-row items-center gap-4">
-                {[0, 1, 2, 3].map(i => (
-                  <FoundationPile key={i} index={i} cards={foundationPiles[i]} />
+
+              {/* Desktop tableau placeholder */}
+              <div className="hidden sm:flex justify-between w-full">
+                {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="flex-shrink-0" style={{ width: '128px' }}>
+                    <div className="tableau-pile opacity-50"></div>
+                  </div>
                 ))}
               </div>
-            </div>
-            {/* Tableau piles - perfectly flush left/right using grid with negative margin */}
-            <div className="grid grid-cols-7 w-full">
-              {tableauPiles.map((pile, i) => (
-                <div key={i} className={i === 0 ? "pe-2" :
-                  i === tableauPiles.length -1 ? "ps-2" 
-                  : "px-2"}>
-          
-                  <TableauPile cards={pile} />
+              
+              {/* Mobile tableau placeholder */}
+              <div className="sm:hidden space-y-2">
+                <div className="grid grid-cols-4 w-full gap-1">
+                  {[0, 1, 2, 3].map(i => (
+                    <div key={i}>
+                      <div className="tableau-pile opacity-50"></div>
+                    </div>
+                  ))}
                 </div>
-
-              ))}
+                <div className="grid grid-cols-3 w-full gap-1 justify-center">
+                  {[4, 5, 6].map(i => (
+                    <div key={i}>
+                      <div className="tableau-pile opacity-50"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </main>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Header 
+        timeElapsed={timeElapsed}
+        moves={gameState.moves}
+        score={gameState.score}
+        onNewGame={startNewGame}
+        settings={gameState.settings}
+        onSettingsChange={updateSettings}
+      />
+      <div className="pt-20 sm:pt-24 w-full flex flex-col items-center bg-transparent" style={{ height: 'calc(100vh - 0px)' }}>
+        <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex-1 overflow-hidden">
+          <div className="card-playing-area flex flex-col gap-6 sm:gap-8 w-full h-full mt-6">
+
+            {/* Stock, Waste, and Foundations */}
+            <div className="flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
+              <div className="flex flex-row items-center gap-4 sm:gap-6 flex-shrink-0">
+                <StockPile 
+                  cards={gameState.stockPile} 
+                  onClick={handleStockFlip}
+                  cyclesRemaining={gameState.settings.deckCyclingLimit > 0 ? 
+                    Math.max(0, gameState.settings.deckCyclingLimit - gameState.stockCycles) : 
+                    undefined}
+                  canCycle={gameState.settings.deckCyclingLimit === 0 || 
+                    gameState.stockCycles < gameState.settings.deckCyclingLimit}
+                />
+                <WastePile 
+                  cards={gameState.wastePile}
+                  onCardClick={(cardId) => {
+                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
+                    if (cardIndex !== -1) {
+                      handleCardClick(cardId, 'waste', 0, cardIndex);
+                    }
+                  }}
+                  onCardDragStart={(cardId, event) => {
+                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
+                    if (cardIndex !== -1) {
+                      const movableCards = getMovableCards({ pileType: 'waste', pileIndex: 0, cardIndex });
+                      if (movableCards.length > 0) {
+                        startDrag(movableCards, { pileType: 'waste', pileIndex: 0, cardIndex }, event);
+                      }
+                    }
+                  }}
+                />
+              </div>
+              <div className="flex flex-row items-center gap-2 sm:gap-3 flex-shrink-0">
+                {[0, 1, 2, 3].map(i => (
+                  <div
+                    key={i}
+                    data-drop-zone
+                    data-pile-type="foundation"
+                    data-pile-index={i}
+                    className={isZoneHovered('foundation', i) ? 'drop-zone' : ''}
+                  >
+                    <FoundationPile 
+                      index={i} 
+                      cards={gameState.foundationPiles[i]}
+                      onCardClick={(cardId) => {
+                        const cardIndex = gameState.foundationPiles[i].findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          handleCardClick(cardId, 'foundation', i, cardIndex);
+                        }
+                      }}
+                      onCardDragStart={(cardId, event) => {
+                        const cardIndex = gameState.foundationPiles[i].findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          const movableCards = getMovableCards({ pileType: 'foundation', pileIndex: i, cardIndex });
+                          if (movableCards.length > 0) {
+                            startDrag(movableCards, { pileType: 'foundation', pileIndex: i, cardIndex }, event);
+                          }
+                        }
+                      }}
+                      isDropZone={isZoneHovered('foundation', i)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tableau piles */}
+            <div className="hidden sm:flex justify-between w-full">
+              {gameState.tableauPiles.map((pile, i) => (
+                <div 
+                  key={i} 
+                  className="flex-shrink-0"
+                  data-drop-zone
+                  data-pile-type="tableau"
+                  data-pile-index={i}
+                  style={{ width: '128px' }}
+                >
+                  <TableauPile 
+                    cards={pile}
+                    onCardClick={(cardId) => {
+                      const cardIndex = pile.findIndex(c => c.id === cardId);
+                      if (cardIndex !== -1) {
+                        handleCardClick(cardId, 'tableau', i, cardIndex);
+                      }
+                    }}
+                    onCardDragStart={(cardId, event) => {
+                      const cardIndex = pile.findIndex(c => c.id === cardId);
+                      if (cardIndex !== -1) {
+                        const movableCards = getMovableCards({ pileType: 'tableau', pileIndex: i, cardIndex });
+                        if (movableCards.length > 0) {
+                          startDrag(movableCards, { pileType: 'tableau', pileIndex: i, cardIndex }, event);
+                        }
+                      }
+                    }}
+                    isDropZone={isZoneHovered('tableau', i)}
+                  />
+                </div>
+              ))}
+            </div>
+            
+            {/* Mobile-only layout for tableau piles */}
+            <div className="sm:hidden space-y-2">
+              {/* First row - 4 piles */}
+              <div className="grid grid-cols-4 w-full gap-1">
+                {gameState.tableauPiles.slice(0, 4).map((pile, i) => (
+                  <div 
+                    key={i} 
+                    data-drop-zone
+                    data-pile-type="tableau"
+                    data-pile-index={i}
+                  >
+                    <TableauPile 
+                      cards={pile}
+                      onCardClick={(cardId) => {
+                        const cardIndex = pile.findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          handleCardClick(cardId, 'tableau', i, cardIndex);
+                        }
+                      }}
+                      onCardDragStart={(cardId, event) => {
+                        const cardIndex = pile.findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          const movableCards = getMovableCards({ pileType: 'tableau', pileIndex: i, cardIndex });
+                          if (movableCards.length > 0) {
+                            startDrag(movableCards, { pileType: 'tableau', pileIndex: i, cardIndex }, event);
+                          }
+                        }
+                      }}
+                      isDropZone={isZoneHovered('tableau', i)}
+                    />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Second row - 3 piles centered */}
+              <div className="grid grid-cols-3 w-full gap-1 justify-center">
+                {gameState.tableauPiles.slice(4).map((pile, i) => {
+                  const actualIndex = i + 4;
+                  return (
+                    <div 
+                      key={actualIndex} 
+                      data-drop-zone
+                      data-pile-type="tableau"
+                      data-pile-index={actualIndex}
+                    >
+                      <TableauPile 
+                        cards={pile}
+                        onCardClick={(cardId) => {
+                          const cardIndex = pile.findIndex(c => c.id === cardId);
+                          if (cardIndex !== -1) {
+                            handleCardClick(cardId, 'tableau', actualIndex, cardIndex);
+                          }
+                        }}
+                        onCardDragStart={(cardId, event) => {
+                          const cardIndex = pile.findIndex(c => c.id === cardId);
+                          if (cardIndex !== -1) {
+                            const movableCards = getMovableCards({ pileType: 'tableau', pileIndex: actualIndex, cardIndex });
+                            if (movableCards.length > 0) {
+                              startDrag(movableCards, { pileType: 'tableau', pileIndex: actualIndex, cardIndex }, event);
+                            }
+                          }
+                        }}
+                        isDropZone={isZoneHovered('tableau', actualIndex)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Win condition display */}
+            {gameState.isGameWon && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-8 text-center shadow-2xl win-celebration">
+                  <h2 className="text-3xl font-bold text-green-600 mb-4">🎉 Congratulations! 🎉</h2>
+                  <p className="text-lg mb-4">You won in {gameState.moves} moves!</p>
+                  <p className="text-lg mb-6">Final Score: {gameState.score}</p>
+                  <button
+                    onClick={startNewGame}
+                    className="px-6 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-lg hover:bg-emerald-700 border border-emerald-500 hover:shadow-xl active:scale-95 transition-all"
+                  >
+                    🎮 Play Again
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Drag Preview */}
+            {dragState.isDragging && (
+              <DragPreview
+                cards={dragState.draggedCards}
+                style={getDragPreviewStyle()}
+                isOverDropZone={!!hoveredZone}
+              />
+            )}
+          </div>
+        </div>
+      </div>
     </>
   );
 };
