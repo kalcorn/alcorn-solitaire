@@ -133,12 +133,26 @@ const GameBoard: React.FC = () => {
             <div className="card-playing-area flex flex-col gap-6 sm:gap-8 w-full h-full mt-6">
 
               {/* Placeholder content during hydration */}
-              <div className="flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
+              {/* Desktop placeholder */}
+              <div className="hidden sm:flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
                 <div className="flex flex-row items-center gap-4 sm:gap-6 flex-shrink-0">
                   <div className="stock-pile opacity-50"></div>
                   <div className="waste-pile opacity-50"></div>
                 </div>
                 <div className="flex flex-row items-center gap-2 sm:gap-3 flex-shrink-0">
+                  {[0, 1, 2, 3].map(i => (
+                    <div key={i} className="foundation-pile opacity-50"></div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile placeholder */}
+              <div className="sm:hidden space-y-3">
+                <div className="flex justify-center gap-4">
+                  <div className="stock-pile opacity-50"></div>
+                  <div className="waste-pile opacity-50"></div>
+                </div>
+                <div className="grid grid-cols-4 gap-1 w-full">
                   {[0, 1, 2, 3].map(i => (
                     <div key={i} className="foundation-pile opacity-50"></div>
                   ))}
@@ -155,7 +169,7 @@ const GameBoard: React.FC = () => {
               </div>
               
               {/* Mobile tableau placeholder */}
-              <div className="sm:hidden space-y-2">
+              <div className="sm:hidden space-y-1">
                 <div className="grid grid-cols-4 w-full gap-1">
                   {[0, 1, 2, 3].map(i => (
                     <div key={i}>
@@ -192,8 +206,8 @@ const GameBoard: React.FC = () => {
         <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex-1 overflow-hidden">
           <div className="card-playing-area flex flex-col gap-6 sm:gap-8 w-full h-full mt-6">
 
-            {/* Stock, Waste, and Foundations */}
-            <div className="flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
+            {/* Stock, Waste, and Foundations - Desktop Layout */}
+            <div className="hidden sm:flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
               <div className="flex flex-row items-center gap-4 sm:gap-6 flex-shrink-0">
                 <StockPile 
                   cards={gameState.stockPile} 
@@ -224,6 +238,74 @@ const GameBoard: React.FC = () => {
                 />
               </div>
               <div className="flex flex-row items-center gap-2 sm:gap-3 flex-shrink-0">
+                {[0, 1, 2, 3].map(i => (
+                  <div
+                    key={i}
+                    data-drop-zone
+                    data-pile-type="foundation"
+                    data-pile-index={i}
+                    className={isZoneHovered('foundation', i) ? 'drop-zone' : ''}
+                  >
+                    <FoundationPile 
+                      index={i} 
+                      cards={gameState.foundationPiles[i]}
+                      onCardClick={(cardId) => {
+                        const cardIndex = gameState.foundationPiles[i].findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          handleCardClick(cardId, 'foundation', i, cardIndex);
+                        }
+                      }}
+                      onCardDragStart={(cardId, event) => {
+                        const cardIndex = gameState.foundationPiles[i].findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          const movableCards = getMovableCards({ pileType: 'foundation', pileIndex: i, cardIndex });
+                          if (movableCards.length > 0) {
+                            startDrag(movableCards, { pileType: 'foundation', pileIndex: i, cardIndex }, event);
+                          }
+                        }
+                      }}
+                      isDropZone={isZoneHovered('foundation', i)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile Layout - Stock and Waste on first row, Foundations on second row */}
+            <div className="sm:hidden space-y-3">
+              {/* First row - Stock and Waste */}
+              <div className="flex justify-center gap-4">
+                <StockPile 
+                  cards={gameState.stockPile} 
+                  onClick={handleStockFlip}
+                  cyclesRemaining={gameState.settings.deckCyclingLimit > 0 ? 
+                    Math.max(0, gameState.settings.deckCyclingLimit - gameState.stockCycles) : 
+                    undefined}
+                  canCycle={gameState.settings.deckCyclingLimit === 0 || 
+                    gameState.stockCycles < gameState.settings.deckCyclingLimit}
+                />
+                <WastePile 
+                  cards={gameState.wastePile}
+                  onCardClick={(cardId) => {
+                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
+                    if (cardIndex !== -1) {
+                      handleCardClick(cardId, 'waste', 0, cardIndex);
+                    }
+                  }}
+                  onCardDragStart={(cardId, event) => {
+                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
+                    if (cardIndex !== -1) {
+                      const movableCards = getMovableCards({ pileType: 'waste', pileIndex: 0, cardIndex });
+                      if (movableCards.length > 0) {
+                        startDrag(movableCards, { pileType: 'waste', pileIndex: 0, cardIndex }, event);
+                      }
+                    }
+                  }}
+                />
+              </div>
+              
+              {/* Second row - Foundation piles */}
+              <div className="grid grid-cols-4 gap-1 w-full">
                 {[0, 1, 2, 3].map(i => (
                   <div
                     key={i}
@@ -292,7 +374,7 @@ const GameBoard: React.FC = () => {
             </div>
             
             {/* Mobile-only layout for tableau piles */}
-            <div className="sm:hidden space-y-2">
+            <div className="sm:hidden space-y-1">
               {/* First row - 4 piles */}
               <div className="grid grid-cols-4 w-full gap-1">
                 {gameState.tableauPiles.slice(0, 4).map((pile, i) => (

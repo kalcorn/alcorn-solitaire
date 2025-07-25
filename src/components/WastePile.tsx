@@ -46,8 +46,8 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
         </>
       ) : (
         <div 
-          className={`waste-pile ${cards.length === 0 ? 'empty' : ''} flex items-center justify-center`}
-          style={{ position: 'absolute', top: 0, left: 0, width: '128px', height: '184px' }}
+          className={`waste-pile ${cards.length === 0 ? 'empty' : ''} flex items-center justify-center waste-pile-responsive`}
+          style={{ position: 'absolute', top: 0, left: 0 }}
         >
           <div className="text-gray-400 text-sm opacity-60">Empty</div>
         </div>

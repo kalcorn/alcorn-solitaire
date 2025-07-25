@@ -47,10 +47,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="p-2 rounded-lg bg-slate-700 text-white hover:bg-slate-600 border border-slate-600 hover:border-slate-500 transition-all"
+        className="text-xs sm:text-sm font-mono font-bold text-white bg-black bg-opacity-30 rounded-lg px-3 py-2 border border-white border-opacity-10 backdrop-blur-sm hover:bg-opacity-40 transition-all"
         title="Game Settings"
       >
-        <BsGear className="w-5 h-5" />
+        <div className="flex items-center justify-center min-h-[20px]">
+          <BsGear className="w-4 h-4 sm:w-5 sm:h-5" />
+        </div>
       </button>
 
       {/* Settings Modal */}
@@ -79,10 +81,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <select
                     value={settings.deckCyclingLimit}
                     onChange={(e) => handleSettingChange('deckCyclingLimit', parseInt(e.target.value))}
-                    className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white cursor-pointer"
+                    className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white cursor-pointer text-gray-900"
                   >
                     {cyclingOptions.map(option => (
-                      <option key={option.value} value={option.value}>
+                      <option key={option.value} value={option.value} className="text-gray-900">
                         {option.label}
                       </option>
                     ))}
@@ -103,10 +105,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <select
                     value={settings.drawCount}
                     onChange={(e) => handleSettingChange('drawCount', parseInt(e.target.value))}
-                    className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white cursor-pointer"
+                    className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white cursor-pointer text-gray-900"
                   >
                     {drawCountOptions.map(option => (
-                      <option key={option.value} value={option.value}>
+                      <option key={option.value} value={option.value} className="text-gray-900">
                         {option.label}
                       </option>
                     ))}

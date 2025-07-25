@@ -443,8 +443,13 @@ main.pt-32 {
   
   /* Fix face-down card overflow on mobile */
   .card.face-down::after {
-    font-size: 0.8rem;
-    letter-spacing: 0.2rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.15rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 0.7rem;
+    letter-spacing: 0.15rem;
   }
   
   /* Improve button sizes for mobile */
@@ -488,8 +493,13 @@ main.pt-32 {
   
   /* Further adjust face-down cards for very small screens */
   .card.face-down::after {
-    font-size: 0.6rem;
-    letter-spacing: 0.1rem;
+    font-size: 0.5rem;
+    letter-spacing: 0.08rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 0.5rem;
+    letter-spacing: 0.08rem;
   }
 }
 
