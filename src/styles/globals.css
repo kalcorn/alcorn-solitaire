@@ -22,6 +22,9 @@ body {
 @media (max-width: 768px) {
   body {
     background-attachment: scroll; /* Better performance on mobile */
+    overflow: auto; /* Allow scrolling on mobile */
+    height: auto; /* Allow body to expand */
+    min-height: 100vh; /* Maintain minimum height */
   }
 }
 
@@ -40,17 +43,17 @@ body {
   flex-direction: column;
   justify-content: space-between;
   font-weight: 700;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   position: relative;
   cursor: pointer;
 }
 
 .card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-6px) scale(1.02);
   box-shadow: 
-    0 16px 32px rgba(0, 0, 0, 0.45),
-    0 8px 16px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    0 12px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .card.playable {
@@ -240,6 +243,7 @@ body {
   position: relative;
 }
 
+
 .foundation-pile::before {
   content: '';
   position: absolute;
@@ -381,6 +385,74 @@ body {
   }
 }
 
+/* Card landing animation */
+.card-landing {
+  animation: cardLand 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes cardLand {
+  0% {
+    transform: translateY(-20px) scale(1.1);
+  }
+  60% {
+    transform: translateY(5px) scale(0.95);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Card cascade animation */
+.card-cascade {
+  animation: cascade 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes cascade {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) rotate(-10deg) scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(10px) rotate(2deg) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+/* Card flip entrance animation */
+.card-flip-in {
+  animation: flipIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes flipIn {
+  0% {
+    transform: rotateY(-90deg) scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: rotateY(-45deg) scale(1.1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Pile shake animation for invalid drops */
+.pile-shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
 /* Header spacing fix */
 main.pt-32 {
   padding-top: 8rem !important; /* Ensures spacing below fixed header */
@@ -392,6 +464,32 @@ main.pt-32 {
   border-radius: 0;
   padding: 0; /* Remove padding to align with header */
   background: transparent;
+}
+
+/* Medium screen adjustments (768px - 1024px) for better fit */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .card {
+    width: 112px;
+    height: 160px;
+    font-size: 0.9rem;
+  }
+  
+  .tableau-pile {
+    width: 112px;
+    height: 520px;
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 112px;
+    height: 160px;
+    min-width: 112px;
+    min-height: 160px;
+  }
+  
+  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
+    width: 112px;
+    height: 160px;
+  }
 }
 
 /* Responsive spacing adjustments for mobile */
@@ -417,6 +515,7 @@ main.pt-32 {
     min-width: 88px;
     min-height: 126px;
   }
+  
   
   .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
     width: 88px;
@@ -481,6 +580,7 @@ main.pt-32 {
     height: 110px;
   }
   
+  
   .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
     width: 76px;
     height: 110px;
@@ -523,5 +623,68 @@ main.pt-32 {
   
   .card.face-down {
     border-color: #ffffff;
+  }
+}
+
+/* Professional hydration loading effect */
+.hydration-loading {
+  pointer-events: none;
+  position: relative;
+}
+
+.hydration-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  animation: hydration-pulse 2s ease-in-out infinite;
+}
+
+@keyframes hydration-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  50% {
+    opacity: 0.8;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Ensure proper layering during hydration */
+.hydration-loading .card,
+.hydration-loading .stock-pile,
+.hydration-loading .waste-pile,
+.hydration-loading .foundation-pile,
+.hydration-loading .tableau-pile {
+  filter: blur(4px);
+  opacity: 0.7;
+  transition: none;
+}
+
+/* Force mutually exclusive tableau layouts */
+.desktop-tableau {
+  display: none !important;
+}
+
+.mobile-tableau {
+  display: flex !important;
+}
+
+@media (min-width: 768px) {
+  .desktop-tableau {
+    display: flex !important;
+  }
+  
+  .mobile-tableau {
+    display: none !important;
   }
 }

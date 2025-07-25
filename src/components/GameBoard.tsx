@@ -5,12 +5,19 @@ import FoundationPile from './FoundationPile';
 import StockPile from './StockPile';
 import WastePile from './WastePile';
 import DragPreview from './DragPreview';
+import ParticleEffects from './ParticleEffects';
+import SubtleHints from './SubtleHints';
 import { useGameState } from '@/hooks/useGameState';
 import { useDragAndDrop } from '@/hooks/useDragAndDrop';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { Card, CardPosition } from '@/types';
 
 const GameBoard: React.FC = () => {
   const [isClient, setIsClient] = React.useState(false);
+  const [particleTrigger, setParticleTrigger] = React.useState<{
+    type: 'win' | 'validMove' | null;
+    position?: { x: number; y: number };
+  }>({ type: null });
   const {
     gameState,
     timeElapsed,
@@ -28,6 +35,14 @@ const GameBoard: React.FC = () => {
   React.useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Trigger win effect when game is won
+  React.useEffect(() => {
+    if (gameState.isGameWon) {
+      setParticleTrigger({ type: 'win' });
+      setTimeout(() => setParticleTrigger({ type: null }), 100);
+    }
+  }, [gameState.isGameWon]);
 
   const {
     dragState,
@@ -58,7 +73,15 @@ const GameBoard: React.FC = () => {
 
   const handleDrop = (source: CardPosition, target: CardPosition, cards: Card[]) => {
     const result = moveCards(source, target, cards);
-    if (!result.success) {
+    if (result.success) {
+      // Trigger sparkle effect for valid moves
+      setParticleTrigger({ 
+        type: 'validMove', 
+        position: { x: window.innerWidth / 2, y: window.innerHeight / 2 } 
+      });
+      // Clear trigger after a brief delay
+      setTimeout(() => setParticleTrigger({ type: null }), 100);
+    } else {
       console.warn('Move failed:', result.error);
     }
   };
@@ -111,104 +134,24 @@ const GameBoard: React.FC = () => {
     };
   }, [dragState.isDragging, updateDrag, endDrag]);
 
-  // Show loading state during hydration to prevent mismatches
-  if (!isClient) {
-    return (
-      <>
-        <Header 
-          timeElapsed={0}
-          moves={0}
-          score={0}
-          onNewGame={() => {}}
-          settings={{
-            deckCyclingLimit: 0,
-            drawCount: 1,
-            autoMoveToFoundation: true,
-            showTimer: true
-          }}
-          onSettingsChange={() => {}}
-        />
-        <div className="pt-20 sm:pt-24 w-full flex flex-col items-center bg-transparent" style={{ height: 'calc(100vh - 0px)' }}>
-          <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex-1 overflow-hidden">
-            <div className="card-playing-area flex flex-col gap-6 sm:gap-8 w-full h-full mt-6">
-
-              {/* Placeholder content during hydration */}
-              {/* Desktop placeholder */}
-              <div className="hidden sm:flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
-                <div className="flex flex-row items-center gap-4 sm:gap-6 flex-shrink-0">
-                  <div className="stock-pile opacity-50"></div>
-                  <div className="waste-pile opacity-50"></div>
-                </div>
-                <div className="flex flex-row items-center gap-2 sm:gap-3 flex-shrink-0">
-                  {[0, 1, 2, 3].map(i => (
-                    <div key={i} className="foundation-pile opacity-50"></div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mobile placeholder */}
-              <div className="sm:hidden space-y-3">
-                <div className="flex justify-center gap-4">
-                  <div className="stock-pile opacity-50"></div>
-                  <div className="waste-pile opacity-50"></div>
-                </div>
-                <div className="grid grid-cols-4 gap-1 w-full">
-                  {[0, 1, 2, 3].map(i => (
-                    <div key={i} className="foundation-pile opacity-50"></div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Desktop tableau placeholder */}
-              <div className="hidden sm:flex justify-between w-full">
-                {[0, 1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="flex-shrink-0" style={{ width: '128px' }}>
-                    <div className="tableau-pile opacity-50"></div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Mobile tableau placeholder */}
-              <div className="sm:hidden" style={{ gap: '4px', display: 'flex', flexDirection: 'column' }}>
-                <div className="grid grid-cols-4 w-full gap-1">
-                  {[0, 1, 2, 3].map(i => (
-                    <div key={i}>
-                      <div className="tableau-pile opacity-50"></div>
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-3 w-full gap-1 justify-center">
-                  {[4, 5, 6].map(i => (
-                    <div key={i}>
-                      <div className="tableau-pile opacity-50"></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
 
   return (
     <>
       <Header 
-        timeElapsed={timeElapsed}
-        moves={gameState.moves}
-        score={gameState.score}
+        timeElapsed={isClient ? timeElapsed : 0}
+        moves={isClient ? gameState.moves : 0}
+        score={isClient ? gameState.score : 0}
         onNewGame={startNewGame}
         settings={gameState.settings}
         onSettingsChange={updateSettings}
       />
-      <div className="pt-20 sm:pt-24 w-full flex flex-col items-center bg-transparent" style={{ height: 'calc(100vh - 0px)' }}>
-        <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 flex-1 overflow-hidden">
-          <div className="card-playing-area flex flex-col gap-6 sm:gap-8 w-full h-full mt-6">
+      <div className={`pt-32 sm:pt-28 w-full flex flex-col items-center bg-transparent ${!isClient ? 'hydration-loading' : ''}`}>
+        <div className="w-full max-w-6xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="card-playing-area flex flex-col gap-4 sm:gap-8 w-full py-4 sm:py-6 pb-48 sm:pb-20">
 
             {/* Stock, Waste, and Foundations - Desktop Layout */}
-            <div className="hidden sm:flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
-              <div className="flex flex-row items-center gap-4 sm:gap-6 flex-shrink-0">
+            <div className="hidden md:flex flex-row items-start justify-between w-full" style={{ minHeight: '184px' }}>
+              <div className="flex flex-row items-center gap-2 md:gap-4 lg:gap-6 flex-shrink-0">
                 <StockPile 
                   cards={gameState.stockPile} 
                   onClick={handleStockFlip}
@@ -237,7 +180,7 @@ const GameBoard: React.FC = () => {
                   }}
                 />
               </div>
-              <div className="flex flex-row items-center gap-2 sm:gap-3 flex-shrink-0">
+              <div className="flex flex-row items-center gap-1 md:gap-2 lg:gap-3 flex-shrink-0">
                 {[0, 1, 2, 3].map(i => (
                   <div
                     key={i}
@@ -272,7 +215,7 @@ const GameBoard: React.FC = () => {
             </div>
 
             {/* Mobile Layout - Stock and Waste on first row, Foundations on second row */}
-            <div className="sm:hidden space-y-3">
+            <div className="md:hidden space-y-3">
               {/* First row - Stock and Waste */}
               <div className="flex justify-center gap-4">
                 <StockPile 
@@ -339,8 +282,8 @@ const GameBoard: React.FC = () => {
               </div>
             </div>
 
-            {/* Tableau piles */}
-            <div className="hidden sm:flex justify-between w-full">
+            {/* Tableau piles - Desktop only (768px+) */}
+            <div className="desktop-tableau justify-between w-full">
               {gameState.tableauPiles.map((pile, i) => (
                 <div 
                   key={i} 
@@ -373,8 +316,8 @@ const GameBoard: React.FC = () => {
               ))}
             </div>
             
-            {/* Mobile-only layout for tableau piles */}
-            <div className="sm:hidden" style={{ gap: '4px', display: 'flex', flexDirection: 'column' }}>
+            {/* Mobile-only layout for tableau piles (below 768px) */}
+            <div className="mobile-tableau" style={{ gap: '4px', flexDirection: 'column' }}>
               {/* First row - 4 piles */}
               <div className="grid grid-cols-4 w-full gap-1">
                 {gameState.tableauPiles.slice(0, 4).map((pile, i) => (
@@ -408,7 +351,7 @@ const GameBoard: React.FC = () => {
               </div>
               
               {/* Second row - 3 piles centered */}
-              <div className="grid grid-cols-3 w-full gap-1 justify-center">
+              <div className="grid grid-cols-3 w-full gap-1 justify-center mb-8">
                 {gameState.tableauPiles.slice(4).map((pile, i) => {
                   const actualIndex = i + 4;
                   return (
@@ -471,6 +414,12 @@ const GameBoard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Particle Effects */}
+      <ParticleEffects trigger={particleTrigger} />
+
+      {/* Subtle Hints */}
+      <SubtleHints gameState={gameState} />
     </>
   );
 };

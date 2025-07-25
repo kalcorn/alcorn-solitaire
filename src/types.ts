@@ -8,6 +8,24 @@ export interface Card {
   draggable?: boolean;
 }
 
+export interface GameStats {
+  gamesPlayed: number;
+  gamesWon: number;
+  totalTime: number; // in seconds
+  bestTime: number; // fastest completion in seconds
+  currentStreak: number;
+  longestStreak: number;
+  averageMoves: number;
+  totalMoves: number;
+  lastPlayed: number; // timestamp
+}
+
+export interface GameHistoryEntry {
+  state: Omit<GameState, 'history' | 'historyIndex'>;
+  timestamp: number;
+  action: string;
+}
+
 export interface GameState {
   tableauPiles: Card[][];
   foundationPiles: Card[][];
@@ -25,7 +43,12 @@ export interface GameState {
     drawCount: number;
     autoMoveToFoundation: boolean;
     showTimer: boolean;
+    soundEnabled: boolean;
+    showHints: boolean;
   };
+  stats: GameStats;
+  history: GameHistoryEntry[];
+  historyIndex: number;
 }
 
 export interface MoveResult {

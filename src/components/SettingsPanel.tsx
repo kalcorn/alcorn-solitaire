@@ -6,18 +6,18 @@ export interface GameSettings {
   drawCount: number; // 1 or 3 cards from stock
   autoMoveToFoundation: boolean;
   showTimer: boolean;
+  soundEnabled: boolean;
+  showHints: boolean;
 }
 
 interface SettingsPanelProps {
   settings: GameSettings;
   onSettingsChange: (settings: GameSettings) => void;
-  onNewGame: () => void;
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ 
   settings, 
-  onSettingsChange, 
-  onNewGame 
+  onSettingsChange 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -46,7 +46,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         className="text-xs sm:text-sm font-mono font-bold text-white bg-black bg-opacity-30 rounded-lg px-3 py-2 border border-white border-opacity-10 backdrop-blur-sm hover:bg-opacity-40 transition-all"
         title="Game Settings"
       >
-        <div className="flex items-center justify-center min-h-[20px]">
+        <div className="flex items-center justify-center" style={{ minHeight: '32px' }}>
           <BsGear className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
       </button>
@@ -132,22 +132,53 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   </div>
                 </label>
               </div>
+
+              {/* Sound Effects */}
+              <div>
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={settings.soundEnabled}
+                    onChange={(e) => handleSettingChange('soundEnabled', e.target.checked)}
+                    className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                  />
+                  <div>
+                    <span className="text-sm font-semibold text-gray-700">
+                      Sound Effects
+                    </span>
+                    <p className="text-xs text-gray-500">
+                      Play sounds for card movements and game events
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              {/* Show Hints */}
+              <div>
+                <label className="flex items-center space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={settings.showHints}
+                    onChange={(e) => handleSettingChange('showHints', e.target.checked)}
+                    className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                  />
+                  <div>
+                    <span className="text-sm font-semibold text-gray-700">
+                      Show Hints
+                    </span>
+                    <p className="text-xs text-gray-500">
+                      Display helpful move suggestions during gameplay
+                    </p>
+                  </div>
+                </label>
+              </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-between mt-8 pt-4 border-t border-gray-200">
-              <button
-                onClick={() => {
-                  onNewGame();
-                  setIsOpen(false);
-                }}
-                className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors"
-              >
-                New Game
-              </button>
+            <div className="flex justify-center mt-8 pt-4 border-t border-gray-200">
               <button
                 onClick={() => setIsOpen(false)}
-                className="px-4 py-2 rounded-lg bg-gray-600 text-white font-semibold hover:bg-gray-700 transition-colors"
+                className="px-6 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors"
               >
                 Close
               </button>

@@ -105,8 +105,23 @@ export function createInitialGameState(): GameState {
       deckCyclingLimit: 0, // unlimited by default
       drawCount: 1,
       autoMoveToFoundation: true,
-      showTimer: true
-    }
+      showTimer: true,
+      soundEnabled: true,
+      showHints: false
+    },
+    stats: {
+      gamesPlayed: 0,
+      gamesWon: 0,
+      totalTime: 0,
+      bestTime: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      averageMoves: 0,
+      totalMoves: 0,
+      lastPlayed: 0
+    },
+    history: [],
+    historyIndex: -1
   };
 }
 

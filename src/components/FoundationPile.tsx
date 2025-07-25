@@ -28,14 +28,16 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
           <div className="text-gray-300 text-xs font-semibold text-center">{suits[index]}</div>
         </div>
       ) : (
-        <div className="relative h-full">
+        <>
           {/* Show slight stacking effect */}
           {cards.slice(-3).map((card, stackIndex, visibleCards) => (
             <div
               key={card.id}
-              className="absolute top-0 left-0"
+              className="absolute"
               style={{ 
-                transform: `translateY(${stackIndex * -1}px) translateX(${stackIndex * 0.5}px)`,
+                top: '50%',
+                left: '50%',
+                transform: `translate(-50%, -50%) translateY(${stackIndex * -1}px) translateX(${stackIndex * 0.5}px)`,
                 zIndex: stackIndex
               }}
             >
@@ -52,7 +54,7 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
               />
             </div>
           ))}
-        </div>
+        </>
       )}
     </div>
   );

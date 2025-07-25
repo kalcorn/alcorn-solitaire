@@ -2,6 +2,9 @@ import { useState, useCallback, useEffect } from 'react';
 import { GameState, Card, CardPosition, MoveResult } from '@/types';
 import { createInitialGameState, cloneGameState } from '@/utils/gameUtils';
 import { validateAndExecuteMove, flipStock, autoMoveToFoundation } from '@/utils/moveValidation';
+import { soundManager, playSoundEffect } from '@/utils/soundUtils';
+import { saveSettings, loadSettings, saveGameState, loadGameState, clearGameState } from '@/utils/localStorage';
+import { useUndoRedo } from './useUndoRedo';
 
 /**
  * Custom hook for managing game state and actions
@@ -25,8 +28,23 @@ export function useGameState() {
         deckCyclingLimit: 0, // unlimited by default
         drawCount: 1,
         autoMoveToFoundation: true,
-        showTimer: true
-      }
+        showTimer: true,
+        soundEnabled: true,
+        showHints: false
+      },
+      stats: {
+        gamesPlayed: 0,
+        gamesWon: 0,
+        totalTime: 0,
+        bestTime: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        averageMoves: 0,
+        totalMoves: 0,
+        lastPlayed: 0
+      },
+      history: [],
+      historyIndex: -1
     };
   });
   const [timeElapsed, setTimeElapsed] = useState(0);
@@ -51,22 +69,80 @@ export function useGameState() {
   // Initialize game state after hydration
   useEffect(() => {
     if (!isHydrated) {
-      setGameState(createInitialGameState());
-      setGameStarted(false);
-      setTimeElapsed(0);
+      // Load saved settings first
+      const savedSettings = loadSettings();
+      
+      // Try to load saved game state
+      const savedGameState = loadGameState();
+      
+      let initialState: GameState;
+      
+      if (savedGameState && !savedGameState.isGameWon) {
+        // Restore saved game if it exists and isn't won
+        initialState = {
+          ...createInitialGameState(),
+          ...savedGameState,
+          // Ensure we have all required fields
+          selectedCards: [],
+          selectedPileType: null,
+          selectedPileIndex: null,
+          history: [],
+          historyIndex: -1
+        };
+        
+        // Apply saved settings if available
+        if (savedSettings) {
+          initialState.settings = { ...initialState.settings, ...savedSettings };
+        }
+        
+        setGameStarted(true); // Resume game timer if we loaded a game in progress
+      } else {
+        // Create new game with saved settings
+        initialState = createInitialGameState();
+        if (savedSettings) {
+          initialState.settings = { ...initialState.settings, ...savedSettings };
+        }
+        setGameStarted(false);
+        setTimeElapsed(0);
+      }
+      
+      setGameState(initialState);
       setIsHydrated(true);
+      
+      // Initialize sound manager with loaded settings
+      if (initialState.settings.soundEnabled !== undefined) {
+        soundManager.setEnabled(initialState.settings.soundEnabled);
+      }
     }
   }, [isHydrated]);
+
+  // Auto-save game state whenever it changes (but not during initial hydration)
+  useEffect(() => {
+    if (isHydrated && gameState) {
+      // Debounce saves to avoid excessive localStorage writes
+      const timeoutId = setTimeout(() => {
+        saveGameState(gameState);
+      }, 500);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [gameState, isHydrated]);
 
   /**
    * Starts a new game
    */
   const startNewGame = useCallback(() => {
     const newState = createInitialGameState();
+    // Preserve current settings
+    newState.settings = { ...gameState.settings };
+    
     setGameState(newState);
     setTimeElapsed(0);
     setGameStarted(false);
-  }, []);
+    
+    // Clear the saved game state since we're starting fresh
+    clearGameState();
+  }, [gameState.settings]);
 
   /**
    * Selects cards for moving
@@ -104,6 +180,22 @@ export function useGameState() {
     
     if (result.success && result.newGameState) {
       setGameState(result.newGameState);
+      
+      // Play sound effects based on the move
+      if (gameState.settings.soundEnabled) {
+        if (to.pileType === 'foundation') {
+          playSoundEffect.cardDrop();
+        } else {
+          playSoundEffect.cardMove();
+        }
+        
+        // Check for win condition and play win sound
+        if (result.newGameState.isGameWon) {
+          setTimeout(() => playSoundEffect.win(), 200);
+        }
+      }
+    } else if (gameState.settings.soundEnabled) {
+      playSoundEffect.error();
     }
     
     return result;
@@ -121,6 +213,11 @@ export function useGameState() {
     
     if (result.success && result.newGameState) {
       setGameState(result.newGameState);
+      
+      // Play stock flip sound
+      if (gameState.settings.soundEnabled) {
+        playSoundEffect.stockFlip();
+      }
     }
     
     return result;
@@ -130,13 +227,25 @@ export function useGameState() {
    * Updates game settings
    */
   const updateSettings = useCallback((newSettings: Partial<GameState['settings']>): void => {
-    setGameState(prev => ({
-      ...prev,
-      settings: {
+    setGameState(prev => {
+      const updatedSettings = {
         ...prev.settings,
         ...newSettings
+      };
+      
+      // Update sound manager if sound setting changed
+      if ('soundEnabled' in newSettings) {
+        soundManager.setEnabled(newSettings.soundEnabled!);
       }
-    }));
+      
+      // Save settings to localStorage
+      saveSettings(updatedSettings);
+      
+      return {
+        ...prev,
+        settings: updatedSettings
+      };
+    });
   }, []);
 
   /**
@@ -147,6 +256,11 @@ export function useGameState() {
     
     if (result.success && result.newGameState) {
       setGameState(result.newGameState);
+      
+      // Play card drop sound for auto-move
+      if (gameState.settings.soundEnabled) {
+        playSoundEffect.cardDrop();
+      }
     }
     
     return result;
