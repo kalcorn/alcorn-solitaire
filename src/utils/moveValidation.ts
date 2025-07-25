@@ -298,8 +298,8 @@ export function flipStock(gameState: GameState): MoveResult {
       newState.moves++;
       
     } else {
-      // Deal cards from stock to waste based on draw count setting
-      const cardsToDeal = Math.min(newState.settings.drawCount, newState.stockPile.length);
+      // Deal one card from stock to waste
+      const cardsToDeal = Math.min(1, newState.stockPile.length);
       const dealtCards = newState.stockPile.splice(-cardsToDeal, cardsToDeal).map(card => ({
         ...card,
         faceUp: true,

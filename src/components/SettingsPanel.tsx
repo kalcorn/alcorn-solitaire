@@ -37,10 +37,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
     { value: 3, label: 'Three Times' }
   ];
 
-  const drawCountOptions = [
-    { value: 1, label: 'Draw 1 Card' },
-    { value: 3, label: 'Draw 3 Cards' }
-  ];
 
   return (
     <>
@@ -96,29 +92,6 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </p>
               </div>
 
-              {/* Draw Count */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Cards to Draw
-                </label>
-                <div className="relative">
-                  <select
-                    value={settings.drawCount}
-                    onChange={(e) => handleSettingChange('drawCount', parseInt(e.target.value))}
-                    className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white cursor-pointer text-gray-900"
-                  >
-                    {drawCountOptions.map(option => (
-                      <option key={option.value} value={option.value} className="text-gray-900">
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <BsChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  Number of cards to draw from stock pile at once
-                </p>
-              </div>
 
               {/* Auto-move to Foundation */}
               <div>

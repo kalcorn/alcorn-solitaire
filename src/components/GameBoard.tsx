@@ -169,7 +169,7 @@ const GameBoard: React.FC = () => {
               </div>
               
               {/* Mobile tableau placeholder */}
-              <div className="sm:hidden space-y-1">
+              <div className="sm:hidden" style={{ gap: '4px', display: 'flex', flexDirection: 'column' }}>
                 <div className="grid grid-cols-4 w-full gap-1">
                   {[0, 1, 2, 3].map(i => (
                     <div key={i}>
@@ -374,7 +374,7 @@ const GameBoard: React.FC = () => {
             </div>
             
             {/* Mobile-only layout for tableau piles */}
-            <div className="sm:hidden space-y-1">
+            <div className="sm:hidden" style={{ gap: '4px', display: 'flex', flexDirection: 'column' }}>
               {/* First row - 4 piles */}
               <div className="grid grid-cols-4 w-full gap-1">
                 {gameState.tableauPiles.slice(0, 4).map((pile, i) => (
