@@ -2,22 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Textured green background for table */
-body, html, #__next {
-  height: 100%;
+body {
+  min-height: 100vh;
   margin: 0;
-  background-color: #065f46; /* Tailwind emerald-800 */
-  background-image: 
-    radial-gradient(circle at 1px 1px, #064e3b 1px, transparent 2px),
-    radial-gradient(circle at 3px 3px, #064e3b 1px, transparent 2px);
-  background-size: 4px 4px;
+  padding: 0;
   font-family: 'Inter', system-ui, sans-serif;
+  background:
+    radial-gradient(circle, rgba(60,100,45,0.23) 0%, rgba(35,97,28,0.8) 100%),
+    repeating-linear-gradient(120deg, rgba(55,129,32,0.07) 0px, rgba(55,129,32,0.07) 2px, transparent 2px, transparent 18px),
+    repeating-linear-gradient(60deg, rgba(37,145,26,0.07) 0px, rgba(37,145,26,0.07) 2px, transparent 2px, transparent 18px),
+    #23611c;
+  background-blend-mode: multiply;
+  background-size: cover, 120px 120px, 120px 120px, cover;
 }
 
 /* Card styles */
 .card {
-  width: 80px;
-  height: 120px;
+  /*width: 80px;*/
+  /*height: 120px;*/
   border-radius: 8px;
   border: 2px solid #374151; /* Tailwind gray-700 */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -29,10 +31,12 @@ body, html, #__next {
   font-weight: 700;
   font-size: 1.2rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
 }
 
+/* Ensure face-up cards are always white */
 .card.face-up {
-  background-color: white;
+  background-color: white !important;
   color: black;
 }
 
@@ -50,7 +54,7 @@ body, html, #__next {
 
 /* Tableau pile card vertical spacing */
 .tableau-pile {
-  width: 80px; /* match card width */
+  /*width: 80px; /* match card width */
   height: 400px; /* enough height for stacking cards */
   position: relative;
 }
@@ -100,4 +104,15 @@ body, html, #__next {
 /* Header spacing fix */
 main.pt-32 {
   padding-top: 8rem !important; /* Ensures spacing below fixed header */
+}
+
+/* --- Blue linen texture for card backs (NEW) --- */
+.blue-linen-texture {
+  background-color: #225b9c;
+  background-image:
+    repeating-linear-gradient(45deg, #3490dc 0px, #3490dc 1px, transparent 1px, transparent 6px),
+    repeating-linear-gradient(-45deg, #1465a2 0px, #1465a2 1px, transparent 1px, transparent 6px);
+  background-size: 12px 12px;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
 }

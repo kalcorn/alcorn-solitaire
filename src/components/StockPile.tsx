@@ -1,34 +1,31 @@
 import React from 'react';
-import { Card } from '@/types';
+import { Card as CardType } from '@/types';
 
 interface StockPileProps {
-  cards: Card[];
-  onDrawCard?: () => void;
-  disabled?: boolean;
+  cards: CardType[];
+  onClick?: () => void;
 }
 
-const StockPile: React.FC<StockPileProps> = ({ cards, onDrawCard, disabled }) => {
-  const isEmpty = cards.length === 0;
+const StockPile: React.FC<StockPileProps> = ({ cards, onClick }) => (
+  <div className="relative">
+    {/* Card stack effect (subtle shadows if more than 1 card) */}
+    {cards.length > 1 && (
+      <div className="absolute left-1 top-1 w-20 h-28 rounded-xl border-2 border-blue-900 shadow opacity-10 pointer-events-none" />
+    )}
+    {cards.length > 2 && (
+      <div className="absolute left-2 top-2 w-20 h-28 rounded-xl border-2 border-blue-900 shadow opacity-5 pointer-events-none" />
+    )}
+    {/* Top card */}
+    {cards.length > 0 ? (
+      <div
+        className="blue-linen-texture w-20 h-28 rounded-xl border-2 border-blue-800 shadow-lg cursor-pointer"
+        onClick={onClick}
+        title="Stock pile"
+      />
+    ) : (
+      <div className="w-20 h-28 rounded-xl border-2 border-gray-400 bg-gray-200 flex items-center justify-center opacity-40" />
+    )}
+  </div>
+);
 
-  return (
-    <button
-      type="button"
-      className={`stock-pile w-20 h-28 rounded-md border ${
-        isEmpty ? 'bg-gray-700 cursor-default' : 'bg-green-700 cursor-pointer'
-      }`}
-      aria-label={isEmpty ? 'Empty stock pile' : 'Stock pile, click to draw a card'}
-      onClick={() => {
-        if (!disabled && !isEmpty && onDrawCard) onDrawCard();
-      }}
-      disabled={disabled || isEmpty}
-    >
-      {isEmpty ? (
-        <div className="empty-pile text-gray-400">Empty</div>
-      ) : (
-        <div className="card-back" />
-      )}
-    </button>
-  );
-};
-
-export default React.memo(StockPile);
+export default StockPile;

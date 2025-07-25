@@ -16,53 +16,51 @@ const suitIcons = {
   spades: BsSuitSpadeFill,
 };
 
+const rankMap = {
+  1: "A", 11: "J", 12: "Q", 13: "K"
+};
+
 const Card: React.FC<CardProps> = ({ suit, rank, faceUp, onClick }) => {
   const SuitIcon = suitIcons[suit];
+  const displayRank = rankMap[rank as keyof typeof rankMap] || rank;
+
+  const suitColor = suit === 'hearts' || suit === 'diamonds' ? 'text-red-600' : 'text-black';
 
   return (
-    <button
-      type="button"
+    <div
+      className={`card w-100 h-28 rounded-xl border-2 border-gray-300 shadow-lg
+        flex items-center justify-center select-none cursor-pointer
+        transition-transform duration-150 active:scale-95
+        ${faceUp ? "bg-white face-up" : "blue-linen-texture border-blue-800"}`
+      }
       onClick={onClick}
-      aria-pressed={faceUp}
-      aria-label={`${rank} of ${suit}`}
-      className={`card w-20 h-28 rounded-md border-2 border-gray-700 shadow-lg relative bg-white text-black flex flex-col justify-between p-2 font-semibold text-lg transition-transform duration-300 ease-in-out ${
-        !faceUp ? 'bg-blue-900 text-transparent' : ''
-      }`}
+      style={{
+        userSelect: 'none',
+        touchAction: 'manipulation',
+        position: 'relative'
+      }}
     >
       {faceUp ? (
-        <>
-          {/* Top-left rank and suit */}
-          <div className="flex flex-col items-start">
-            <span className={`${suit === 'hearts' || suit === 'diamonds' ? 'text-red-600' : 'text-black'} text-xs font-bold`}>
-              {rank}
-            </span>
-            <SuitIcon
-              className={`${suit === 'hearts' || suit === 'diamonds' ? 'text-red-600' : 'text-black'} w-4 h-4`}
-              aria-hidden="true"
-            />
+        <div className="relative w-full h-full">
+          {/* Top-left corner */}
+          <div className="absolute top-1 left-1 flex flex-col items-start">
+            <span className={`${suitColor} text-xs font-bold`}>{displayRank}</span>
+            <SuitIcon className={`${suitColor} text-base`} />
           </div>
-
-          {/* Center large, low-opacity suit */}
-          <SuitIcon
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-10 w-12 h-12 pointer-events-none select-none"
-            aria-hidden="true"
-          />
-
-          {/* Bottom-right rank and suit rotated */}
-          <div className="flex flex-col items-end rotate-180 transform">
-            <span className={`${suit === 'hearts' || suit === 'diamonds' ? 'text-red-600' : 'text-black'} text-xs font-bold`}>
-              {rank}
-            </span>
-            <SuitIcon
-              className={`${suit === 'hearts' || suit === 'diamonds' ? 'text-red-600' : 'text-black'} w-4 h-4`}
-              aria-hidden="true"
-            />
+          {/* Bottom-right corner (rotated) */}
+          <div className="absolute bottom-1 right-1 flex flex-col items-end rotate-180">
+            <span className={`${suitColor} text-xs font-bold`}>{displayRank}</span>
+            <SuitIcon className={`${suitColor} text-base`} />
           </div>
-        </>
+          {/* Center large faded suit */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <SuitIcon className={`${suitColor} opacity-20 text-5xl`} />
+          </div>
+        </div>
       ) : (
-        <span className="card-back" />
+        <div className="w-full h-full flex items-center justify-center" />
       )}
-    </button>
+    </div>
   );
 };
 

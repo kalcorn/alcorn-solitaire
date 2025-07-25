@@ -8,7 +8,7 @@ interface TableauPileProps {
 }
 
 const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick }) => (
-  <div className="tableau-pile w-20 relative" role="list" aria-label="Tableau pile">
+  <div className="tableau-pile w-100 relative" role="list" aria-label="Tableau pile">
     {cards.map((card, index) => (
       <div
         key={card.id}
