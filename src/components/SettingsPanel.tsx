@@ -5,7 +5,6 @@ export interface GameSettings {
   deckCyclingLimit: number; // 0 = unlimited, 1 = once, 3 = three times
   drawCount: number; // 1 or 3 cards from stock
   autoMoveToFoundation: boolean;
-  showTimer: boolean;
   soundEnabled: boolean;
   showHints: boolean;
 }
@@ -43,26 +42,26 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="text-xs sm:text-sm font-mono font-bold text-white bg-black bg-opacity-30 rounded-lg px-3 py-2 border border-white border-opacity-10 backdrop-blur-sm hover:bg-opacity-40 transition-all"
+        className="text-sm sm:text-base font-mono font-bold text-white bg-slate-800 rounded-lg px-4 py-3 border border-slate-600 shadow-lg hover:bg-slate-700 transition-all"
         title="Game Settings"
       >
-        <div className="flex items-center justify-center" style={{ minHeight: '32px' }}>
-          <BsGear className="w-4 h-4 sm:w-5 sm:h-5" />
+        <div className="flex items-center justify-center" style={{ minHeight: '36px' }}>
+          <BsGear className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
       </button>
 
       {/* Settings Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 shadow-2xl">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4 shadow-2xl border border-slate-600">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">Game Settings</h2>
+              <h2 className="text-3xl font-bold text-white">Game Settings</h2>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded hover:bg-gray-100 transition-colors"
+                className="p-1 rounded hover:bg-slate-700 transition-colors"
               >
-                <BsX className="w-6 h-6 text-gray-600" />
+                <BsX className="w-7 h-7 text-slate-300" />
               </button>
             </div>
 
@@ -70,68 +69,30 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="space-y-6">
               {/* Deck Cycling Limit */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-base font-semibold text-slate-200 mb-2">
                   Deck Cycling Limit
                 </label>
                 <div className="relative">
                   <select
                     value={settings.deckCyclingLimit}
                     onChange={(e) => handleSettingChange('deckCyclingLimit', parseInt(e.target.value))}
-                    className="w-full p-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-white cursor-pointer text-gray-900"
+                    className="w-full p-3 pr-12 border border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 appearance-none bg-slate-700 cursor-pointer text-base text-white"
                   >
                     {cyclingOptions.map(option => (
-                      <option key={option.value} value={option.value} className="text-gray-900">
+                      <option key={option.value} value={option.value} className="text-white bg-slate-700">
                         {option.label}
                       </option>
                     ))}
                   </select>
-                  <BsChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                  <BsChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-sm text-slate-400 mt-1">
                   How many times you can cycle through the stock pile
                 </p>
               </div>
 
 
-              {/* Auto-move to Suit Pile */}
-              <div>
-                <label className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={settings.autoMoveToFoundation}
-                    onChange={(e) => handleSettingChange('autoMoveToFoundation', e.target.checked)}
-                    className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
-                  />
-                  <div>
-                    <span className="text-sm font-semibold text-gray-700">
-                      Auto-move to Suit Pile
-                    </span>
-                    <p className="text-xs text-gray-500">
-                      Automatically move cards to suit piles when possible
-                    </p>
-                  </div>
-                </label>
-              </div>
-
-              {/* Show Timer */}
-              <div>
-                <label className="flex items-center space-x-3">
-                  <input
-                    type="checkbox"
-                    checked={settings.showTimer}
-                    onChange={(e) => handleSettingChange('showTimer', e.target.checked)}
-                    className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
-                  />
-                  <div>
-                    <span className="text-sm font-semibold text-gray-700">
-                      Show Timer
-                    </span>
-                    <p className="text-xs text-gray-500">
-                      Display elapsed time during gameplay
-                    </p>
-                  </div>
-                </label>
-              </div>
+              {/* Auto-move and Timer settings removed but logic preserved */}
 
               {/* Sound Effects */}
               <div>
@@ -140,13 +101,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     type="checkbox"
                     checked={settings.soundEnabled}
                     onChange={(e) => handleSettingChange('soundEnabled', e.target.checked)}
-                    className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                    className="w-5 h-5 text-emerald-600 border-slate-500 rounded focus:ring-emerald-500 bg-slate-700"
                   />
                   <div>
-                    <span className="text-sm font-semibold text-gray-700">
+                    <span className="text-base font-semibold text-slate-200">
                       Sound Effects
                     </span>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-slate-400">
                       Play sounds for card movements and game events
                     </p>
                   </div>
@@ -160,13 +121,13 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                     type="checkbox"
                     checked={settings.showHints}
                     onChange={(e) => handleSettingChange('showHints', e.target.checked)}
-                    className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                    className="w-5 h-5 text-emerald-600 border-slate-500 rounded focus:ring-emerald-500 bg-slate-700"
                   />
                   <div>
-                    <span className="text-sm font-semibold text-gray-700">
+                    <span className="text-base font-semibold text-slate-200">
                       Show Hints
                     </span>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm text-slate-400">
                       Display helpful move suggestions during gameplay
                     </p>
                   </div>
@@ -175,10 +136,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-center mt-8 pt-4 border-t border-gray-200">
+            <div className="flex justify-center mt-8 pt-4 border-t border-slate-600">
               <button
                 onClick={() => setIsOpen(false)}
-                className="px-6 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors"
+                className="px-8 py-3 rounded-lg bg-emerald-700 text-white text-lg font-semibold hover:bg-emerald-800 transition-colors shadow-lg"
               >
                 Close
               </button>

@@ -1,0 +1,51 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hat -->
+  <path d="M30 15 Q50 8 70 15 L68 25 L32 25 Z" fill="#8B4513" stroke="#654321" stroke-width="1"/>
+  <ellipse cx="50" cy="15" rx="12" ry="6" fill="#654321"/>
+  
+  <!-- Feather -->
+  <path d="M68 15 Q72 8 76 15" stroke="#DC2626" stroke-width="2" fill="none"/>
+  <path d="M70 12 L72 8 L74 12" stroke="#DC2626" stroke-width="1" fill="none"/>
+  
+  <!-- Hair -->
+  <path d="M32 25 Q28 30 32 35 Q50 30 68 35 Q72 30 68 25" fill="#654321"/>
+  
+  <!-- Face -->
+  <ellipse cx="50" cy="40" rx="16" ry="18" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
+  
+  <!-- Eyes -->
+  <circle cx="45" cy="37" r="2" fill="#2C3E50"/>
+  <circle cx="55" cy="37" r="2" fill="#2C3E50"/>
+  
+  <!-- Eyebrows -->
+  <path d="M42 34 Q45 32 48 34" stroke="#654321" stroke-width="1.5" fill="none"/>
+  <path d="M52 34 Q55 32 58 34" stroke="#654321" stroke-width="1.5" fill="none"/>
+  
+  <!-- Nose -->
+  <path d="M50 40 L49 42 L51 42 Z" fill="#E68A7A"/>
+  
+  <!-- Mouth -->
+  <path d="M47 44 Q50 46 53 44" stroke="#DC2626" stroke-width="1.5" fill="none"/>
+  
+  <!-- Neck -->
+  <rect x="45" y="55" width="10" height="8" fill="#FDBCB4"/>
+  
+  <!-- Doublet/Tunic -->
+  <path d="M25 63 Q50 58 75 63 L75 85 Q50 90 25 85 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  
+  <!-- Sleeves -->
+  <ellipse cx="25" cy="70" rx="8" ry="12" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <ellipse cx="75" cy="70" rx="8" ry="12" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  
+  <!-- Arms -->
+  <rect x="20" y="78" width="6" height="16" fill="#FDBCB4" rx="3"/>
+  <rect x="74" y="78" width="6" height="16" fill="#FDBCB4" rx="3"/>
+  
+  
+  <!-- Belt -->
+  <rect x="30" y="82" width="40" height="4" fill="#8B4513"/>
+  
+  <!-- Diamond decoration on chest -->
+  <path d="M50 70 L45 75 L50 80 L55 75 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  
+</svg>

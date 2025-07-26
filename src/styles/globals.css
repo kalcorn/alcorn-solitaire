@@ -1,6 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Playful but professional background */
+body {
+  background: linear-gradient(
+    135deg,
+    #e0f7fa 0%,
+    #f3e5f5 25%,
+    #e8f5e8 50%,
+    #fff3e0 75%,
+    #fce4ec 100%
+  );
+  min-height: 100vh;
+}
+
+/* =================================================================
+   SOLITAIRE GAME BACKGROUND & BODY STYLES
+   ================================================================= */
 
 body {
   height: 100vh;
@@ -14,24 +33,26 @@ body {
     radial-gradient(circle at 50% 50%, rgba(26,94,53,0.3) 0%, transparent 70%);
   background-size: 100% 100%, 600px 400px, 800px 600px, 1200px 900px;
   background-position: center, 20% 30%, 80% 70%, center;
-  background-attachment: fixed;
-  overflow: hidden;
+  background-attachment: scroll; /* Better performance on mobile/tablet */
+  overflow: auto; /* Allow scrolling on mobile/tablet */
+  height: auto; /* Allow body to expand */
+  min-height: 100vh; /* Maintain minimum height */
 }
 
-/* Mobile and tablet-specific body adjustments */
-@media (max-width: 991px) {
+/* Desktop body adjustments */
+@media (min-width: 1024px) {
   body {
-    background-attachment: scroll; /* Better performance on mobile/tablet */
-    overflow: auto; /* Allow scrolling on mobile/tablet */
-    height: auto; /* Allow body to expand */
-    min-height: 100vh; /* Maintain minimum height */
+    background-attachment: fixed; /* Can use fixed on desktop */
+    overflow: hidden;
+    height: 100vh;
   }
 }
 
-/* Card styles with enhanced shadows and 8px grid */
+/* =================================================================
+   BASE CARD STYLES - INDUSTRY STANDARD 5:7 ASPECT RATIO
+   ================================================================= */
+
 .card {
-  width: 128px;
-  height: 184px; /* 8px grid alignment */
   border-radius: 8px;
   border: 1px solid #374151;
   box-shadow: 
@@ -49,14 +70,27 @@ body {
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   position: relative;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.card:hover {
+/* Removed card hover effects for stock/waste piles - they should not move */
+.card:hover:not(.stock-pile .card):not(.waste-pile .card) {
   transform: translateY(-6px) scale(1.02);
   box-shadow: 
     0 20px 40px rgba(0, 0, 0, 0.5),
     0 12px 20px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Stock and waste pile cards should not have hover effects */
+.stock-pile .card:hover,
+.waste-pile .card:hover {
+  transform: none;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .card.playable {
@@ -75,7 +109,7 @@ body {
     0 0 0 3px rgba(59, 130, 246, 0.8);
 }
 
-/* Enhanced face-up cards with improved contrast and accessibility */
+/* Enhanced face-up cards */
 .card.face-up {
   background-color: #ffffff !important;
   background-image: 
@@ -92,17 +126,16 @@ body {
 }
 
 .card.face-down {
-  /* Ensure face-down cards have same dimensions as face-up cards */
   width: inherit !important;
   height: inherit !important;
-  background-color: #111827; /* Tailwind bg-gray-900 */
+  background-color: #111827;
   background-image:
     repeating-linear-gradient(
       45deg,
-      #1e293b 0px,      /* slate-800, slightly lighter than bg-gray-900 */
-      #1e293b 2px,      /* width of the line */
-      #111827 2px,      /* bg-gray-900 again, acts as gap start */
-      #111827 12px      /* width of the gap */
+      #1e293b 0px,
+      #1e293b 2px,
+      #111827 2px,
+      #111827 12px
     ),
     repeating-linear-gradient(
       -45deg,
@@ -122,25 +155,24 @@ body {
 }
 
 .card.face-down::after {
-  content: 'A';
+  content: '𝒜';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 4.5rem;
-  font-weight: bold;
-  font-family: 'Brush Script MT', cursive, serif;
-  color:  rgba(255, 255, 255, 0.45);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5);
+  font-family: 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', 'Apple Chancery', cursive, serif;
+  color: rgba(255, 255, 255, 0.45);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1);
+  font-weight: 600;
   white-space: nowrap;
-  /*overflow: hidden;*/
 }
 
-/* Tableau pile with responsive height for optimal card stacking */
+/* =================================================================
+   TABLEAU PILE STYLING
+   ================================================================= */
+
 .tableau-pile {
   width: 100%;
-  max-width: 128px;
-  height: 512px; /* Optimized for 13-card max: 128px + (12 × 32px) */
   position: relative;
 }
 
@@ -153,33 +185,48 @@ body {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(var(--card-index) * 32px); /* Default desktop/tablet stacking */
 }
 
-/* Ensure ALL cards use consistent dimensions - no aspect-ratio inconsistencies */
-.tableau-pile .card {
-  width: 128px !important;
-  height: 184px !important;
-  box-sizing: border-box !important;
-  display: flex !important;
-  min-height: 184px !important;
-  max-height: 184px !important;
-  min-width: 128px !important;
-  max-width: 128px !important;
-  flex: none !important;
+.desktop-tableau {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
 }
 
-/* Force face-down tableau cards to match face-up cards exactly */
-.tableau-pile .card.face-down {
-  width: 128px !important;
-  height: 184px !important;
-  box-sizing: border-box !important;
-  display: flex !important;
-  min-height: 184px !important;
-  max-height: 184px !important;
-  min-width: 128px !important;
-  max-width: 128px !important;
-  flex: none !important;
+/* =================================================================
+   STOCK, WASTE, AND FOUNDATION PILE STYLES
+   ================================================================= */
+
+.stock-pile, .waste-pile, .foundation-pile {
+  border-radius: 8px;
+  border: 1px solid #4b5563;
+  position: relative;
+  overflow: hidden;
+  background: 
+    radial-gradient(circle at center, rgba(26, 46, 37, 0.8) 0%, rgba(13, 62, 34, 0.6) 100%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.1) 100%);
+  box-shadow: 
+    inset 0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.stock-pile.face-down::after {
+  content: '𝒜';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', 'Apple Chancery', cursive, serif;
+  color: rgba(255, 255, 255, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.foundation-pile {
+  background: 
+    radial-gradient(circle at center, rgba(26, 46, 37, 0.6) 0%, rgba(13, 62, 34, 0.4) 100%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%);
 }
 
 /* Container classes for layout stability */
@@ -189,101 +236,841 @@ body {
   flex-shrink: 0;
 }
 
-/* Responsive container sizes */
+/* Responsive pile containers */
 .stock-pile-responsive, .waste-pile-responsive {
-  width: 128px;
-  height: 184px;
+  position: relative;
+  flex-shrink: 0;
 }
 
-.foundation-pile-responsive {
-  width: 128px;
-  height: 184px;
-}
-
-/* Stock and Waste piles with 8px grid alignment and enhanced styling */
-.stock-pile, .waste-pile {
-  width: 128px;
-  height: 184px; /* 8px grid alignment */
-  border-radius: 8px;
-  border: 2px solid #374151;
+/* Foundation pile improvements - better visibility */
+.foundation-pile {
+  background: 
+    radial-gradient(circle at center, rgba(26, 46, 37, 0.85) 0%, rgba(13, 62, 34, 0.75) 100%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.15) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.35),
-    0 4px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  will-change: transform, box-shadow;
-  backface-visibility: hidden;
-  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+    inset 0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-.stock-pile::before, .waste-pile::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 6px;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
-  pointer-events: none;
+/* Foundation pile suit symbols and text - preserve colors with transparency */
+.foundation-pile .text-5xl {
+  opacity: 0.7 !important;
 }
 
-/* When stock pile has face-down styling */
-.stock-pile.face-down {
-   background-color: #111827; /* Tailwind bg-gray-900 */
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      #1e293b 0px,      /* slate-800, slightly lighter than bg-gray-900 */
-      #1e293b 2px,      /* width of the line */
-      #111827 2px,      /* bg-gray-900 again, acts as gap start */
-      #111827 12px      /* width of the gap */
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      #1e293b 0px,
-      #1e293b 2px,
-      #111827 2px,
-      #111827 12px
-    );
-    border-width: 1px;
-  border-color: #a16207;
-  position: relative;
+.foundation-pile .text-5xl.text-red-500 {
+  color: rgba(239, 68, 68, 0.8) !important; /* Red suits with transparency */
+}
+
+.foundation-pile .text-5xl.text-gray-800 {
+  color: rgb(3, 7, 18) !important; /* Black suits with transparency */
+}
+
+.foundation-pile .text-xs {
+  opacity: 0.8 !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600;
+}
+
+/* =================================================================
+   RESPONSIVE CARD DIMENSIONS - MOBILE FIRST APPROACH
+   ================================================================= */
+
+/* Base Layout - Proportional spacing from header */
+.card-playing-area {
+  background: transparent;
+  margin-top: 8.0rem; /* Proportional to mobile screen height */
+  padding-top: 0.5rem;
+}
+
+/* MOBILE (default - up to 639px) - Increased sizes */
+.card {
+  width: 50px;
+  height: 70px; /* 5:7 ratio */
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.tableau-pile {
+  max-width: 50px;
+  height: 350px;
+}
+
+.tableau-card-position {
+  top: calc(var(--card-index) * 18px);
+}
+
+.stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+  width: 50px;
+  height: 70px;
+}
+
+.tableau-container {
+  width: 50px;
+}
+
+.tableau-pile .card,
+.tableau-pile .card.face-down {
+  width: 50px !important;
+  height: 70px !important;
+  min-width: 50px !important;
+  max-width: 50px !important;
+  min-height: 70px !important;
+  max-height: 70px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex: none !important;
+}
+
+.card span {
+  font-size: 1.4rem !important;
+}
+
+.card .opacity-25 {
+  font-size: 2.8rem !important;
+  width: 2.8rem !important;
+  height: 2.8rem !important;
+}
+
+.card.face-down::after {
+  font-size: 1.8rem;
 }
 
 .stock-pile.face-down::after {
-  content: 'A';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 4.5rem;
-  font-weight: bold;
-  font-family: 'Brush Script MT', cursive, serif;
-  color:  rgba(255, 255, 255, 0.45);
-  /*text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5);*/
+  font-size: 1.8rem;
 }
 
-.stock-pile:hover, .waste-pile:hover:not(.empty) {
-  box-shadow: 
-    0 12px 28px rgba(0, 0, 0, 0.4),
-    0 6px 12px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  border-color: #059669;
+/* Mobile Foundation Piles - Hide text, center symbols */
+.foundation-pile .text-xs {
+  display: none;
 }
 
-.stock-pile.face-down:hover {
-  border-color: #d97706;
+.foundation-pile > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.stock-pile.empty, .waste-pile.empty {
-  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-  cursor: default;
+/* SMALL (sm: 640px+) - Increased sizes */
+@media (min-width: 640px) {
+  .card-playing-area {
+    margin-top: 9rem; /* Proportional increase for small screens */
+    padding-top: 0.75rem;
+  }
+  
+  .card {
+    width: 65px;
+    height: 91px; /* 5:7 ratio */
+    font-size: 1rem;
+  }
+  
+  .tableau-pile {
+    max-width: 65px;
+    height: 420px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 20px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+    width: 65px;
+    height: 91px;
+  }
+  
+  .tableau-container {
+    width: 65px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 65px !important;
+    height: 91px !important;
+    min-width: 65px !important;
+    max-width: 65px !important;
+    min-height: 91px !important;
+    max-height: 91px !important;
+  }
+  
+  .card span {
+    font-size: 1.8rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 3.4rem !important;
+    width: 3.4rem !important;
+    height: 3.4rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 2.1rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 2.1rem;
+  }
+  
+  /* Show foundation pile text on small screens and up */
+  .foundation-pile .text-xs {
+    display: block;
+  }
 }
 
-/* Enhanced recycle state styling */
+/* MEDIUM (md: 768px+) - Increased sizes */
+@media (min-width: 768px) {
+  .card-playing-area {
+    margin-top: 6rem; /* Balanced for tablet header */
+    padding-top: 1rem;
+  }
+  
+  .card {
+    width: 85px;
+    height: 119px; /* 5:7 ratio */
+    font-size: 1.1rem;
+  }
+  
+  .tableau-pile {
+    max-width: 85px;
+    height: 520px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 26px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+    width: 85px;
+    height: 119px;
+  }
+  
+  .tableau-container {
+    width: 85px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 85px !important;
+    height: 119px !important;
+    min-width: 85px !important;
+    max-width: 85px !important;
+    min-height: 119px !important;
+    max-height: 119px !important;
+  }
+  
+  .card span {
+    font-size: 2rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 4.8rem !important;
+    width: 4.8rem !important;
+    height: 4.8rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 2.8rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 2.8rem;
+  }
+}
+
+/* LARGE (lg: 1024px+) - Increased sizes */
+@media (min-width: 1024px) {
+  .card-playing-area {
+    margin-top: 6rem; /* Proportional to desktop viewport */
+    padding-top: 1rem;
+  }
+  
+  .card {
+    width: 100px;
+    height: 140px; /* 5:7 ratio */
+    font-size: 1.25rem;
+  }
+  
+  .tableau-pile {
+    max-width: 100px;
+    height: 600px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 30px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+    width: 100px;
+    height: 140px;
+  }
+  
+  .tableau-container {
+    width: 100px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 100px !important;
+    height: 140px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    min-height: 140px !important;
+    max-height: 140px !important;
+  }
+  
+  .card span {
+    font-size: 2.2rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 5.4rem !important;
+    width: 5.4rem !important;
+    height: 5.4rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 3.2rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 3.2rem;
+  }
+}
+
+/* EXTRA LARGE (xl: 1280px+) - Viewport optimized */
+@media (min-width: 1280px) {
+  .card-playing-area {
+    margin-top: 6rem; /* Proportional to XL viewport */
+    padding-top: 1rem;
+  }
+  
+  .card {
+    width: 132px;
+    height: 185px; /* 5:7 ratio, optimized for viewport fit */
+    font-size: 1.35rem;
+  }
+  
+  .tableau-pile {
+    max-width: 132px;
+    height: 520px; /* Controlled for viewport */
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 24px); /* Compact overlap for viewport fit */
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+    width: 132px;
+    height: 185px;
+  }
+  
+  .tableau-container {
+    width: 132px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 132px !important;
+    height: 185px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
+    min-height: 185px !important;
+    max-height: 185px !important;
+  }
+  
+  .card span {
+    font-size: 2.4rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 5.8rem !important;
+    width: 5.8rem !important;
+    height: 5.8rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 3rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 3rem;
+  }
+}
+
+/* 2X LARGE (2xl: 1536px+) - Maximum viewport optimization */
+@media (min-width: 1536px) {
+  .card-playing-area {
+    margin-top: 6.0rem; /* Proportional to 2XL viewport */
+    padding-top: 1.5rem;
+  }
+  
+  .card {
+    width: 132px;
+    height: 185px; /* 5:7 ratio, viewport constrained */
+    font-size: 1.4rem;
+  }
+  
+  .tableau-pile {
+    max-width: 132px;
+    height: 580px; /* Viewport fit priority */
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 28px); /* Efficient overlap */
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+    width: 132px;
+    height: 185px;
+  }
+  
+  .tableau-container {
+    width: 132px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 132px !important;
+    height: 185px !important;
+    min-width: 132px !important;
+    max-width: 132px !important;
+    min-height: 185px !important;
+    max-height: 185px !important;
+  }
+  
+  .card span {
+    font-size: 2.6rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 6.2rem !important;
+    width: 6.2rem !important;
+    height: 6.2rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 3.4rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 3.4rem;
+  }
+}
+
+/* =================================================================
+   LANDSCAPE PHONE OPTIMIZATION
+   ================================================================= */
+@media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
+  
+  /* Hide standard layout elements in landscape mobile */
+  .standard-layout,
+  .standard-tableau {
+    display: none !important;
+  }
+  
+  /* Show landscape mobile specific elements */
+  .landscape-mobile-left-sidebar,
+  .landscape-mobile-right-sidebar,
+  .landscape-mobile-tableau {
+    display: block !important;
+  }
+  
+  /* Landscape Mobile Layout Structure */
+  .card-playing-area {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    margin-top: 1rem !important;
+    padding-top: 0.5rem !important;
+  }
+  
+  .landscape-mobile-left-sidebar {
+    position: fixed;
+    left: 1rem;
+    top: 6rem;
+    z-index: 20;
+  }
+  
+  .landscape-mobile-right-sidebar {
+    position: fixed;
+    right: 1rem;
+    top: 6rem;
+    z-index: 20;
+  }
+  
+  .landscape-mobile-tableau {
+    flex: 1;
+    padding: 0 6rem; /* Space for sidebars */
+  }
+  
+  .landscape-tableau-center {
+    display: flex !important;
+    gap: 0.5rem !important;
+  }
+  
+  /* Increase tableau card sizes for landscape mobile */
+  .landscape-mobile-tableau .card {
+    width: 48px !important;
+    height: 67px !important; /* 5:7 ratio */
+    font-size: 0.8rem !important;
+  }
+  
+  .landscape-mobile-tableau .tableau-container {
+    width: 48px !important;
+  }
+  
+  .landscape-mobile-tableau .tableau-pile {
+    max-width: 48px !important;
+    height: 320px !important;
+  }
+  
+  .landscape-mobile-tableau .tableau-card-position {
+    top: calc(var(--card-index) * 16px) !important;
+  }
+  
+  .landscape-mobile-tableau .tableau-pile .card,
+  .landscape-mobile-tableau .tableau-pile .card.face-down {
+    width: 48px !important;
+    height: 67px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    min-height: 67px !important;
+    max-height: 67px !important;
+  }
+  
+  .landscape-mobile-tableau .card span {
+    font-size: 1.4rem !important;
+  }
+  
+  .landscape-mobile-tableau .card .opacity-25 {
+    font-size: 2.4rem !important;
+    width: 2.4rem !important;
+    height: 2.4rem !important;
+  }
+
+  /* Header optimizations for landscape mobile */
+  .landscape-mobile-header {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  
+  .landscape-mobile-single-line {
+    flex-direction: row !important;
+    gap: 1rem !important;
+  }
+  
+  .landscape-mobile-logo {
+    height: 2.5rem !important;
+  }
+  
+  /* Ensure landscape mobile header elements are visible */
+  .landscape-mobile-title {
+    display: flex !important;
+  }
+  
+  .landscape-mobile-right {
+    display: flex !important;
+  }
+  
+  .header-title {
+    display: block !important;
+    font-size: 1.25rem !important;
+  }
+  
+  /* Show single line stats, hide regular stats */
+  .landscape-mobile-single-stat {
+    display: block !important;
+  }
+  
+  .landscape-mobile-regular-stats {
+    display: none !important;
+  }
+  
+  /* In landscape mobile, only show the + button in controls, hide both other buttons */
+  .landscape-mobile-plus-button {
+    display: flex !important;
+    border-radius: 4px !important; /* Square instead of circle */
+  }
+  
+  .landscape-mobile-new-game {
+    display: none !important;
+  }
+  
+  /* Hide portrait mobile + button in landscape */
+  @media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
+    .md\:hidden {
+      display: none !important;
+    }
+  }
+  
+  /* Position + button next to settings */
+  .landscape-mobile-controls {
+    order: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .landscape-mobile-stats {
+    order: 2;
+  }
+  
+  /* Undo/Redo buttons side by side in landscape */
+  .fixed.z-40 {
+    flex-direction: row !important;
+    gap: 1rem !important;
+    bottom: 1rem !important;
+    left: 5.75rem !important;
+    transform: translateX(-50%) !important;
+  }
+  
+  /* Smaller undo text and icon for landscape mobile */
+  .landscape-mobile-undo-text {
+    font-size: 0.875rem !important;
+  }
+  
+  .landscape-mobile-undo-icon {
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+  
+  /* Smaller hints text and components for landscape mobile */
+  .landscape-mobile-hints-header {
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  .landscape-mobile-hints-title {
+    font-size: 0.75rem !important;
+  }
+  
+  .landscape-mobile-hints-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+  
+  .landscape-mobile-hints-counter {
+    font-size: 0.625rem !important;
+    padding: 0.125rem 0.375rem !important;
+  }
+  
+  .landscape-mobile-hints-chevron {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+  }
+  
+  .landscape-mobile-hints-content {
+    padding: 0.375rem 0.5rem 0.375rem 0.5rem !important;
+  }
+  
+  .landscape-mobile-hints-text {
+    font-size: 0.75rem !important;
+    margin-top: 0.25rem !important;
+  }
+  
+  /* Sidebar card sizes */
+  .landscape-mobile-left-sidebar .card,
+  .landscape-mobile-right-sidebar .card {
+    width: 40px !important;
+    height: 56px !important; /* 5:7 ratio */
+    font-size: 0.75rem !important;
+  }
+  
+  .landscape-mobile-left-sidebar .stock-pile,
+  .landscape-mobile-left-sidebar .waste-pile,
+  .landscape-mobile-right-sidebar .foundation-pile {
+    width: 40px !important;
+    height: 56px !important;
+  }
+  
+  .landscape-mobile-left-sidebar .card span,
+  .landscape-mobile-right-sidebar .card span {
+    font-size: 1.3rem !important;
+  }
+  
+  .landscape-mobile-left-sidebar .card .opacity-25,
+  .landscape-mobile-right-sidebar .card .opacity-25 {
+    font-size: 1rem !important;
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+  
+  .foundation-pile .text-xs {
+    display: none !important;
+  }
+}
+
+/* Default styles - hide landscape mobile elements */
+.landscape-mobile-left-sidebar,
+.landscape-mobile-right-sidebar,
+.landscape-mobile-tableau {
+  display: none;
+}
+
+.standard-layout,
+.standard-tableau {
+  display: flex;
+}
+
+.landscape-mobile-single-stat {
+  display: none;
+}
+
+.landscape-mobile-regular-stats {
+  display: flex;
+}
+
+.landscape-mobile-plus-button {
+  display: none;
+}
+
+.landscape-mobile-new-game {
+  display: block;
+}
+
+/* =================================================================
+   DRAG AND DROP PERFORMANCE OPTIMIZATIONS
+   ================================================================= */
+
+/* Improve drag performance on mobile */
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card {
+  /* Enable hardware acceleration for smooth transforms */
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Better touch scrolling for the game area */
+.card-playing-area {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Prevent text selection during drag */
+.dragging {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* =================================================================
+   ADDITIONAL GAME STYLES
+   ================================================================= */
+
+/* Responsive Bottom Padding - Fixed scrolling issues */
+.pb-bottom-responsive {
+  padding-bottom: 2rem; /* Minimal padding for mobile */
+}
+
+@media (min-width: 768px) {
+  .pb-bottom-responsive {
+    padding-bottom: 6rem; /* Reduced from 8rem to prevent scrolling */
+  }
+}
+
+/* Card Drop Zone Styling - Keep logic but hide visual */
+.drop-zone {
+  /* Drop zone effects are now hidden but logic remains intact */
+}
+
+/* Fix mouse scroll focus outline and prevent yellow borders */
+*:focus {
+  outline: none !important;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.5) !important;
+  outline-offset: 2px !important;
+}
+
+/* Prevent focus outlines on div elements during drag operations */
+div:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure card areas don't get focus outlines */
+[data-drop-zone]:focus {
+  outline: none !important;
+}
+
+/* Particle Effects */
+.particle-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Win Animation */
+.win-overlay {
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.win-celebration {
+  animation: bounceIn 0.6s ease-out;
+}
+
+.foundation-win-cascade {
+  animation: celebration-pulse 2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+  50% { transform: scale(1.05) rotate(2deg); }
+  70% { transform: scale(0.9) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes celebration-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+}
+
+/* Loading State */
+.hydration-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Ensure consistent spacing between game sections */
+.card-playing-area > .flex {
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .card-playing-area > .flex {
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-playing-area > .flex {
+    gap: 2rem;
+  }
+}
+
+/* =================================================================
+   STOCK PILE ANIMATIONS & INTERACTIONS
+   ================================================================= */
+
 .stock-pile.empty.recycle-available {
   background: linear-gradient(135deg, #0f4b3c 0%, #10b981 20%, #059669 100%);
   border-color: #10b981;
@@ -293,11 +1080,7 @@ body {
 
 .stock-pile.empty.recycle-available:hover {
   background: linear-gradient(135deg, #064e3b 0%, #10b981 30%, #047857 100%);
-  box-shadow: 
-    0 12px 28px rgba(16, 185, 129, 0.3),
-    0 6px 12px rgba(16, 185, 129, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
+  /* Removed transform: scale(1.05) - no pile movement */
 }
 
 @keyframes recycleGlow {
@@ -309,126 +1092,72 @@ body {
   }
   50% {
     box-shadow: 
-      0 8px 24px rgba(16, 185, 129, 0.4),
-      0 4px 8px rgba(16, 185, 129, 0.3),
+      0 12px 32px rgba(16, 185, 129, 0.4),
+      0 6px 12px rgba(16, 185, 129, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 }
 
-/* Recycle animation */
-.waste-recycle-to-stock {
-  animation: recycleToStock 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+/* Stock and Waste Slide Animations */
+.stock-slide-to-waste {
+  animation: slideToWaste 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-@keyframes recycleToStock {
+.card-slide-from-stock {
+  animation: slideFromStock 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes slideToWaste {
   0% {
-    transform: translateX(0) rotateY(0deg) scale(1);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
-  50% {
-    transform: translateX(-60px) rotateY(180deg) scale(0.8);
-    opacity: 0.5;
-  }
   100% {
-    transform: translateX(-120px) rotateY(360deg) scale(1);
+    transform: translateX(70px) scale(1);
     opacity: 0;
   }
 }
 
-/* Foundation pile with consistent 8px grid and enhanced interactivity */
-.foundation-pile {
-  width: 128px;
-  height: 184px; /* 8px grid alignment */
-  border-radius: 8px;
-  border: 2px solid #374151;
-  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
-  box-shadow: 
-    0 8px 24px rgba(0, 0, 0, 0.35),
-    0 4px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  will-change: transform, box-shadow;
-  backface-visibility: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-
-.foundation-pile::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 6px;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.05) 100%);
-  pointer-events: none;
-}
-
-/* Removed hover effects from foundation piles for cleaner look */
-
-.foundation-pile.drop-zone {
-  border-color: #10b981;
-  box-shadow: 
-    0 8px 20px rgba(0, 0, 0, 0.3),
-    0 3px 6px rgba(0, 0, 0, 0.15),
-    0 0 0 2px rgba(16, 185, 129, 0.6),
-    inset 0 2px 4px rgba(16, 185, 129, 0.1);
-  background-color: #065f46;
-}
-
-/* Enhanced drop zone styling for active zones */
-.drop-zone-active {
-  position: relative;
-  transform: scale(1.02);
-  transition: transform 0.2s ease;
-}
-
-.drop-zone-active::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  border: 2px dashed #10b981;
-  border-radius: 12px;
-  background-color: rgba(16, 185, 129, 0.15);
-  pointer-events: none;
-  z-index: 1;
-  animation: pulse-glow 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.7;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+@keyframes slideFromStock {
+  0% {
+    transform: translateX(-70px) scale(0.9);
+    opacity: 0;
   }
-  50% {
+  100% {
+    transform: translateX(0) scale(1);
     opacity: 1;
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
   }
 }
 
-/* Card selection states */
-.card.selected {
-  box-shadow: 
-    0 15px 30px rgba(0, 0, 0, 0.5),
-    0 8px 15px rgba(0, 0, 0, 0.3),
-    0 0 0 3px rgba(59, 130, 246, 0.8);
-  transform: translateY(-4px);
+/* Recycle Animation */
+.waste-recycle-to-stock {
+  animation: recycleSlideToStock 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Enhanced drag preview styling with smooth animations */
+@keyframes recycleSlideToStock {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-70px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* =================================================================
+   DRAG AND DROP ANIMATIONS
+   ================================================================= */
+
 .drag-preview {
   pointer-events: none;
   z-index: 1000;
   will-change: transform;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease-out;
-  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4));
+  transform: rotate(5deg) scale(1.05);
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
 }
 
-/* Snap-back animation for invalid drops */
 .drag-preview.snap-back {
   animation: snapBack 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
@@ -439,43 +1168,19 @@ body {
     opacity: 0.8;
   }
   50% {
-    transform: scale(1.1) rotate(0deg);
-    opacity: 0.6;
+    transform: scale(1.1) rotate(-5deg);
+    opacity: 0.9;
   }
   100% {
-    transform: scale(0.8) rotate(0deg);
-    opacity: 0;
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
   }
 }
 
-.drag-preview.over-dropzone {
-  transform: rotate(3deg) scale(1.05);
-  opacity: 0.9;
-}
+/* =================================================================
+   CARD INTERACTIVE ANIMATIONS
+   ================================================================= */
 
-.drag-preview.dragging {
-  transform: rotate(5deg) scale(1);
-  opacity: 0.8;
-}
-
-/* Card stacking depth effect */
-.card-stack {
-  position: relative;
-}
-
-.card-stack::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  right: -2px;
-  bottom: -2px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  z-index: -1;
-}
-
-/* Subtle glow for playable cards */
 .card.playable {
   animation: subtle-glow 2s ease-in-out infinite;
 }
@@ -486,82 +1191,17 @@ body {
       0 8px 20px rgba(0, 0, 0, 0.3),
       0 3px 6px rgba(0, 0, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 0 0 2px rgba(59, 130, 246, 0.5);
-  }
-  50% { 
-    box-shadow: 
-      0 8px 20px rgba(0, 0, 0, 0.3),
-      0 3px 6px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 0 0 2px rgba(59, 130, 246, 0.7),
-      0 0 8px rgba(59, 130, 246, 0.3);
-  }
-}
-
-/* Game completion celebration */
-.win-celebration {
-  animation: celebration 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes celebration {
-  0% { 
-    opacity: 0; 
-    transform: scale(0.5) rotateY(-180deg) translateY(-50px);
-  }
-  30% {
-    opacity: 0.8;
-    transform: scale(1.2) rotateY(-90deg) translateY(-20px);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(0.9) rotateY(0deg) translateY(10px);
-  }
-  80% {
-    transform: scale(1.1) rotateY(0deg) translateY(-5px);
-  }
-  100% { 
-    opacity: 1; 
-    transform: scale(1) rotateY(0deg) translateY(0px);
-  }
-}
-
-/* Confetti animation for background */
-.win-overlay {
-  animation: winOverlay 0.6s ease-out;
-}
-
-@keyframes winOverlay {
-  0% {
-    opacity: 0;
-    backdrop-filter: blur(0px);
-  }
-  100% {
-    opacity: 1;
-    backdrop-filter: blur(2px);
-  }
-}
-
-/* Foundation pile cascade animation for win */
-.foundation-win-cascade {
-  animation: foundationCascade 0.8s ease-out forwards;
-}
-
-@keyframes foundationCascade {
-  0% {
-    transform: translateY(0) scale(1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      0 0 0 2px rgba(59, 130, 246, 0.3);
   }
   50% {
-    transform: translateY(-10px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
-  }
-  100% {
-    transform: translateY(0) scale(1);
-    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.2);
+    box-shadow: 
+      0 12px 30px rgba(0, 0, 0, 0.4),
+      0 6px 12px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      0 0 0 2px rgba(59, 130, 246, 0.6);
   }
 }
 
-/* Card landing animation */
 .card-landing {
   animation: cardLand 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
@@ -578,47 +1218,10 @@ body {
   }
 }
 
-/* Card cascade animation */
-.card-cascade {
-  animation: cascade 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
+/* =================================================================
+   SHUFFLE AND NEW GAME ANIMATIONS
+   ================================================================= */
 
-@keyframes cascade {
-  0% {
-    opacity: 0;
-    transform: translateY(-30px) rotate(-10deg) scale(0.8);
-  }
-  60% {
-    opacity: 1;
-    transform: translateY(10px) rotate(2deg) scale(1.05);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
-}
-
-/* Card flip entrance animation */
-.card-flip-in {
-  animation: flipIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-@keyframes flipIn {
-  0% {
-    transform: rotateY(-90deg) scale(0.8);
-    opacity: 0;
-  }
-  50% {
-    transform: rotateY(-45deg) scale(1.1);
-    opacity: 0.5;
-  }
-  100% {
-    transform: rotateY(0deg) scale(1);
-    opacity: 1;
-  }
-}
-
-/* Shuffle animation for new game */
 .shuffle-animation {
   animation: shuffle 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
@@ -629,28 +1232,24 @@ body {
     opacity: 1;
   }
   15% {
-    transform: scale(0.95) rotate(-2deg) translateY(-5px);
+    transform: scale(1.1) rotate(5deg) translateY(-10px);
     opacity: 0.9;
   }
   30% {
-    transform: scale(1.05) rotate(2deg) translateY(-10px);
-    opacity: 0.8;
-  }
-  45% {
-    transform: scale(0.98) rotate(-1deg) translateY(-8px);
-    opacity: 0.85;
-  }
-  60% {
-    transform: scale(1.02) rotate(1deg) translateY(-12px);
+    transform: scale(0.9) rotate(-5deg) translateY(10px);
     opacity: 0.7;
   }
-  75% {
-    transform: scale(0.99) rotate(-0.5deg) translateY(-6px);
-    opacity: 0.9;
+  45% {
+    transform: scale(1.05) rotate(3deg) translateY(-5px);
+    opacity: 0.8;
   }
-  90% {
-    transform: scale(1.01) rotate(0.5deg) translateY(-3px);
-    opacity: 0.95;
+  60% {
+    transform: scale(0.95) rotate(-2deg) translateY(8px);
+    opacity: 0.6;
+  }
+  80% {
+    transform: scale(1.02) rotate(1deg) translateY(-3px);
+    opacity: 0.9;
   }
   100% {
     transform: scale(1) rotate(0deg) translateY(0);
@@ -658,110 +1257,29 @@ body {
   }
 }
 
-/* Individual card cascade animation for shuffle */
-.card-shuffle-cascade {
-  animation: cardCascade 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+.card-cascade {
+  animation: cascade 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Stock pile shuffle animation - cards cascade down into position */
-.stock-shuffle-cascade {
-  animation: stockShuffleCascade 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes stockShuffleCascade {
+@keyframes cascade {
   0% {
-    transform: translateY(-20px) translateX(10px) rotate(8deg) scale(0.9);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateY(5px) translateX(-3px) rotate(-2deg) scale(1.05);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes cardCascade {
-  0% {
-    transform: translateY(-100px) translateX(50px) rotate(25deg) scale(0.8);
     opacity: 0;
+    transform: translateY(-30px) rotate(-10deg) scale(0.8);
   }
   60% {
-    transform: translateY(10px) translateX(-10px) rotate(-5deg) scale(1.1);
     opacity: 0.8;
+    transform: translateY(5px) rotate(2deg) scale(1.05);
   }
   100% {
-    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
     opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
   }
 }
 
-/* Stock pile flip animation for cycling - subtle and professional */
-.stock-flip-to-waste {
-  animation: flipToWaste 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
+/* =================================================================
+   ERROR AND FEEDBACK ANIMATIONS
+   ================================================================= */
 
-.waste-flip-from-stock {
-  animation: flipFromStock 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-@keyframes flipToWaste {
-  0% {
-    transform: translateX(0) rotateY(0deg) scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: translateX(25px) rotateY(45deg) scale(1.02);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateX(50px) rotateY(90deg) scale(1);
-    opacity: 0.6;
-  }
-}
-
-@keyframes flipFromStock {
-  0% {
-    transform: translateX(-50px) rotateY(-90deg) scale(0.95);
-    opacity: 0;
-  }
-  50% {
-    transform: translateX(-25px) rotateY(-45deg) scale(1.02);
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateX(0) rotateY(0deg) scale(1);
-    opacity: 1;
-  }
-}
-
-/* Recycle animation (waste back to stock) */
-.waste-recycle-to-stock {
-  animation: recycleToStock 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-@keyframes recycleToStock {
-  0% {
-    transform: translateX(0) rotateY(0deg) scale(1);
-    opacity: 1;
-  }
-  30% {
-    transform: translateX(-30px) rotateY(-45deg) scale(1.2);
-    opacity: 0.8;
-  }
-  70% {
-    transform: translateX(-70px) rotateY(-135deg) scale(0.8);
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateX(-100px) rotateY(-180deg) scale(1);
-    opacity: 1;
-  }
-}
-
-/* Pile shake animation for invalid drops */
 .pile-shake {
   animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
@@ -772,274 +1290,10 @@ body {
   20%, 40%, 60%, 80% { transform: translateX(3px); }
 }
 
-/* Header spacing fix */
-main.pt-32 {
-  padding-top: 8rem !important; /* Ensures spacing below fixed header */
-}
+/* =================================================================
+   ACCESSIBILITY & PERFORMANCE
+   ================================================================= */
 
-
-/* --- Card playing area with 8px grid system --- */
-.card-playing-area {
-  border-radius: 0;
-  padding: 0; /* Remove padding to align with header */
-  background: transparent;
-  margin-top: 7.5rem;
-}
-
-/* Medium screen adjustments (768px - 1024px) for better fit */
-@media (min-width: 768px) and (max-width: 1024px) {
-  /* Smaller center suit icon */
-  .card .opacity-25 {
-    font-size: 4.2rem !important;
-    width: 4.2rem !important;
-    height: 4.2rem !important;
-  }
-
-  .card {
-    width: 112px;
-    height: 160px;
-    font-size: 0.9rem;
-  }
-  
-  .tableau-pile {
-    width: 100%;
-    max-width: 112px;
-    height: 496px; /* Optimized for 13-card max: 112px + (12 × 32px) */
-  }
-  
-  .stock-pile, .waste-pile, .foundation-pile {
-    width: 112px;
-    height: 160px;
-    min-width: 112px;
-    min-height: 160px;
-  }
-  
-  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
-    width: 112px;
-    height: 160px;
-  }
-  
-  /* Fix face-down card overflow at tablet resolutions */
-  .card.face-down::after {
-    font-size: 1.8rem;
-  }
-  
-  .stock-pile.face-down::after {
-    font-size: 1.8rem;
-  }
-}
-
-/* Responsive spacing adjustments for mobile */
-@media (max-width: 768px) {
-  .card-playing-area {
-    padding: 0; /* Remove padding to align with header */
-    margin-top: 10rem;
-  }
-  
-  .card {
-    width: 44px;
-    height: 62px;
-    font-size: 0.55rem;
-  }
-  
-  .tableau-pile {
-    width: 100%;
-    max-width: 44px; /* Further reduced to prevent overflow */
-    height: 250px; /* Adjusted for smaller cards */
-  }
-  
-  /* Tighter card stacking for mobile */
-  .tableau-card-position {
-    top: calc(var(--card-index) * 10px); /* Even tighter stacking to prevent overlap */
-  }
-  
-  .stock-pile, .waste-pile, .foundation-pile {
-    width: 44px;
-    height: 62px;
-    min-width: 44px;
-    min-height: 62px;
-  }
-  
-  
-  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
-    width: 44px;
-    height: 62px;
-  }
-  
-  /* Face-down card text sizing for mobile */
-  .card.face-down {
-    width: 44px !important;
-    height: 62px !important;
-  }
-  
-  /* Ensure tableau cards are consistent at mobile */
-  .tableau-pile .card,
-  .tableau-pile .card.face-down {
-    width: 44px !important;
-    height: 62px !important;
-    min-width: 44px !important;
-    max-width: 44px !important;
-    min-height: 62px !important;
-    max-height: 62px !important;
-  }
-  
-  .card.face-down::after {
-    font-size: 1.2rem;
-  }
-  
-  .stock-pile.face-down::after {
-    font-size: 1.2rem;
-  }
-  
-  /* Improve mobile touch targets */
-  .card {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    min-height: 62px; /* Match the card height */
-  }
-  
-  .stock-pile, .waste-pile, .foundation-pile {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    min-height: 62px; /* Match the card height */
-  }
-  
-  /* Better mobile text sizing - reduce card font sizes to prevent overlap */
-  .card .rank, .card .suit {
-    font-size: 0.7rem;
-  }
-  
-  /* Reduce card text sizes for mobile to prevent suit overlap */
-  .card span {
-    font-size: 1rem !important;
-  }
-  
-  .card svg {
-    font-size: 0.8rem !important;
-    width: 0.8rem !important;
-    height: 0.8rem !important;
-  }
-  
-  /* Smaller center suit icon */
-  .card .opacity-25 {
-    font-size: 3.5rem !important;
-    width: 3.5rem !important;
-    height: 3.5rem !important;
-  }
-  
-  /* Fix face-down card overflow on mobile */
-  .card.face-down::after {
-    font-size: 1.4rem;
-  }
-  
-  .stock-pile.face-down::after {
-    font-size: 1.4rem;
-  }
-}
-
-/* Responsive spacing adjustments for mobile */
-@media (max-width: 639px) {
-  .card-playing-area {
-    padding: 0; /* Remove padding to align with header */
-    margin-top: 8.4rem;
-  }
-}
-
-/* Extra small mobile adjustments */
-@media (max-width: 575px) {
-  .card-playing-area {
-    gap: 12px;
-  }
-  
-  .card {
-    width: 49px;
-    height: 76px;
-    font-size: 0.65rem;
-  }
-  
-  .tableau-pile {
-    width: 100%;
-    max-width: 49px;
-    height: 340px; /* Optimized for small mobile with tighter stacking */
-  }
-  
-  /* Even tighter card stacking for very small screens */
-  .tableau-card-position {
-    top: calc(var(--card-index) * 20px); /* Very tight stacking for small screens */
-  }
-  
-  .stock-pile, .waste-pile, .foundation-pile {
-    width: 49px;
-    height: 76px;
-  }
-  
-  
-  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
-    width: 49px;
-    height: 76px;
-  }
-  
-  /* Smaller text for very small screens */
-  .card .rank, .card .suit {
-    font-size: 0.6rem;
-  }
-  
-  /* Extra small mobile card text sizing */
-  .card span {
-    font-size: 1rem !important;
-  }
-  
-  .card svg {
-    font-size: 0.7rem !important;
-    width: 0.7rem !important;
-    height: 0.7rem !important;
-  }
-  
-  /* Even smaller center suit icon */
-  .card .opacity-25 {
-    font-size: 2.5rem !important;
-    width: 2.5rem !important;
-    height: 2.5rem !important;
-  }
-  
-  /* Further adjust face-down cards for very small screens */
-  .card.face-down::after {
-    font-size: 1.0rem;
-  }
-  
-  .stock-pile.face-down::after {
-    font-size: 1.0rem;
-  }
-  
-  /* Ensure tableau cards are consistent at extra small mobile */
-  .tableau-pile .card,
-  .tableau-pile .card.face-down {
-    width: 49px !important;
-    min-width: 49px !important;
-    max-width: 49px !important;
-    height: 76px !important;
-    min-height: 76px !important;
-    max-height: 76px !important;
-  }
-}
-
-/* Global animation performance improvements */
-button, .button, [role="button"] {
-  will-change: transform, box-shadow;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-button:hover, .button:hover, [role="button"]:hover {
-  transform: translateY(-1px) translateZ(0);
-}
-
-button:active, .button:active, [role="button"]:active {
-  transform: translateY(0) scale(0.98) translateZ(0);
-}
-
-/* Enhanced accessibility and contrast */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -1049,179 +1303,15 @@ button:active, .button:active, [role="button"]:active {
   }
   
   .card, .stock-pile, .waste-pile, .foundation-pile {
-    transition: none;
-  }
-  
-  .card:hover, .stock-pile:hover, .waste-pile:hover, .foundation-pile:hover {
-    transform: none;
+    transition: none !important;
+    animation: none !important;
   }
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .card.face-up {
-    border-color: #000000;
-    color: #000000;
-  }
-  
-  .card.face-down {
-    border-color: #ffffff;
-  }
-}
-
-/* Professional hydration loading effect */
-.hydration-loading {
-  pointer-events: none;
-  position: relative;
-}
-
-.hydration-loading::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 1000;
-  animation: hydration-pulse 2s ease-in-out infinite;
-}
-
-@keyframes hydration-pulse {
-  0%, 100% {
-    opacity: 0.6;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-  50% {
-    opacity: 0.8;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-}
-
-/* Ensure proper layering during hydration */
-.hydration-loading .card,
-.hydration-loading .stock-pile,
-.hydration-loading .waste-pile,
-.hydration-loading .foundation-pile,
-.hydration-loading .tableau-pile {
-  filter: blur(4px);
-  opacity: 0.7;
-  transition: none;
-}
-
-/* Force mutually exclusive tableau layouts */
-.desktop-tableau {
-  display: flex !important;
-}
-
-@media (min-width: 992px) {
-  /* Ensure face-down cards have proper dimensions on desktop */
-  .card.face-down {
-    width: 128px !important;
-    height: 184px !important;
-  }
-}
-
-/* Small tablet breakpoint with optimized larger cards */
-@media (min-width: 480px) and (max-width: 767px) {
-  .card {
-    width: 49px;
-    height: 76px;
-    font-size: 0.85rem;
-  }
-  
-  .tableau-pile {
-    max-width: 49px;
-    height: 420px;
-  }
-  
-  .tableau-card-position {
-    top: calc(var(--card-index) * 24px);
-  }
-  
-  .stock-pile, .waste-pile, .foundation-pile {
-    width: 49px;
-    height: 76px;
-    min-width: 49px;
-    min-height: 76px;
-  }
-  
-  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
-    width: 49px;
-    height: 76px;
-  }
-  
-  /* Face-down card text sizing for small tablet */
-  .card.face-down::after {
-    font-size: 1.6rem;
-  }
-  
-  .stock-pile.face-down::after {
-    font-size: 1.6rem;
-  }
-  
-  /* Ensure tableau cards are consistent at small tablet */
-  .tableau-pile .card,
-  .tableau-pile .card.face-down {
-    width: 49px !important;
-    min-width: 49px !important;
-    max-width: 49px !important;
-    height: 76px !important;
-    min-height: 76px !important;
-    max-height: 76px !important;
-  }
-}
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  /* Large tablet gets significantly bigger cards to maximize space usage */
-  .card {
-    width: 100px;
-    height: 145px;
-    font-size: 1rem;
-  }
-  
-  .tableau-pile {
-    max-width: 100px;
-    height: 500px;
-  }
-  
-  .tableau-card-position {
-    top: calc(var(--card-index) * 28px);
-  }
-  
-  .stock-pile, .waste-pile, .foundation-pile {
-    width: 100px;
-    height: 145px;
-    min-width: 100px;
-    min-height: 145px;
-  }
-  
-  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
-    width: 100px;
-    height: 145px;
-  }
-  
-  /* Face-down card text sizing for large tablet */
-  .card.face-down::after {
-    font-size: 2.0rem;
-  }
-  
-  .stock-pile.face-down::after {
-    font-size: 2.0rem;
-  }
-  
-  /* Ensure tableau cards are consistent at large tablet */
-  .tableau-pile .card,
-  .tableau-pile .card.face-down {
-    width: 100px !important;
-    height: 145px !important;
-    min-width: 100px !important;
-    max-width: 100px !important;
-    min-height: 145px !important;
-    max-height: 145px !important;
-  }
+/* Global animation performance improvements */
+button, .button, [role="button"] {
+  will-change: transform, box-shadow;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }

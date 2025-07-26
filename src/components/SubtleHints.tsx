@@ -182,27 +182,27 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
       <div className="bg-black bg-opacity-40 backdrop-blur-md text-white rounded-lg shadow-2xl border border-white border-opacity-10 transition-all duration-300 hover:bg-opacity-60">
         {/* Header with expand/collapse */}
         <div 
-          className="flex items-center gap-2 px-3 py-2 cursor-pointer"
+          className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 cursor-pointer landscape-mobile-hints-header"
           onClick={() => setIsExpanded(!isExpanded)}
         >
-          <BsLightbulb className="text-yellow-300 w-4 h-4 flex-shrink-0" />
-          <span className="text-xs font-medium opacity-80">Hints</span>
+          <BsLightbulb className="text-yellow-300 w-4 h-4 sm:w-6 sm:h-6 flex-shrink-0 landscape-mobile-hints-icon" />
+          <span className="text-sm sm:text-base font-medium opacity-80 landscape-mobile-hints-title">Hints</span>
           {currentHints.length > 1 && (
-            <span className="text-xs bg-white bg-opacity-20 rounded-full px-2 py-0.5 ml-auto">
+            <span className="text-xs sm:text-base bg-white bg-opacity-20 rounded-full px-2 py-1 sm:px-4 sm:py-1.5 ml-auto landscape-mobile-hints-counter">
               {currentHintIndex + 1}/{currentHints.length}
             </span>
           )}
           {isExpanded ? (
-            <BsChevronDown className="w-3 h-3 opacity-60" />
+            <BsChevronDown className="w-4 h-4 sm:w-5 sm:h-5 opacity-60 landscape-mobile-hints-chevron" />
           ) : (
-            <BsChevronUp className="w-3 h-3 opacity-60" />
+            <BsChevronUp className="w-4 h-4 sm:w-5 sm:h-5 opacity-60 landscape-mobile-hints-chevron" />
           )}
         </div>
 
         {/* Hint content */}
         {isExpanded && (
-          <div className="px-3 pb-3 border-t border-white border-opacity-10">
-            <p className="text-sm leading-relaxed mt-2 opacity-90">
+          <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-white border-opacity-10 landscape-mobile-hints-content">
+            <p className="text-sm sm:text-lg leading-relaxed mt-2 sm:mt-3 opacity-90 landscape-mobile-hints-text">
               {currentHint.message}
             </p>
             
@@ -216,7 +216,7 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
                       e.stopPropagation();
                       setCurrentHintIndex(index);
                     }}
-                    className={`w-2 h-2 rounded-full transition-colors ${
+                    className={`w-4 h-4 rounded-full transition-colors ${
                       index === currentHintIndex 
                         ? 'bg-yellow-300' 
                         : 'bg-white bg-opacity-30 hover:bg-opacity-50'

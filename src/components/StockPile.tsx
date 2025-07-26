@@ -20,23 +20,23 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
     {Array.from({ length: Math.min(5, cards.length - 1) }, (_, i) => (
       <div 
         key={i}
-        className={`stock-pile pointer-events-none ${isShuffling ? 'stock-shuffle-cascade' : ''}`}
+        className={`card face-down pointer-events-none ${isShuffling ? 'stock-shuffle-cascade' : ''}`}
         style={{ 
           position: 'absolute', 
-          left: `${(i + 1) * 2}px`, 
-          top: `${(i + 1) * 2}px`,
+          left: `${(i + 1) * 1}px`, 
+          top: `${(i + 1) * 1}px`,
           zIndex: i + 1,
-          opacity: Math.max(0.03, 0.15 - (i * 0.03)),
+          opacity: Math.max(0.1, 0.4 - (i * 0.08)),
           animationDelay: isShuffling ? `${i * 0.08}s` : '0s'
         }} 
       />
     ))}
-    {/* Top card */}
-    {cards.length > 0 ? (
+    {/* Top card - maintain cards during animation */}
+    {(cards.length > 0 || isAnimating) ? (
       <div
-        className={`stock-pile face-down transition-all duration-200 ${
-          canCycle ? 'cursor-pointer hover:shadow-2xl' : 'cursor-not-allowed opacity-50'
-        } ${isAnimating ? 'stock-flip-to-waste' : ''} ${isShuffling ? 'stock-shuffle-cascade' : ''}`}
+        className={`card face-down ${
+          canCycle && !isAnimating ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+        } ${isShuffling ? 'stock-shuffle-cascade' : ''}`}
         style={{ 
           position: 'absolute', 
           top: 0, 
@@ -44,25 +44,25 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
           zIndex: 10,
           animationDelay: isShuffling ? '0.4s' : '0s'
         }}
-        onClick={canCycle ? onClick : undefined}
+        onClick={canCycle && !isAnimating ? onClick : undefined}
         title={canCycle ? "Stock pile" : "No more cycles allowed"}
       />
     ) : (
       <div 
-        className={`stock-pile empty flex flex-col items-center justify-center transition-all duration-200 ${
+        className={`stock-pile empty flex flex-col items-center justify-center ${
           isRecycleAvailable ? 'recycle-available' : ''
         } ${
-          canCycle ? 'cursor-pointer hover:shadow-lg' : 'cursor-not-allowed opacity-40'
+          canCycle ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'
         }`}
         style={{ position: 'absolute', top: 0, left: 0, zIndex: 10 }}
         onClick={canCycle ? onClick : undefined}
         title={canCycle ? "Click to recycle" : "No more cycles allowed"}
       >
-        <div className={`text-xs text-center font-semibold ${isRecycleAvailable ? 'text-white' : 'text-gray-500'}`}>
+        <div className={`text-base text-center font-semibold ${isRecycleAvailable ? 'text-white' : 'text-gray-400'}`}>
           {isRecycleAvailable ? '♻️ Recycle' : canCycle ? 'Recycle' : 'Empty'}
         </div>
         {cyclesRemaining !== undefined && cyclesRemaining > 0 && (
-          <div className="text-gray-500 text-xs">
+          <div className="text-gray-400 text-sm">
             {cyclesRemaining} left
           </div>
         )}

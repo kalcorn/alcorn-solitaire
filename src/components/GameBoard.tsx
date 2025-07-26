@@ -23,6 +23,8 @@ const GameBoard: React.FC = () => {
   const [isWasteAnimating, setIsWasteAnimating] = React.useState(false);
   const [isShuffling, setIsShuffling] = React.useState(false);
   const [isWinAnimating, setIsWinAnimating] = React.useState(false);
+  const [lastClickTime, setLastClickTime] = React.useState(0);
+  const [lastClickedCardId, setLastClickedCardId] = React.useState<string | null>(null);
   const {
     gameState,
     timeElapsed,
@@ -34,9 +36,7 @@ const GameBoard: React.FC = () => {
     getMovableCards,
     updateSettings,
     undo,
-    redo,
-    canUndo,
-    canRedo
+    canUndo
   } = useGameState();
 
   // Ensure client-side rendering for consistent hydration
@@ -72,7 +72,24 @@ const GameBoard: React.FC = () => {
   } = useDragAndDrop();
 
   const handleCardClick = (cardId: string, pileType: 'tableau' | 'foundation' | 'waste', pileIndex: number, cardIndex: number) => {
-    // Double-click to auto-move to foundation
+    const currentTime = Date.now();
+    const isDoubleClick = currentTime - lastClickTime < 500 && lastClickedCardId === cardId;
+    
+    setLastClickTime(currentTime);
+    setLastClickedCardId(cardId);
+    
+    if (isDoubleClick) {
+      // Double-click to auto-move to foundation
+      const card = getCardById(cardId);
+      if (card) {
+        const result = handleAutoMoveToFoundation(card);
+        if (result.success) {
+          return;
+        }
+      }
+    }
+    
+    // Try auto-move to foundation on single click first
     const card = getCardById(cardId);
     if (card) {
       const result = handleAutoMoveToFoundation(card);
@@ -80,8 +97,8 @@ const GameBoard: React.FC = () => {
         return;
       }
     }
-
-    // Single click for selection
+    
+    // If auto-move failed, proceed with selection
     const movableCards = getMovableCards({ pileType, pileIndex, cardIndex });
     if (movableCards.length > 0) {
       selectCards({ pileType, pileIndex, cardIndex }, movableCards);
@@ -133,27 +150,20 @@ const GameBoard: React.FC = () => {
       }
       setIsWasteAnimating(true);
       setTimeout(() => {
-        setIsStockAnimating(true);
         handleStockFlip();
         setTimeout(() => {
           setIsWasteAnimating(false);
-          setIsStockAnimating(false);
-        }, 500);
-      }, 250);
+        }, 600);
+      }, 100);
     } else {
-      // When dealing from stock to waste
-      setIsStockAnimating(true);
+      // When dealing from stock to waste - simple slide animation
+      setIsWasteAnimating(true);
       setTimeout(() => {
-        setIsWasteAnimating(true);
-        // Delay game state update to keep stock cards visible during animation
+        handleStockFlip();
         setTimeout(() => {
-          handleStockFlip();
-        }, 250);
-        setTimeout(() => {
-          setIsStockAnimating(false);
           setIsWasteAnimating(false);
         }, 400);
-      }, 150);
+      }, 100);
     }
   };
 
@@ -181,18 +191,21 @@ const GameBoard: React.FC = () => {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault(); // Prevent scrolling
       updateDrag(e as any);
     };
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
       endDrag(handleDrop);
     };
 
     if (dragState.isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      document.addEventListener('touchmove', handleTouchMove);
-      document.addEventListener('touchend', handleTouchEnd);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd, { passive: false });
+      document.addEventListener('touchcancel', handleTouchEnd, { passive: false });
     }
 
     return () => {
@@ -200,6 +213,7 @@ const GameBoard: React.FC = () => {
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('touchcancel', handleTouchEnd);
     };
   }, [dragState.isDragging, updateDrag, endDrag]);
 
@@ -215,11 +229,87 @@ const GameBoard: React.FC = () => {
         onSettingsChange={updateSettings}
       />
       <div className={` w-full flex flex-col items-center bg-transparent ${!isClient ? 'hydration-loading' : ''}`}>
-        <div className="w-full max-w-6xl mx-auto px-1 sm:px-4 md:px-6 lg:px-8">
-          <div className="card-playing-area flex flex-col gap-4 sm:gap-8 w-full py-4 pb-bottom-responsive">
+        <div className="w-full max-w-7xl mx-auto px-1 sm:px-4 md:px-6 lg:px-0">
+          <div className="card-playing-area flex flex-col gap-3 w-full pt-6 md:pt-8 lg:pt-10 pb-bottom-responsive">
 
-            {/* Stock, Waste, and Foundations - Desktop Layout */}
-            <div className="flex flex-row items-start justify-between w-full">
+            {/* Landscape Mobile: Left Side Piles (Stock, Waste) */}
+            <div className="landscape-mobile-left-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 rounded-xl p-4 shadow-lg border border-green-700 border-opacity-30">
+              <div className="flex flex-col gap-2">
+                <StockPile 
+                  cards={gameState.stockPile} 
+                  onClick={handleAnimatedStockFlip}
+                  cyclesRemaining={gameState.settings.deckCyclingLimit > 0 ? 
+                    Math.max(0, gameState.settings.deckCyclingLimit - gameState.stockCycles) : 
+                    undefined}
+                  canCycle={gameState.settings.deckCyclingLimit === 0 || 
+                    gameState.stockCycles < gameState.settings.deckCyclingLimit}
+                  isAnimating={isStockAnimating}
+                  wasteCardCount={gameState.wastePile.length}
+                  isShuffling={isShuffling}
+                />
+                <WastePile 
+                  cards={gameState.wastePile}
+                  onCardClick={(cardId) => {
+                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
+                    if (cardIndex !== -1) {
+                      handleCardClick(cardId, 'waste', 0, cardIndex);
+                    }
+                  }}
+                  onCardDragStart={(cardId, event) => {
+                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
+                    if (cardIndex !== -1) {
+                      const movableCards = getMovableCards({ pileType: 'waste', pileIndex: 0, cardIndex });
+                      if (movableCards.length > 0) {
+                        startDrag(movableCards, { pileType: 'waste', pileIndex: 0, cardIndex }, event);
+                      }
+                    }
+                  }}
+                  isCardBeingDragged={isCardBeingDragged}
+                  isAnimating={isWasteAnimating}
+                  animationType={gameState.stockPile.length === 0 ? 'toStock' : 'fromStock'}
+                />
+              </div>
+            </div>
+
+            {/* Landscape Mobile: Right Side Foundation Piles */}
+            <div className="landscape-mobile-right-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 rounded-xl p-4 shadow-lg border border-green-700 border-opacity-30">
+              <div className="flex flex-col gap-2">
+                {[0, 1, 2, 3].map(i => (
+                  <div
+                    key={i}
+                    data-drop-zone
+                    data-pile-type="foundation"
+                    data-pile-index={i}
+                    className={`${isZoneHovered('foundation', i) ? 'drop-zone' : ''} ${isWinAnimating ? 'foundation-win-cascade' : ''}`}
+                  >
+                    <FoundationPile 
+                      index={i} 
+                      cards={gameState.foundationPiles[i]}
+                      onCardClick={(cardId) => {
+                        const cardIndex = gameState.foundationPiles[i].findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          handleCardClick(cardId, 'foundation', i, cardIndex);
+                        }
+                      }}
+                      onCardDragStart={(cardId, event) => {
+                        const cardIndex = gameState.foundationPiles[i].findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          const movableCards = getMovableCards({ pileType: 'foundation', pileIndex: i, cardIndex });
+                          if (movableCards.length > 0) {
+                            startDrag(movableCards, { pileType: 'foundation', pileIndex: i, cardIndex }, event);
+                          }
+                        }
+                      }}
+                      isDropZone={isZoneHovered('foundation', i)}
+                      isCardBeingDragged={isCardBeingDragged}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Top Piles Section - Standard Layout: Stock, Waste, and Foundations - Desktop/Portrait Mobile */}
+            <div className="standard-layout flex flex-row items-start justify-between w-full bg-gradient-to-r from-emerald-900 to-green-900 bg-opacity-40 rounded-xl p-6 mb-6 shadow-lg border border-green-700 border-opacity-30">
               <div className="flex flex-row items-center gap-2 md:gap-4 lg:gap-6 flex-shrink-0">
                 <StockPile 
                   cards={gameState.stockPile} 
@@ -290,19 +380,55 @@ const GameBoard: React.FC = () => {
               </div>
             </div>
 
-            {/* Tableau piles */}
-            <div className="desktop-tableau justify-between w-full">
+            {/* Landscape Mobile: Center Tableau with Increased Size */}
+            <div className="landscape-mobile-tableau flex-1 flex justify-center">
+              <div className="landscape-tableau-center justify-between w-full max-w-4xl">
+                {gameState.tableauPiles.map((pile, i) => (
+                  <div 
+                    key={i} 
+                    className={`flex-shrink-0 tableau-pile tableau-container ${isZoneHovered('tableau', i) ? 'drop-zone' : ''}`}
+                    data-drop-zone
+                    data-pile-type="tableau"
+                    data-pile-index={i}
+                  >
+                    <TableauPile 
+                      cards={pile}
+                      isDropZone={isZoneHovered('tableau', i)}
+                      onCardClick={(cardId) => {
+                        const cardIndex = pile.findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          handleCardClick(cardId, 'tableau', i, cardIndex);
+                        }
+                      }}
+                      onCardDragStart={(cardId, event) => {
+                        const cardIndex = pile.findIndex(c => c.id === cardId);
+                        if (cardIndex !== -1) {
+                          const movableCards = getMovableCards({ pileType: 'tableau', pileIndex: i, cardIndex });
+                          if (movableCards.length > 0) {
+                            startDrag(movableCards, { pileType: 'tableau', pileIndex: i, cardIndex }, event);
+                          }
+                        }
+                      }}
+                      isCardBeingDragged={isCardBeingDragged}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Tableau Section - Standard Tableau for Desktop/Portrait Mobile */}
+            <div className="standard-tableau desktop-tableau justify-between w-full">
               {gameState.tableauPiles.map((pile, i) => (
                 <div 
                   key={i} 
-                  className="flex-shrink-0 tableau-pile"
+                  className={`flex-shrink-0 tableau-pile tableau-container ${isZoneHovered('tableau', i) ? 'drop-zone' : ''}`}
                   data-drop-zone
                   data-pile-type="tableau"
                   data-pile-index={i}
-                  style={{ width: '128px' }}
                 >
                   <TableauPile 
                     cards={pile}
+                    isDropZone={isZoneHovered('tableau', i)}
                     onCardClick={(cardId) => {
                       const cardIndex = pile.findIndex(c => c.id === cardId);
                       if (cardIndex !== -1) {
@@ -318,7 +444,6 @@ const GameBoard: React.FC = () => {
                         }
                       }
                     }}
-                    isDropZone={isZoneHovered('tableau', i)}
                     isCardBeingDragged={isCardBeingDragged}
                   />
                 </div>
@@ -327,14 +452,14 @@ const GameBoard: React.FC = () => {
           
             {/* Win condition display */}
             {gameState.isGameWon && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 win-overlay">
-                <div className="bg-white rounded-lg p-8 text-center shadow-2xl win-celebration">
-                  <h2 className="text-3xl font-bold text-green-600 mb-4">🎉 Congratulations! 🎉</h2>
-                  <p className="text-lg mb-4">You won in {gameState.moves} moves!</p>
-                  <p className="text-lg mb-6">Final Score: {gameState.score}</p>
+              <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 win-overlay">
+                <div className="bg-slate-800 rounded-lg p-8 text-center shadow-2xl win-celebration border border-slate-600">
+                  <h2 className="text-3xl font-bold text-green-400 mb-4">🎉 Congratulations! 🎉</h2>
+                  <p className="text-lg mb-4 text-slate-200">You won in {gameState.moves} moves!</p>
+                  <p className="text-lg mb-6 text-slate-200">Final Score: {gameState.score}</p>
                   <button
                     onClick={handleAnimatedNewGame}
-                    className="px-6 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-lg hover:bg-emerald-700 border border-emerald-500 hover:shadow-xl active:scale-95 transition-all"
+                    className="px-6 py-2 rounded-lg bg-emerald-700 text-white font-semibold shadow-lg hover:bg-emerald-800 border border-emerald-600 hover:shadow-xl active:scale-95 transition-all"
                   >
                     🎮 Play Again
                   </button>
@@ -361,12 +486,10 @@ const GameBoard: React.FC = () => {
       {/* Subtle Hints */}
       <SubtleHints gameState={gameState} />
 
-      {/* Undo/Redo Buttons */}
+      {/* Undo Button */}
       <UndoRedoButtons 
         onUndo={undo}
-        onRedo={redo}
         canUndo={canUndo}
-        canRedo={canRedo}
       />
     </>
   );

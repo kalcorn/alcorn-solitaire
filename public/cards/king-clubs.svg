@@ -1,0 +1,24 @@
+<svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+  <!-- Crown -->
+  <path d="M20 20 L30 15 L35 25 L40 10 L45 25 L50 10 L55 25 L60 10 L65 25 L70 15 L80 20 L75 35 L25 35 Z" 
+        fill="#1F2937" stroke="#111827" stroke-width="1"/>
+
+  <!-- Face -->
+  <ellipse cx="50" cy="50" rx="18" ry="20" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
+
+  <!-- Eyes -->
+  <circle cx="45" cy="47" r="2" fill="#2C3E50"/>
+  <circle cx="55" cy="47" r="2" fill="#2C3E50"/>
+
+  <!-- Mustache -->
+  <path d="M42 52 Q50 55 58 52" stroke="#111827" stroke-width="2" fill="none"/>
+
+  <!-- Beard -->
+  <path d="M35 58 Q50 70 65 58 Q60 75 50 75 Q40 75 35 58" fill="#111827"/>
+
+  <!-- Upper chest -->
+  <rect x="25" y="65" width="50" height="5" fill="#1F2937" stroke="#111827" stroke-width="1" rx="2"/>
+
+  <!-- Bottom rectangle -->
+  <rect x="0" y="65" width="100" height="5" fill="#1F2937"/>
+</svg>

@@ -16,14 +16,14 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
 
   const getAnimationClass = () => {
     if (!isAnimating) return '';
-    if (animationType === 'fromStock') return 'waste-flip-from-stock';
+    if (animationType === 'fromStock') return '';
     if (animationType === 'toStock') return 'waste-recycle-to-stock';
     return '';
   };
 
   return (
     <div
-      className={`flex-shrink-0 waste-pile-responsive ${getAnimationClass()}`}
+      className={`flex-shrink-0 waste-pile-responsive ${isAnimating && animationType === 'fromStock' ? 'card-slide-from-stock' : ''} ${getAnimationClass()}`}
       style={{ position: 'relative', zIndex: 1 }}
       aria-label="Waste pile"
       role="list"
@@ -61,7 +61,7 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
           className={`waste-pile ${cards.length === 0 ? 'empty' : ''} flex items-center justify-center waste-pile-responsive`}
           style={{ position: 'absolute', top: 0, left: 0 }}
         >
-          <div className="text-gray-400 text-sm opacity-60">Empty</div>
+          <div className="text-gray-400 text-base opacity-60">Empty</div>
         </div>
       )}
     </div>

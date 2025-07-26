@@ -6,7 +6,11 @@
       "Bash(npm run build:*)",
       "WebFetch(domain:localhost)",
       "Bash(cp:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(ls:*)",
+      "Bash(npm run dev:*)",
+      "Bash(pkill:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

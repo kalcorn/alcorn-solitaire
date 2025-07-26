@@ -196,35 +196,35 @@ const HintsPanel: React.FC<HintsPanelProps> = ({ gameState, onClose }) => {
       case 'foundation': return <BsArrowUp className="text-green-600" />;
       case 'reveal': return <BsLightbulb className="text-yellow-600" />;
       case 'move': return <BsArrowRight className="text-blue-600" />;
-      default: return <BsChevronRight className="text-gray-600" />;
+      default: return <BsChevronRight className="text-slate-400" />;
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 shadow-2xl max-h-[80vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+      <div className="bg-slate-800 rounded-lg p-6 w-full max-w-lg mx-4 shadow-2xl max-h-[80vh] overflow-hidden border border-slate-600">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
             <BsLightbulb className="text-yellow-500" />
             Hints & Tips
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded hover:bg-gray-100 transition-colors"
+            className="p-1 rounded hover:bg-slate-700 transition-colors"
           >
-            <BsX className="w-6 h-6 text-gray-600" />
+            <BsX className="w-6 h-6 text-slate-300" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex mb-4 border-b">
+        <div className="flex mb-4 border-b border-slate-600">
           <button
             onClick={() => setActiveTab('hints')}
             className={`py-2 px-4 font-semibold transition-colors ${
               activeTab === 'hints' 
                 ? 'text-emerald-600 border-b-2 border-emerald-600' 
-                : 'text-gray-600 hover:text-gray-800'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Current Hints ({hints.length})
@@ -234,7 +234,7 @@ const HintsPanel: React.FC<HintsPanelProps> = ({ gameState, onClose }) => {
             className={`py-2 px-4 font-semibold transition-colors ${
               activeTab === 'tips' 
                 ? 'text-emerald-600 border-b-2 border-emerald-600' 
-                : 'text-gray-600 hover:text-gray-800'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             General Tips
@@ -247,21 +247,21 @@ const HintsPanel: React.FC<HintsPanelProps> = ({ gameState, onClose }) => {
             <div className="space-y-3">
               {hints.length > 0 ? (
                 hints.map((hint, index) => (
-                  <div key={hint.id} className="bg-gray-50 rounded-lg p-4 border-l-4 border-emerald-400">
+                  <div key={hint.id} className="bg-slate-700 rounded-lg p-4 border-l-4 border-emerald-400">
                     <div className="flex items-start gap-3">
                       <div className="mt-1">
                         {getHintIcon(hint.type)}
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800 mb-1">{hint.title}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{hint.description}</p>
+                        <h3 className="font-semibold text-white mb-1">{hint.title}</h3>
+                        <p className="text-sm text-slate-300 mb-2">{hint.description}</p>
                         {hint.fromPile && hint.toPile && (
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          <div className="flex items-center gap-2 text-xs text-slate-400">
+                            <span className="bg-blue-900 text-blue-200 px-2 py-1 rounded">
                               {hint.fromPile}
                             </span>
                             <BsArrowRight />
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                            <span className="bg-green-900 text-green-200 px-2 py-1 rounded">
                               {hint.toPile}
                             </span>
                           </div>
@@ -271,7 +271,7 @@ const HintsPanel: React.FC<HintsPanelProps> = ({ gameState, onClose }) => {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8 text-slate-400">
                   <BsLightbulb className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p>No hints available right now.</p>
                   <p className="text-sm">Try making a move or flipping the stock pile!</p>
@@ -281,12 +281,12 @@ const HintsPanel: React.FC<HintsPanelProps> = ({ gameState, onClose }) => {
           ) : (
             <div className="space-y-4">
               {staticTips.map((tip, index) => (
-                <div key={index} className="bg-blue-50 rounded-lg p-4">
-                  <h3 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                <div key={index} className="bg-slate-700 rounded-lg p-4">
+                  <h3 className="font-semibold text-white mb-2 flex items-center gap-2">
                     <BsLightbulb className="text-blue-600 w-4 h-4" />
                     {tip.title}
                   </h3>
-                  <p className="text-sm text-gray-600">{tip.description}</p>
+                  <p className="text-sm text-slate-300">{tip.description}</p>
                 </div>
               ))}
             </div>
@@ -294,10 +294,10 @@ const HintsPanel: React.FC<HintsPanelProps> = ({ gameState, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="mt-6 pt-4 border-t border-gray-200 text-center">
+        <div className="mt-6 pt-4 border-t border-slate-600 text-center">
           <button
             onClick={onClose}
-            className="px-6 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors"
+            className="px-6 py-2 rounded-lg bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition-colors"
           >
             Got it!
           </button>

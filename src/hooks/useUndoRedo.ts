@@ -3,21 +3,23 @@ import { GameState, GameHistoryEntry } from '@/types';
 
 export const useUndoRedo = (gameState: GameState, setGameState: (state: GameState) => void) => {
   
-  const saveState = useCallback((action: string) => {
+  const saveState = useCallback((action: string, currentState?: GameState) => {
+    const stateToUse = currentState || gameState;
+    
     const stateToSave = {
-      tableauPiles: gameState.tableauPiles,
-      foundationPiles: gameState.foundationPiles,
-      stockPile: gameState.stockPile,
-      wastePile: gameState.wastePile,
-      moves: gameState.moves,
-      score: gameState.score,
-      isGameWon: gameState.isGameWon,
-      selectedCards: gameState.selectedCards,
-      selectedPileType: gameState.selectedPileType,
-      selectedPileIndex: gameState.selectedPileIndex,
-      stockCycles: gameState.stockCycles,
-      settings: gameState.settings,
-      stats: gameState.stats
+      tableauPiles: stateToUse.tableauPiles,
+      foundationPiles: stateToUse.foundationPiles,
+      stockPile: stateToUse.stockPile,
+      wastePile: stateToUse.wastePile,
+      moves: stateToUse.moves,
+      score: stateToUse.score,
+      isGameWon: stateToUse.isGameWon,
+      selectedCards: [],
+      selectedPileType: null,
+      selectedPileIndex: null,
+      stockCycles: stateToUse.stockCycles,
+      settings: stateToUse.settings,
+      stats: stateToUse.stats
     };
 
     const historyEntry: GameHistoryEntry = {
@@ -27,23 +29,29 @@ export const useUndoRedo = (gameState: GameState, setGameState: (state: GameStat
     };
 
     // Remove any future history if we're not at the end
-    const newHistory = gameState.history.slice(0, gameState.historyIndex + 1);
+    const newHistory = stateToUse.history.slice(0, stateToUse.historyIndex + 1);
     newHistory.push(historyEntry);
 
     // Limit history to last 50 moves to prevent memory issues
     const limitedHistory = newHistory.slice(-50);
 
-    setGameState({
-      ...gameState,
+    return {
       history: limitedHistory,
       historyIndex: limitedHistory.length - 1
-    });
-  }, [gameState, setGameState]);
+    };
+  }, [gameState]);
 
   const undo = useCallback(() => {
-    if (gameState.historyIndex > 0) {
+    if (gameState.historyIndex > 0 && gameState.history.length > 0) {
       const previousIndex = gameState.historyIndex - 1;
-      const previousState = gameState.history[previousIndex].state;
+      const historyEntry = gameState.history[previousIndex];
+      
+      if (!historyEntry || !historyEntry.state) {
+        console.warn('Invalid history entry at index', previousIndex);
+        return false;
+      }
+      
+      const previousState = historyEntry.state;
       
       setGameState({
         ...previousState,
@@ -56,31 +64,13 @@ export const useUndoRedo = (gameState: GameState, setGameState: (state: GameStat
     return false;
   }, [gameState, setGameState]);
 
-  const redo = useCallback(() => {
-    if (gameState.historyIndex < gameState.history.length - 1) {
-      const nextIndex = gameState.historyIndex + 1;
-      const nextState = gameState.history[nextIndex].state;
-      
-      setGameState({
-        ...nextState,
-        history: gameState.history,
-        historyIndex: nextIndex
-      });
-      
-      return true;
-    }
-    return false;
-  }, [gameState, setGameState]);
-
-  const canUndo = gameState.historyIndex > 0;
-  const canRedo = gameState.historyIndex < gameState.history.length - 1;
+  const canUndo = gameState.historyIndex > 0 && 
+                  gameState.history.length > 0;
 
   return {
     saveState,
     undo,
-    redo,
     canUndo,
-    canRedo,
     historyLength: gameState.history.length
   };
 };

@@ -1,0 +1,55 @@
+<svg viewBox="0 0 100 102" xmlns="http://www.w3.org/2000/svg">
+  <!-- Crown -->
+  <path d="M25 18 L30 12 L35 22 L40 8 L45 22 L50 8 L55 22 L60 8 L65 22 L70 12 L75 18 L72 28 L28 28 Z" 
+        fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+  
+  <!-- Crown jewels -->
+  <path d="M40 15 L37 18 L40 21 L43 18 Z" fill="#DC2626"/>
+  <path d="M50 15 L47 18 L50 21 L53 18 Z" fill="#DC2626"/>
+  <path d="M60 15 L57 18 L60 21 L63 18 Z" fill="#DC2626"/>
+
+  <!-- Hair -->
+  <path d="M28 28 Q22 38 28 48 Q50 38 72 48 Q78 38 72 28" fill="#654321"/>
+  
+  <!-- Face -->
+  <ellipse cx="50" cy="42" rx="16" ry="20" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
+
+  <!-- Eyes -->
+  <circle cx="45" cy="39" r="2" fill="#2C3E50"/>
+  <circle cx="55" cy="39" r="2" fill="#2C3E50"/>
+  <path d="M43 37 Q45 35 47 37" stroke="#654321" stroke-width="1" fill="none"/>
+  <path d="M53 37 Q55 35 57 37" stroke="#654321" stroke-width="1" fill="none"/>
+
+  <!-- Nose -->
+  <path d="M50 42 L49 44 L51 44 Z" fill="#E68A7A"/>
+
+  <!-- Lips -->
+  <ellipse cx="50" cy="46" rx="3" ry="1.5" fill="#DC2626"/>
+  
+  <!-- Neck -->
+  <rect x="45" y="58" width="10" height="8" fill="#FDBCB4"/>
+  
+  <!-- Necklace -->
+  <ellipse cx="50" cy="62" rx="8" ry="2" fill="none" stroke="#FFD700" stroke-width="2"/>
+  <path d="M50 64 L47 67 L50 70 L53 67 Z" fill="#DC2626"/>
+
+  <!-- Gown bodice -->
+  <path d="M20 66 Q50 62 80 66 L80 88 Q50 92 20 88 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  
+  <!-- Sleeves -->
+  <ellipse cx="20" cy="72" rx="10" ry="14" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <ellipse cx="80" cy="72" rx="10" ry="14" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  
+  <!-- Arms -->
+  <rect x="15" y="82" width="6" height="16" fill="#FDBCB4" rx="3"/>
+  <rect x="79" y="82" width="6" height="16" fill="#FDBCB4" rx="3"/>
+  
+  
+  <!-- Gown skirt -->
+  <path d="M25 88 Q50 85 75 88 L78 102 L22 102 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  
+  <!-- Decorative diamond trim -->
+  <path d="M35 75 L32 78 L35 81 L38 78 Z" fill="#FFD700"/>
+  <path d="M50 75 L47 78 L50 81 L53 78 Z" fill="#FFD700"/>
+  <path d="M65 75 L62 78 L65 81 L68 78 Z" fill="#FFD700"/>
+</svg>

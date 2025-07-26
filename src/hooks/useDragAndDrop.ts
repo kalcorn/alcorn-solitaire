@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Card, CardPosition } from '@/types';
 
 interface DragState {
@@ -33,6 +33,7 @@ export function useDragAndDrop() {
 
   const [dropZones, setDropZones] = useState<DropZone[]>([]);
   const [hoveredZone, setHoveredZone] = useState<DropZone | null>(null);
+  const lastUpdateRef = useRef<number>(0);
 
   /**
    * Starts dragging cards
@@ -52,7 +53,17 @@ export function useDragAndDrop() {
     }
 
     const cardElement = event.currentTarget as HTMLElement;
+    if (!cardElement) {
+      console.warn('Card element not found for drag operation');
+      return;
+    }
+    
     const rect = cardElement.getBoundingClientRect();
+    if (!rect) {
+      console.warn('Could not get bounding rect for card element');
+      return;
+    }
+    
     const offsetX = clientX - rect.left - rect.width / 2;
     const offsetY = clientY - rect.top - rect.height / 2;
 
@@ -104,39 +115,63 @@ export function useDragAndDrop() {
     if ('touches' in event) {
       // Prevent scrolling and other touch behaviors during drag
       event.preventDefault();
-      clientX = event.touches[0].clientX;
-      clientY = event.touches[0].clientY;
+      event.stopPropagation();
+      
+      // Use the first touch point, but ensure it exists
+      if (event.touches.length > 0) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+      } else {
+        // Fallback to changedTouches if touches is empty (can happen on touchend)
+        if (event.changedTouches && event.changedTouches.length > 0) {
+          clientX = event.changedTouches[0].clientX;
+          clientY = event.changedTouches[0].clientY;
+        } else {
+          return; // No valid touch data
+        }
+      }
     } else {
       clientX = event.clientX;
       clientY = event.clientY;
     }
 
-    // Update drag position for smooth movement
-    setDragState(prev => ({
-      ...prev,
-      dragPosition: { x: clientX, y: clientY }
-    }));
-
-    // Update drop zone hover states based on cursor position
-    const elementBelow = document.elementFromPoint(clientX, clientY);
-    let newHoveredZone: DropZone | null = null;
-
-    if (elementBelow) {
-      // Check if cursor is over a drop zone
-      const dropZoneElement = elementBelow.closest('[data-drop-zone]');
-      if (dropZoneElement) {
-        const pileType = dropZoneElement.getAttribute('data-pile-type') as 'tableau' | 'foundation';
-        const pileIndex = parseInt(dropZoneElement.getAttribute('data-pile-index') || '0');
-        
-        newHoveredZone = {
-          pileType,
-          pileIndex,
-          isActive: true
+    // Use requestAnimationFrame for smoother updates
+    requestAnimationFrame(() => {
+      setDragState(prev => {
+        if (!prev.isDragging) return prev; // Guard against race conditions
+        return {
+          ...prev,
+          dragPosition: { x: clientX, y: clientY }
         };
-      }
-    }
+      });
+    });
 
-    setHoveredZone(newHoveredZone);
+    // Throttle drop zone detection for better performance
+    const now = Date.now();
+    if (!lastUpdateRef.current || now - lastUpdateRef.current > 16) { // ~60fps
+      lastUpdateRef.current = now;
+      
+      // Update drop zone hover states based on cursor position
+      const elementBelow = document.elementFromPoint(clientX, clientY);
+      let newHoveredZone: DropZone | null = null;
+
+      if (elementBelow) {
+        // Check if cursor is over a drop zone
+        const dropZoneElement = elementBelow.closest('[data-drop-zone]');
+        if (dropZoneElement) {
+          const pileType = dropZoneElement.getAttribute('data-pile-type') as 'tableau' | 'foundation';
+          const pileIndex = parseInt(dropZoneElement.getAttribute('data-pile-index') || '0');
+          
+          newHoveredZone = {
+            pileType,
+            pileIndex,
+            isActive: true
+          };
+        }
+      }
+
+      setHoveredZone(newHoveredZone);
+    }
   }, [dragState.isDragging]);
 
   /**
@@ -165,6 +200,9 @@ export function useDragAndDrop() {
 
     // If drop failed or no valid target, trigger snap-back animation
     if (!dropSuccessful) {
+      // Immediately clear hover zone to remove green border
+      setHoveredZone(null);
+      
       setDragState(prev => ({
         ...prev,
         isSnapBack: true,
@@ -244,9 +282,9 @@ export function useDragAndDrop() {
   const getDragPreviewStyle = useCallback(() => {
     if (!dragState.isDragging) return { display: 'none' };
 
-    const scale = hoveredZone ? 1.05 : 1;
-    const rotation = hoveredZone ? '3deg' : '5deg';
-    const opacity = hoveredZone ? 0.9 : 0.8;
+    const scale = hoveredZone ? 1.08 : 1.02;
+    const rotation = hoveredZone ? '2deg' : '3deg';
+    const opacity = hoveredZone ? 0.95 : 0.85;
 
     // Responsive card dimensions for mobile
     const isMobile = window.innerWidth <= 768;
@@ -261,9 +299,13 @@ export function useDragAndDrop() {
       pointerEvents: 'none' as const,
       transform: `rotate(${rotation}) scale(${scale})`,
       opacity,
-      transition: 'transform 0.15s ease-out, opacity 0.15s ease-out',
-      filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))',
-      willChange: 'transform, opacity'
+      transition: dragState.isSnapBack 
+        ? 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)' 
+        : 'transform 0.1s ease-out, opacity 0.1s ease-out',
+      filter: 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4))',
+      willChange: 'transform, opacity',
+      backfaceVisibility: 'hidden' as const,
+      perspective: '1000px'
     };
   }, [dragState, hoveredZone]);
 

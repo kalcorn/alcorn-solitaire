@@ -1,0 +1,633 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =================================================================
+   SOLITAIRE GAME STYLES - INDUSTRY STANDARD CARDS
+   Standard playing card aspect ratio: 2.5:3.5 (5:7 ratio)
+   ================================================================= */
+
+/* Global Game Styles */
+html, body {
+  font-family: var(--font-geist-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Base Layout */
+.card-playing-area {
+  background: transparent;
+  margin-top: 6rem; /* Base mobile header margin */
+}
+
+/* Face-up and Face-down Card Backgrounds */
+.card.face-up {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1;
+}
+
+.card.face-down {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 25%, #374151 50%, #1f2937 75%, #111827 100%);
+  background-color: #111827;
+  border: 1px solid #4b5563;
+  color: #f59e0b;
+}
+
+.card.face-down::after {
+  content: "𝒜";
+  font-family: 'Brush Script MT', cursive, serif;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  color: #f59e0b;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+  opacity: 0.8;
+}
+
+/* Stock Pile Face-down styling */
+.stock-pile.face-down::after {
+  content: "𝒜";
+  font-family: 'Brush Script MT', cursive, serif;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  color: #f59e0b;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+  opacity: 0.8;
+}
+
+/* =================================================================
+   RESPONSIVE CARD DIMENSIONS - MOBILE FIRST APPROACH
+   All breakpoints follow Tailwind standards and 5:7 aspect ratio
+   ================================================================= */
+
+/* MOBILE (default - up to 639px) */
+.card {
+  width: 45px;
+  height: 63px; /* 5:7 ratio */
+  font-size: 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  position: relative;
+  overflow: hidden;
+  line-height: 1;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tableau-pile {
+  width: 100%;
+  max-width: 45px;
+  height: 320px;
+  position: relative;
+}
+
+.tableau-card-position {
+  top: calc(var(--card-index) * 16px);
+}
+
+.stock-pile, .waste-pile, .foundation-pile {
+  width: 45px;
+  height: 63px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  position: relative;
+  overflow: hidden;
+}
+
+.tableau-pile .card,
+.tableau-pile .card.face-down {
+  width: 45px !important;
+  height: 63px !important;
+  min-width: 45px !important;
+  max-width: 45px !important;
+  min-height: 63px !important;
+  max-height: 63px !important;
+}
+
+.card span {
+  font-size: 0.6rem !important;
+}
+
+.card .opacity-25 {
+  font-size: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+}
+
+/* Mobile Foundation Piles - Hide text, center symbols */
+.foundation-pile .text-xs {
+  display: none;
+}
+
+.foundation-pile > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* SMALL (sm: 640px+) */
+@media (min-width: 640px) {
+  .card {
+    width: 55px;
+    height: 77px; /* 5:7 ratio */
+    font-size: 0.7rem;
+    border-radius: 5px;
+  }
+  
+  .tableau-pile {
+    max-width: 55px;
+    height: 380px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 18px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 55px;
+    height: 77px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 55px !important;
+    height: 77px !important;
+    min-width: 55px !important;
+    max-width: 55px !important;
+    min-height: 77px !important;
+    max-height: 77px !important;
+  }
+  
+  .card span {
+    font-size: 0.7rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 2.5rem !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 1.8rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 1.8rem;
+  }
+  
+  /* Show foundation pile text on small screens and up */
+  .foundation-pile .text-xs {
+    display: block;
+  }
+}
+
+/* MEDIUM (md: 768px+) */
+@media (min-width: 768px) {
+  .card-playing-area {
+    margin-top: 8rem; /* Increased for tablet header */
+  }
+  
+  .card {
+    width: 70px;
+    height: 98px; /* 5:7 ratio */
+    font-size: 0.8rem;
+    border-radius: 6px;
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.2),
+      0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .tableau-pile {
+    max-width: 70px;
+    height: 450px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 22px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 70px;
+    height: 98px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 70px !important;
+    height: 98px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+    min-height: 98px !important;
+    max-height: 98px !important;
+  }
+  
+  .card span {
+    font-size: 0.8rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 3.2rem !important;
+    width: 3.2rem !important;
+    height: 3.2rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 2.2rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 2.2rem;
+  }
+}
+
+/* LARGE (lg: 1024px+) */
+@media (min-width: 1024px) {
+  .card-playing-area {
+    margin-top: 7rem; /* Reset for desktop */
+  }
+  
+  .card {
+    width: 85px;
+    height: 119px; /* 5:7 ratio */
+    font-size: 0.9rem;
+    border-radius: 7px;
+    box-shadow: 
+      0 6px 16px rgba(0, 0, 0, 0.25),
+      0 3px 6px rgba(0, 0, 0, 0.15);
+  }
+  
+  .tableau-pile {
+    max-width: 85px;
+    height: 520px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 26px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 85px;
+    height: 119px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 85px !important;
+    height: 119px !important;
+    min-width: 85px !important;
+    max-width: 85px !important;
+    min-height: 119px !important;
+    max-height: 119px !important;
+  }
+  
+  .card span {
+    font-size: 0.9rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 4rem !important;
+    width: 4rem !important;
+    height: 4rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 2.8rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 2.8rem;
+  }
+}
+
+/* EXTRA LARGE (xl: 1280px+) */
+@media (min-width: 1280px) {
+  .card {
+    width: 100px;
+    height: 140px; /* 5:7 ratio */
+    font-size: 1rem;
+    border-radius: 8px;
+    box-shadow: 
+      0 8px 20px rgba(0, 0, 0, 0.3),
+      0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .tableau-pile {
+    max-width: 100px;
+    height: 580px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 30px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 100px;
+    height: 140px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 100px !important;
+    height: 140px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    min-height: 140px !important;
+    max-height: 140px !important;
+  }
+  
+  .card span {
+    font-size: 1rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 4.5rem !important;
+    width: 4.5rem !important;
+    height: 4.5rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 3.2rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 3.2rem;
+  }
+}
+
+/* 2X LARGE (2xl: 1536px+) */
+@media (min-width: 1536px) {
+  .card {
+    width: 115px;
+    height: 161px; /* 5:7 ratio */
+    font-size: 1.1rem;
+    border-radius: 9px;
+    box-shadow: 
+      0 10px 24px rgba(0, 0, 0, 0.35),
+      0 5px 10px rgba(0, 0, 0, 0.25);
+  }
+  
+  .tableau-pile {
+    max-width: 115px;
+    height: 640px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 34px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 115px;
+    height: 161px;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 115px !important;
+    height: 161px !important;
+    min-width: 115px !important;
+    max-width: 115px !important;
+    min-height: 161px !important;
+    max-height: 161px !important;
+  }
+  
+  .card span {
+    font-size: 1.1rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 5rem !important;
+    width: 5rem !important;
+    height: 5rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 3.6rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 3.6rem;
+  }
+}
+
+/* =================================================================
+   LANDSCAPE PHONE OPTIMIZATION
+   Detect phones held sideways and optimize vertical space
+   ================================================================= */
+@media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
+  /* Hide "Alcorn Solitaire" title text in header */
+  .header-title {
+    display: none !important;
+  }
+  
+  /* Reduce header padding */
+  .card-playing-area {
+    margin-top: 3rem !important;
+  }
+  
+  /* Smaller cards for landscape */
+  .card {
+    width: 40px !important;
+    height: 56px !important; /* 5:7 ratio */
+    font-size: 0.5rem !important;
+  }
+  
+  .tableau-pile {
+    max-width: 40px !important;
+    height: 280px !important;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 14px) !important;
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 40px !important;
+    height: 56px !important;
+  }
+  
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 40px !important;
+    height: 56px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+  }
+  
+  .card span {
+    font-size: 0.5rem !important;
+  }
+  
+  .card .opacity-25 {
+    font-size: 1.8rem !important;
+    width: 1.8rem !important;
+    height: 1.8rem !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 1.4rem !important;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 1.4rem !important;
+  }
+  
+  /* Reduce vertical spacing */
+  .card-playing-area .flex.flex-col {
+    gap: 0.5rem !important;
+  }
+  
+  /* Hide foundation pile text in landscape */
+  .foundation-pile .text-xs {
+    display: none !important;
+  }
+}
+
+/* =================================================================
+   ADDITIONAL GAME STYLES
+   ================================================================= */
+
+/* Tableau Container */
+.tableau-container {
+  width: var(--card-width, 45px);
+}
+
+@media (min-width: 640px) {
+  .tableau-container {
+    width: var(--card-width, 55px);
+  }
+}
+
+@media (min-width: 768px) {
+  .tableau-container {
+    width: var(--card-width, 70px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .tableau-container {
+    width: var(--card-width, 85px);
+  }
+}
+
+@media (min-width: 1280px) {
+  .tableau-container {
+    width: var(--card-width, 100px);
+  }
+}
+
+@media (min-width: 1536px) {
+  .tableau-container {
+    width: var(--card-width, 115px);
+  }
+}
+
+/* Desktop Tableau Layout */
+.desktop-tableau {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+/* Responsive Bottom Padding */
+.pb-bottom-responsive {
+  padding-bottom: 7rem;
+}
+
+@media (min-width: 768px) {
+  .pb-bottom-responsive {
+    padding-bottom: 8rem;
+  }
+}
+
+/* Card Drop Zone Styling */
+.drop-zone {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  border: 2px solid #22c55e !important;
+  border-radius: 8px;
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+
+/* Particle Effects */
+.particle-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Win Animation */
+.win-overlay {
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.win-celebration {
+  animation: bounceIn 0.6s ease-out;
+}
+
+.foundation-win-cascade {
+  animation: celebration-pulse 2s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+  50% { transform: scale(1.05) rotate(2deg); }
+  70% { transform: scale(0.9) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes celebration-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+}
+
+/* Loading State */
+.hydration-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Touch Optimization */
+.card {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Ensure consistent spacing between game sections */
+.card-playing-area > .flex {
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .card-playing-area > .flex {
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-playing-area > .flex {
+    gap: 2rem;
+  }
+}

@@ -27,8 +27,7 @@ export function useGameState() {
       settings: {
         deckCyclingLimit: 0, // unlimited by default
         drawCount: 1,
-        autoMoveToFoundation: true,
-        showTimer: true,
+        autoMoveToFoundation: false, // default OFF with no setting
         soundEnabled: true,
         showHints: false
       },
@@ -52,7 +51,7 @@ export function useGameState() {
   const [isHydrated, setIsHydrated] = useState(false);
   
   // Undo/Redo functionality
-  const { saveState, undo, redo, canUndo, canRedo } = useUndoRedo(gameState, setGameState);
+  const { saveState, undo, canUndo } = useUndoRedo(gameState, setGameState);
 
   // Timer effect
   useEffect(() => {
@@ -89,13 +88,19 @@ export function useGameState() {
           selectedCards: [],
           selectedPileType: null,
           selectedPileIndex: null,
-          history: [],
-          historyIndex: -1
+          history: savedGameState.history || [],
+          historyIndex: savedGameState.historyIndex ?? -1
         };
         
         // Apply saved settings if available
         if (savedSettings) {
           initialState.settings = { ...initialState.settings, ...savedSettings };
+        }
+        
+        // Calculate elapsed time from saved game start time
+        if (savedGameState.gameStartTime) {
+          const elapsedTime = Math.floor((Date.now() - savedGameState.gameStartTime) / 1000);
+          setTimeElapsed(elapsedTime);
         }
         
         setGameStarted(true); // Resume game timer if we loaded a game in progress
@@ -131,15 +136,18 @@ export function useGameState() {
     }
   }, [gameState, isHydrated]);
 
-  // Save initial state for new games after state is set
+  // Save initial state after hydration to enable undo from first move
   useEffect(() => {
-    if (isHydrated && gameState && gameState.moves === 0 && gameState.history.length === 0) {
-      // This is a new game, save the initial state for undo functionality
-      setTimeout(() => {
-        saveState('New game started');
-      }, 100);
+    if (isHydrated && gameState && gameState.history.length === 0) {
+      // This is a new or loaded game, save the initial state for undo functionality
+      const historyUpdate = saveState('Game initialized', gameState);
+      setGameState(prevState => ({
+        ...prevState,
+        history: historyUpdate.history,
+        historyIndex: historyUpdate.historyIndex
+      }));
     }
-  }, [gameState, isHydrated, saveState]);
+  }, [isHydrated, saveState]);
 
   /**
    * Starts a new game
@@ -148,6 +156,8 @@ export function useGameState() {
     const newState = createInitialGameState();
     // Preserve current settings
     newState.settings = { ...gameState.settings };
+    // Set game start time
+    newState.gameStartTime = Date.now();
     
     // Clear the saved game state since we're starting fresh
     clearGameState();
@@ -197,9 +207,15 @@ export function useGameState() {
     const result = validateAndExecuteMove(gameState, from, to, cards);
     
     if (result.success && result.newGameState) {
-      // Save state for undo functionality before making the move
-      saveState(`Move from ${from.pileType} to ${to.pileType}`);
-      setGameState(result.newGameState);
+      // Save current state for undo functionality BEFORE applying the new state
+      const historyUpdate = saveState(`Move from ${from.pileType} to ${to.pileType}`, gameState);
+      
+      // Apply the new game state with the updated history
+      setGameState({
+        ...result.newGameState,
+        history: historyUpdate.history,
+        historyIndex: historyUpdate.historyIndex
+      });
       
       // Play sound effects based on the move
       if (gameState.settings.soundEnabled) {
@@ -219,7 +235,7 @@ export function useGameState() {
     }
     
     return result;
-  }, [gameState, gameStarted]);
+  }, [gameState, gameStarted, saveState]);
 
   /**
    * Flips the stock pile (deals cards to waste)
@@ -232,9 +248,15 @@ export function useGameState() {
     const result = flipStock(gameState);
     
     if (result.success && result.newGameState) {
-      // Save state for undo functionality before flipping stock
-      saveState('Flip stock pile');
-      setGameState(result.newGameState);
+      // Save current state for undo functionality BEFORE applying the new state
+      const historyUpdate = saveState('Flip stock pile', gameState);
+      
+      // Apply the new game state with the updated history
+      setGameState({
+        ...result.newGameState,
+        history: historyUpdate.history,
+        historyIndex: historyUpdate.historyIndex
+      });
       
       // Play card flip sound
       if (gameState.settings.soundEnabled) {
@@ -243,7 +265,7 @@ export function useGameState() {
     }
     
     return result;
-  }, [gameState, gameStarted]);
+  }, [gameState, gameStarted, saveState]);
 
   /**
    * Updates game settings
@@ -277,7 +299,15 @@ export function useGameState() {
     const result = autoMoveToFoundation(gameState, card);
     
     if (result.success && result.newGameState) {
-      setGameState(result.newGameState);
+      // Save current state for undo functionality BEFORE applying the new state
+      const historyUpdate = saveState('Auto-move to foundation', gameState);
+      
+      // Apply the new game state with the updated history
+      setGameState({
+        ...result.newGameState,
+        history: historyUpdate.history,
+        historyIndex: historyUpdate.historyIndex
+      });
       
       // Play card drop sound for auto-move
       if (gameState.settings.soundEnabled) {
@@ -286,7 +316,7 @@ export function useGameState() {
     }
     
     return result;
-  }, [gameState]);
+  }, [gameState, saveState]);
 
   /**
    * Gets cards that can be moved from a specific position
@@ -354,12 +384,10 @@ export function useGameState() {
     handleAutoMoveToFoundation,
     updateSettings,
     undo,
-    redo,
     
     // Utilities
     getMovableCards,
     canDropAtPosition,
-    canUndo,
-    canRedo
+    canUndo
   };
 }

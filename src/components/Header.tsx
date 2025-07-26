@@ -10,9 +10,7 @@ interface HeaderProps {
   settings: GameSettings;
   onSettingsChange: (settings: GameSettings) => void;
   onUndo?: () => void;
-  onRedo?: () => void;
   canUndo?: boolean;
-  canRedo?: boolean;
 }
 
 const formatTime = (seconds: number) => {
@@ -29,56 +27,126 @@ const Header: React.FC<HeaderProps> = ({
   settings, 
   onSettingsChange, 
   onUndo, 
-  onRedo, 
-  canUndo = false, 
-  canRedo = false 
+  canUndo = false 
 }) => (
-  <header className="fixed top-0 left-0 right-0 w-full bg-gradient-to-b from-gray-900 to-gray-800 text-white py-3 sm:py-4 shadow-xl z-50 border-b border-white border-opacity-20">
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-0">
-        <div className="flex items-center gap-3">
-          <img src="./alcorn-logo.svg" alt="Alcorn Solitaire Logo" className="h-10 sm:h-12 lg:h-14 w-auto" />
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
+  <header className="w-full bg-gradient-to-b from-slate-700 to-slate-800 text-white py-4 sm:py-6 shadow-lg border-b border-slate-600 landscape-mobile-header">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-0">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-0 landscape-mobile-single-line">
+        {/* Portrait Mobile: First row centered logo and title */}
+        <div className="flex md:hidden w-full justify-center items-center gap-3 mb-2">
+          <img src="./alcorn-logo.svg" alt="Alcorn Solitaire Logo" className="h-10 sm:h-12 lg:h-14 w-auto landscape-mobile-logo" />
+          <h1 className="header-title text-2xl sm:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
         </div>
-        <div className="flex items-center gap-2 sm:gap-4">
-          {/* Action Buttons */}
+        
+        {/* Portrait Mobile: Second row with + button, stats, and settings cog */}
+        <div className="flex md:hidden w-full items-center justify-between gap-3">
+          {/* Portrait Mobile + Button */}
+          <button
+            onClick={onNewGame}
+            className="w-10 h-10 text-xl font-bold text-white bg-emerald-700 rounded-lg border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 transition-all flex items-center justify-center flex-shrink-0 shadow-md"
+            title="New game"
+          >
+            +
+          </button>
+          
+          {/* Game Stats for portrait mobile */}
+          <div className="flex-1 flex justify-center">
+            <div className="text-sm font-mono text-white bg-gradient-to-r from-slate-800 to-slate-900 rounded-lg px-4 py-2 border border-slate-700 shadow-lg">
+              <span className="opacity-95">
+                <span className="text-blue-300 font-semibold">{formatTime(timeElapsed)}</span>
+                <span className="text-slate-400 mx-1.5">•</span>
+                
+                <span className="text-orange-300 font-semibold mx-1.5">{moves}</span>
+                <span className="text-slate-400 text-xs">moves</span>
+
+                <span className="text-slate-400 mx-1.5">•</span>
+                <span className="text-green-300 font-semibold">{score}</span>
+              </span>
+            </div>
+          </div>
+          
+          {/* Settings cog */}
+          <div className="flex-shrink-0">
+            <SettingsPanel 
+              settings={settings}
+              onSettingsChange={onSettingsChange}
+            />
+          </div>
+        </div>
+        
+        {/* Desktop and Landscape Mobile Layout */}
+        <div className="hidden md:flex items-center gap-3 landscape-mobile-title">
+          <img src="./alcorn-logo.svg" alt="Alcorn Solitaire Logo" className="h-10 sm:h-12 lg:h-14 w-auto landscape-mobile-logo" />
+          <h1 className="header-title text-2xl sm:text-3xl lg:text-4xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
+        </div>
+        
+        <div className="hidden md:flex items-center gap-2 sm:gap-4 landscape-mobile-right">
+          {/* Desktop New Game Button */}
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={onNewGame}
-              className="text-xs sm:text-sm font-semibold text-white bg-emerald-600 rounded-lg px-3 py-2 border border-emerald-500 hover:bg-emerald-700 hover:border-emerald-600 transition-all"
+              className="landscape-mobile-new-game text-base sm:text-lg font-semibold text-white bg-emerald-700 rounded-lg px-4 py-3 border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 transition-all shadow-md"
               title="Start new game"
             >
               New Game
             </button>
           </div>
           
-          {/* Game Stats */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {settings.showTimer && (
-              <div className="text-xs sm:text-sm font-mono font-bold text-white bg-black bg-opacity-30 rounded-lg px-3 py-2 border border-white border-opacity-10 backdrop-blur-sm">
+          {/* Desktop and Landscape Mobile Stats */}
+          <div className="flex items-center gap-2 sm:gap-3 landscape-mobile-stats">
+            {/* Fancy single-line stats for landscape mobile */}
+            <div className="landscape-mobile-single-stat text-sm font-mono text-white bg-gradient-to-r from-slate-800 to-slate-900 rounded-lg px-4 py-2 border border-slate-700 shadow-lg">
+              <span className="opacity-95">
+                <span className="text-slate-300 text-xs">Time: </span>
+                <span className="text-blue-300 font-semibold">{formatTime(timeElapsed)}</span>
+                <span className="text-slate-400 mx-1.5">•</span>
+                <span className="text-slate-300 text-xs">Moves: </span>
+                <span className="text-orange-300 font-semibold">{moves}</span>
+                
+                <span className="text-slate-400 mx-1.5">•</span>
+                <span className="text-slate-300 text-xs">Score: </span>
+                <span className="text-green-300 font-semibold">{score}</span>
+              </span>
+            </div>
+            
+            {/* Regular stats for desktop only */}
+            <div className="landscape-mobile-regular-stats flex items-center gap-2 sm:gap-3">
+              <div className="text-sm sm:text-base font-mono font-bold text-white bg-gradient-to-r from-slate-800 to-slate-900 rounded-lg px-4 py-3 border border-slate-700 shadow-lg">
                 <div className="text-center">
-                  <div className="text-xs opacity-70 mb-0.5">Time</div>
-                  <div className="text-sm sm:text-base">{formatTime(timeElapsed)}</div>
+                  <div className="text-sm opacity-70 mb-0.5 text-slate-400">Time</div>
+                  <div className="text-base sm:text-lg text-blue-300 font-semibold">{formatTime(timeElapsed)}</div>
                 </div>
               </div>
-            )}
-            <div className="text-xs sm:text-sm font-mono font-bold text-white bg-black bg-opacity-30 rounded-lg px-3 py-2 border border-white border-opacity-10 backdrop-blur-sm">
-              <div className="text-center">
-                <div className="text-xs opacity-70 mb-0.5">Moves</div>
-                <div className="text-sm sm:text-base">{moves}</div>
+              <div className="text-sm sm:text-base font-mono font-bold text-white bg-gradient-to-r from-slate-800 to-slate-900 rounded-lg px-4 py-3 border border-slate-700 shadow-lg">
+                <div className="text-center">
+                  <div className="text-sm opacity-70 mb-0.5 text-slate-400">Moves</div>
+                  <div className="text-base sm:text-lg text-orange-300 font-semibold">{moves}</div>
+                </div>
               </div>
-            </div>
-            <div className="text-xs sm:text-sm font-mono font-bold text-white bg-black bg-opacity-30 rounded-lg px-3 py-2 border border-white border-opacity-10 backdrop-blur-sm">
-              <div className="text-center">
-                <div className="text-xs opacity-70 mb-0.5">Score</div>
-                <div className="text-sm sm:text-base">{score}</div>
+              <div className="text-sm sm:text-base font-mono font-bold text-white bg-gradient-to-r from-slate-800 to-slate-900 rounded-lg px-4 py-3 border border-slate-700 shadow-lg">
+                <div className="text-center">
+                  <div className="text-sm opacity-70 mb-0.5 text-slate-400">Score</div>
+                  <div className="text-base sm:text-lg text-green-300 font-semibold">{score}</div>
+                </div>
               </div>
             </div>
           </div>
-          <SettingsPanel 
-            settings={settings}
-            onSettingsChange={onSettingsChange}
-          />
+          
+          {/* Desktop Settings */}
+          <div className="landscape-mobile-controls flex items-center gap-2">
+            {/* Compact + button for landscape mobile - next to settings */}
+            <button
+              onClick={onNewGame}
+              className="landscape-mobile-plus-button w-10 h-10 text-xl font-bold text-white bg-emerald-700 rounded-lg border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 transition-all flex items-center justify-center shadow-md"
+              title="New game"
+            >
+              +
+            </button>
+            <SettingsPanel 
+              settings={settings}
+              onSettingsChange={onSettingsChange}
+            />
+          </div>
         </div>
       </div>
     </div>

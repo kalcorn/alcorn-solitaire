@@ -105,7 +105,6 @@ export function createInitialGameState(): GameState {
       deckCyclingLimit: 0, // unlimited by default
       drawCount: 1,
       autoMoveToFoundation: true,
-      showTimer: true,
       soundEnabled: true,
       showHints: false
     },

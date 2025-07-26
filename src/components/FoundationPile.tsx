@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card as CardType } from '@/types';
 import Card from './Card';
+import { BsSuitHeartFill, BsSuitDiamondFill, BsSuitClubFill, BsSuitSpadeFill } from 'react-icons/bs';
 
 interface FoundationPileProps {
   cards: CardType[];
@@ -13,7 +14,7 @@ interface FoundationPileProps {
 
 const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardClick, onCardDragStart, isDropZone, isCardBeingDragged }) => {
   const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
-  const suitIcons = ['♥', '♦', '♣', '♠'];
+  const suitIcons = [BsSuitHeartFill, BsSuitDiamondFill, BsSuitClubFill, BsSuitSpadeFill];
   const suitColors = ['text-red-500', 'text-red-500', 'text-gray-800', 'text-gray-800'];
   const topCard = cards.length > 0 ? cards[cards.length - 1] : null;
   
@@ -25,8 +26,10 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
     >
       {/* Always show suit icon/text as background */}
       <div className={`flex flex-col items-center justify-center h-full absolute inset-0 ${cards.length > 0 ? 'opacity-15' : 'opacity-40'}`}>
-        <div className={`text-5xl ${suitColors[index]} mb-2`}>{suitIcons[index]}</div>
-        <div className="text-gray-300 text-xs font-semibold text-center">{suits[index]}</div>
+        {React.createElement(suitIcons[index], { 
+          className: `text-2xl md:text-4xl ${suitColors[index]} mb-1 md:mb-2` 
+        })}
+        <div className="text-gray-300 text-xs md:text-base font-semibold text-center">{suits[index]}</div>
       </div>
 
       {/* Show cards with stacking effect */}

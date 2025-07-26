@@ -42,13 +42,13 @@ export interface GameState {
     deckCyclingLimit: number;
     drawCount: number;
     autoMoveToFoundation: boolean;
-    showTimer: boolean;
     soundEnabled: boolean;
     showHints: boolean;
   };
   stats: GameStats;
   history: GameHistoryEntry[];
   historyIndex: number;
+  gameStartTime?: number; // UTC timestamp when game was started
 }
 
 export interface MoveResult {

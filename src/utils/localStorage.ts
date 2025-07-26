@@ -46,7 +46,7 @@ export function saveGameState(gameState: GameState): void {
   if (!isClient) return;
   
   try {
-    // Create a simplified version without history for storage efficiency
+    // Create a state to save including limited history for undo/redo
     const stateToSave = {
       tableauPiles: gameState.tableauPiles,
       foundationPiles: gameState.foundationPiles,
@@ -58,7 +58,10 @@ export function saveGameState(gameState: GameState): void {
       stockCycles: gameState.stockCycles,
       settings: gameState.settings,
       stats: gameState.stats,
-      timestamp: Date.now()
+      history: gameState.history.slice(-10), // Save last 10 history entries
+      historyIndex: Math.max(0, gameState.historyIndex - (gameState.history.length - 10)), // Adjust index
+      timestamp: Date.now(),
+      gameStartTime: gameState.gameStartTime || Date.now() // Store when game was started
     };
     
     localStorage.setItem(GAME_STATE_KEY, JSON.stringify(stateToSave));
