@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => (
   <header className="fixed top-0 left-0 right-0 w-full bg-gradient-to-b from-gray-900 to-gray-800 text-white py-3 sm:py-4 shadow-xl z-50 border-b border-white border-opacity-20">
     <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-0">
         <div className="flex items-center gap-3">
           <img src="./alcorn-logo.svg" alt="Alcorn Solitaire Logo" className="h-10 sm:h-12 lg:h-14 w-auto" />
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
@@ -50,30 +50,6 @@ const Header: React.FC<HeaderProps> = ({
             >
               New Game
             </button>
-            {onUndo && (
-              <button
-                onClick={onUndo}
-                disabled={!canUndo}
-                className={`text-xs sm:text-sm font-mono font-bold text-white bg-black bg-opacity-30 rounded-lg px-2 py-2 border border-white border-opacity-10 backdrop-blur-sm transition-all ${
-                  canUndo ? 'hover:bg-opacity-40 cursor-pointer' : 'opacity-50 cursor-not-allowed'
-                }`}
-                title="Undo last move"
-              >
-                <BsArrowCounterclockwise className="w-4 h-4" />
-              </button>
-            )}
-            {onRedo && (
-              <button
-                onClick={onRedo}
-                disabled={!canRedo}
-                className={`text-xs sm:text-sm font-mono font-bold text-white bg-black bg-opacity-30 rounded-lg px-2 py-2 border border-white border-opacity-10 backdrop-blur-sm transition-all ${
-                  canRedo ? 'hover:bg-opacity-40 cursor-pointer' : 'opacity-50 cursor-not-allowed'
-                }`}
-                title="Redo last move"
-              >
-                <BsArrowClockwise className="w-4 h-4" />
-              </button>
-            )}
           </div>
           
           {/* Game Stats */}

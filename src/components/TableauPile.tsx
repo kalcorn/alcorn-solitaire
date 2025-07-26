@@ -7,10 +7,11 @@ interface TableauPileProps {
   onCardClick?: (cardId: string) => void;
   onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   isDropZone?: boolean;
+  isCardBeingDragged?: (cardId: string) => boolean;
 }
 
-const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDragStart, isDropZone }) => (
-  <div className={`tableau-pile relative ${isDropZone ? 'drop-zone-active' : ''}`} role="list" aria-label="Tableau pile">
+const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDragStart, isDropZone, isCardBeingDragged }) => (
+  <div className={`tableau-pile relative ${isDropZone ? 'drop-zone-active' : ''}`} role="list" aria-label="Play pile">
     {cards.map((card, index) => (
       <div
         key={card.id}
@@ -21,6 +22,8 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDra
           suit={card.suit}
           rank={card.rank}
           faceUp={card.faceUp}
+          cardId={card.id}
+          isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
           onClick={() => onCardClick && onCardClick(card.id)}
           onMouseDown={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e)}
           onTouchStart={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e)}

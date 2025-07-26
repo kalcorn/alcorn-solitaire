@@ -13,7 +13,7 @@ const Home: NextPage = () => {
         <link rel="apple-touch-icon" href="/solitaire/favicon.svg" />
         <meta name="theme-color" content="#1e293b" />
       </Head>
-      <main className="min-h-screen flex flex-col items-center justify-center" suppressHydrationWarning>
+      <main className="min-h-screen flex flex-col items-center" suppressHydrationWarning>
         <GameBoard />
       </main>
     </>

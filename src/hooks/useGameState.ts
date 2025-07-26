@@ -50,6 +50,9 @@ export function useGameState() {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  
+  // Undo/Redo functionality
+  const { saveState, undo, redo, canUndo, canRedo } = useUndoRedo(gameState, setGameState);
 
   // Timer effect
   useEffect(() => {
@@ -128,6 +131,16 @@ export function useGameState() {
     }
   }, [gameState, isHydrated]);
 
+  // Save initial state for new games after state is set
+  useEffect(() => {
+    if (isHydrated && gameState && gameState.moves === 0 && gameState.history.length === 0) {
+      // This is a new game, save the initial state for undo functionality
+      setTimeout(() => {
+        saveState('New game started');
+      }, 100);
+    }
+  }, [gameState, isHydrated, saveState]);
+
   /**
    * Starts a new game
    */
@@ -136,12 +149,17 @@ export function useGameState() {
     // Preserve current settings
     newState.settings = { ...gameState.settings };
     
+    // Clear the saved game state since we're starting fresh
+    clearGameState();
+    
     setGameState(newState);
     setTimeElapsed(0);
     setGameStarted(false);
     
-    // Clear the saved game state since we're starting fresh
-    clearGameState();
+    // Play shuffle sound effect
+    if (newState.settings.soundEnabled) {
+      playSoundEffect.shuffle();
+    }
   }, [gameState.settings]);
 
   /**
@@ -179,6 +197,8 @@ export function useGameState() {
     const result = validateAndExecuteMove(gameState, from, to, cards);
     
     if (result.success && result.newGameState) {
+      // Save state for undo functionality before making the move
+      saveState(`Move from ${from.pileType} to ${to.pileType}`);
       setGameState(result.newGameState);
       
       // Play sound effects based on the move
@@ -212,11 +232,13 @@ export function useGameState() {
     const result = flipStock(gameState);
     
     if (result.success && result.newGameState) {
+      // Save state for undo functionality before flipping stock
+      saveState('Flip stock pile');
       setGameState(result.newGameState);
       
-      // Play stock flip sound
+      // Play card flip sound
       if (gameState.settings.soundEnabled) {
-        playSoundEffect.stockFlip();
+        playSoundEffect.cardFlip();
       }
     }
     
@@ -331,9 +353,13 @@ export function useGameState() {
     handleStockFlip,
     handleAutoMoveToFoundation,
     updateSettings,
+    undo,
+    redo,
     
     // Utilities
     getMovableCards,
-    canDropAtPosition
+    canDropAtPosition,
+    canUndo,
+    canRedo
   };
 }

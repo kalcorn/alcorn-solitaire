@@ -32,6 +32,33 @@ export function canPlaceOnFoundation(card: Card, targetPile: Card[]): boolean {
 }
 
 /**
+ * Gets the correct foundation pile index for a card's suit
+ */
+export function getFoundationPileForSuit(suit: string): number {
+  const suitMap: { [key: string]: number } = {
+    'hearts': 0,
+    'diamonds': 1, 
+    'clubs': 2,
+    'spades': 3
+  };
+  return suitMap[suit] ?? 0;
+}
+
+/**
+ * Finds the correct foundation pile where a card can be placed
+ */
+export function findValidFoundationPile(card: Card, gameState: GameState): number | null {
+  const correctPileIndex = getFoundationPileForSuit(card.suit);
+  const correctPile = gameState.foundationPiles[correctPileIndex];
+  
+  if (canPlaceOnFoundation(card, correctPile)) {
+    return correctPileIndex;
+  }
+  
+  return null;
+}
+
+/**
  * Validates if a sequence of cards can be moved together
  */
 export function isValidCardSequence(cards: Card[]): boolean {
@@ -150,12 +177,13 @@ function validateMoveByDestination(card: Card, to: CardPosition, gameState: Game
       break;
       
     case 'foundation':
-      if (to.pileIndex < 0 || to.pileIndex >= gameState.foundationPiles.length) {
-        return { success: false, error: 'Invalid foundation pile index' };
+      // Automatically find the correct foundation pile for this card's suit
+      const correctFoundationIndex = findValidFoundationPile(card, gameState);
+      if (correctFoundationIndex === null) {
+        return { success: false, error: 'Cannot place card on foundation pile' };
       }
-      if (!canPlaceOnFoundation(card, gameState.foundationPiles[to.pileIndex])) {
-        return { success: false, error: 'Cannot place card on this foundation pile' };
-      }
+      // Update the target to point to the correct foundation pile
+      to.pileIndex = correctFoundationIndex;
       break;
       
     default:

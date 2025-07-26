@@ -93,7 +93,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               </div>
 
 
-              {/* Auto-move to Foundation */}
+              {/* Auto-move to Suit Pile */}
               <div>
                 <label className="flex items-center space-x-3">
                   <input
@@ -104,10 +104,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   />
                   <div>
                     <span className="text-sm font-semibold text-gray-700">
-                      Auto-move to Foundation
+                      Auto-move to Suit Pile
                     </span>
                     <p className="text-xs text-gray-500">
-                      Automatically move cards to foundation when possible
+                      Automatically move cards to suit piles when possible
                     </p>
                   </div>
                 </label>

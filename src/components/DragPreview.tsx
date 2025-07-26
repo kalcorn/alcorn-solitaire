@@ -6,14 +6,15 @@ interface DragPreviewProps {
   cards: CardType[];
   style: React.CSSProperties;
   isOverDropZone: boolean;
+  isSnapBack?: boolean;
 }
 
-const DragPreview: React.FC<DragPreviewProps> = ({ cards, style, isOverDropZone }) => {
+const DragPreview: React.FC<DragPreviewProps> = ({ cards, style, isOverDropZone, isSnapBack }) => {
   if (cards.length === 0) return null;
 
   return (
     <div 
-      className={`drag-preview ${isOverDropZone ? 'over-dropzone' : 'dragging'}`}
+      className={`drag-preview ${isOverDropZone ? 'over-dropzone' : 'dragging'} ${isSnapBack ? 'snap-back' : ''}`}
       style={style}
     >
       {cards.map((card, index) => (

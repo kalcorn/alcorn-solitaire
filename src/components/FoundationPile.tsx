@@ -8,9 +8,10 @@ interface FoundationPileProps {
   onCardClick?: (cardId: string) => void;
   onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   isDropZone?: boolean;
+  isCardBeingDragged?: (cardId: string) => boolean;
 }
 
-const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardClick, onCardDragStart, isDropZone }) => {
+const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardClick, onCardDragStart, isDropZone, isCardBeingDragged }) => {
   const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
   const suitIcons = ['♥', '♦', '♣', '♠'];
   const suitColors = ['text-red-500', 'text-red-500', 'text-gray-800', 'text-gray-800'];
@@ -20,16 +21,17 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
     <div
       className={`foundation-pile ${isDropZone ? 'drop-zone' : ''}`}
       role="list"
-      aria-label={`Foundation pile for ${suits[index]}`}
+      aria-label={`${suits[index]} suit pile`}
     >
-      {cards.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-full opacity-40">
-          <div className={`text-5xl ${suitColors[index]} mb-2`}>{suitIcons[index]}</div>
-          <div className="text-gray-300 text-xs font-semibold text-center">{suits[index]}</div>
-        </div>
-      ) : (
+      {/* Always show suit icon/text as background */}
+      <div className={`flex flex-col items-center justify-center h-full absolute inset-0 ${cards.length > 0 ? 'opacity-15' : 'opacity-40'}`}>
+        <div className={`text-5xl ${suitColors[index]} mb-2`}>{suitIcons[index]}</div>
+        <div className="text-gray-300 text-xs font-semibold text-center">{suits[index]}</div>
+      </div>
+
+      {/* Show cards with stacking effect */}
+      {cards.length > 0 && (
         <>
-          {/* Show slight stacking effect */}
           {cards.slice(-3).map((card, stackIndex, visibleCards) => (
             <div
               key={card.id}
@@ -38,13 +40,15 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
                 top: '50%',
                 left: '50%',
                 transform: `translate(-50%, -50%) translateY(${stackIndex * -1}px) translateX(${stackIndex * 0.5}px)`,
-                zIndex: stackIndex
+                zIndex: stackIndex + 1
               }}
             >
               <Card
                 suit={card.suit}
                 rank={card.rank}
                 faceUp={card.faceUp}
+                cardId={card.id}
+                isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
                 onClick={stackIndex === visibleCards.length - 1 ? 
                   () => onCardClick && onCardClick(card.id) : undefined}
                 onMouseDown={stackIndex === visibleCards.length - 1 && card.draggable ? 

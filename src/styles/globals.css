@@ -40,6 +40,9 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
   user-select: none;
   display: flex;
+  will-change: transform, box-shadow;
+  backface-visibility: hidden;
+  transform: translateZ(0); /* Force hardware acceleration */
   flex-direction: column;
   justify-content: space-between;
   font-weight: 700;
@@ -74,14 +77,14 @@ body {
 
 /* Enhanced face-up cards with improved contrast and accessibility */
 .card.face-up {
-  background-color: #fefdf8 !important;
+  background-color: #ffffff !important;
   background-image: 
-    radial-gradient(circle at 25% 25%, rgba(0,0,0,0.025) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(0,0,0,0.02) 0%, transparent 50%),
-    linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
-  color: #1f2937;
+    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255,255,255,0.06) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);
+  color: #f9fafb;
   border-width: 1px;
-  border-color: #d1d5db;
+  border-color: #374151;
   box-shadow: 
     0 8px 24px rgba(0, 0, 0, 0.25),
     0 4px 8px rgba(0, 0, 0, 0.15),
@@ -89,15 +92,28 @@ body {
 }
 
 .card.face-down {
-  background: linear-gradient(135deg, #7c2d12 0%, #991b1b 50%, #7c2d12 100%);
+  /* Ensure face-down cards have same dimensions as face-up cards */
+  width: inherit !important;
+  height: inherit !important;
+  background-color: #111827; /* Tailwind bg-gray-900 */
   background-image:
-    radial-gradient(circle at 20% 20%, rgba(217, 119, 6, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(217, 119, 6, 0.2) 0%, transparent 50%),
-    repeating-linear-gradient(45deg, rgba(217, 119, 6, 0.1) 0px, rgba(217, 119, 6, 0.1) 2px, transparent 2px, transparent 12px),
-    repeating-linear-gradient(-45deg, rgba(217, 119, 6, 0.08) 0px, rgba(217, 119, 6, 0.08) 2px, transparent 2px, transparent 12px);
-  color: transparent;
+    repeating-linear-gradient(
+      45deg,
+      #1e293b 0px,      /* slate-800, slightly lighter than bg-gray-900 */
+      #1e293b 2px,      /* width of the line */
+      #111827 2px,      /* bg-gray-900 again, acts as gap start */
+      #111827 12px      /* width of the gap */
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      #1e293b 0px,
+      #1e293b 2px,
+      #111827 2px,
+      #111827 12px
+    );
   border-width: 1px;
   border-color: #a16207;
+  color: transparent;
   box-shadow: 
     0 8px 20px rgba(0, 0, 0, 0.4),
     0 3px 6px rgba(0, 0, 0, 0.2),
@@ -106,18 +122,18 @@ body {
 }
 
 .card.face-down::after {
-  content: '♠ ♥ ♦ ♣';
+  content: 'A';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.5rem;
+  font-size: 4.5rem;
   font-weight: bold;
-  color: rgba(217, 119, 6, 0.3);
-  letter-spacing: 0.5rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-family: 'Brush Script MT', cursive, serif;
+  color:  rgba(255, 255, 255, 0.45);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
-  overflow: hidden;
+  /*overflow: hidden;*/
 }
 
 /* Tableau pile with responsive height for optimal card stacking */
@@ -138,6 +154,32 @@ body {
   left: 0;
   right: 0;
   top: calc(var(--card-index) * 32px); /* Default desktop/tablet stacking */
+}
+
+/* Ensure ALL cards use consistent dimensions - no aspect-ratio inconsistencies */
+.tableau-pile .card {
+  width: 128px !important;
+  height: 184px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  min-height: 184px !important;
+  max-height: 184px !important;
+  min-width: 128px !important;
+  max-width: 128px !important;
+  flex: none !important;
+}
+
+/* Force face-down tableau cards to match face-up cards exactly */
+.tableau-pile .card.face-down {
+  width: 128px !important;
+  height: 184px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  min-height: 184px !important;
+  max-height: 184px !important;
+  min-width: 128px !important;
+  max-width: 128px !important;
+  flex: none !important;
 }
 
 /* Container classes for layout stability */
@@ -168,6 +210,8 @@ body {
     0 8px 24px rgba(0, 0, 0, 0.35),
     0 4px 8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  will-change: transform, box-shadow;
+  backface-visibility: hidden;
   background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
   display: flex;
   align-items: center;
@@ -188,27 +232,38 @@ body {
 
 /* When stock pile has face-down styling */
 .stock-pile.face-down {
-  background: linear-gradient(135deg, #7c2d12 0%, #991b1b 50%, #7c2d12 100%);
+   background-color: #111827; /* Tailwind bg-gray-900 */
   background-image:
-    radial-gradient(circle at 20% 20%, rgba(217, 119, 6, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(217, 119, 6, 0.2) 0%, transparent 50%),
-    repeating-linear-gradient(45deg, rgba(217, 119, 6, 0.1) 0px, rgba(217, 119, 6, 0.1) 2px, transparent 2px, transparent 12px),
-    repeating-linear-gradient(-45deg, rgba(217, 119, 6, 0.08) 0px, rgba(217, 119, 6, 0.08) 2px, transparent 2px, transparent 12px);
+    repeating-linear-gradient(
+      45deg,
+      #1e293b 0px,      /* slate-800, slightly lighter than bg-gray-900 */
+      #1e293b 2px,      /* width of the line */
+      #111827 2px,      /* bg-gray-900 again, acts as gap start */
+      #111827 12px      /* width of the gap */
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      #1e293b 0px,
+      #1e293b 2px,
+      #111827 2px,
+      #111827 12px
+    );
+    border-width: 1px;
   border-color: #a16207;
   position: relative;
 }
 
 .stock-pile.face-down::after {
-  content: '♠ ♥ ♦ ♣';
+  content: 'A';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.5rem;
+  font-size: 4.5rem;
   font-weight: bold;
-  color: rgba(217, 119, 6, 0.3);
-  letter-spacing: 0.5rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-family: 'Brush Script MT', cursive, serif;
+  color:  rgba(255, 255, 255, 0.45);
+  /*text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5);*/
 }
 
 .stock-pile:hover, .waste-pile:hover:not(.empty) {
@@ -224,8 +279,60 @@ body {
 }
 
 .stock-pile.empty, .waste-pile.empty {
-  background-color: #1f2937; /* Tailwind gray-800 */
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
   cursor: default;
+}
+
+/* Enhanced recycle state styling */
+.stock-pile.empty.recycle-available {
+  background: linear-gradient(135deg, #0f4b3c 0%, #10b981 20%, #059669 100%);
+  border-color: #10b981;
+  animation: recycleGlow 2s ease-in-out infinite;
+  cursor: pointer !important;
+}
+
+.stock-pile.empty.recycle-available:hover {
+  background: linear-gradient(135deg, #064e3b 0%, #10b981 30%, #047857 100%);
+  box-shadow: 
+    0 12px 28px rgba(16, 185, 129, 0.3),
+    0 6px 12px rgba(16, 185, 129, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+@keyframes recycleGlow {
+  0%, 100% {
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.35),
+      0 4px 8px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  50% {
+    box-shadow: 
+      0 8px 24px rgba(16, 185, 129, 0.4),
+      0 4px 8px rgba(16, 185, 129, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Recycle animation */
+.waste-recycle-to-stock {
+  animation: recycleToStock 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes recycleToStock {
+  0% {
+    transform: translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-60px) rotateY(180deg) scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(-120px) rotateY(360deg) scale(1);
+    opacity: 0;
+  }
 }
 
 /* Foundation pile with consistent 8px grid and enhanced interactivity */
@@ -239,6 +346,8 @@ body {
     0 8px 24px rgba(0, 0, 0, 0.35),
     0 4px 8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  will-change: transform, box-shadow;
+  backface-visibility: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -319,6 +428,26 @@ body {
   filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4));
 }
 
+/* Snap-back animation for invalid drops */
+.drag-preview.snap-back {
+  animation: snapBack 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes snapBack {
+  0% {
+    transform: scale(1) rotate(5deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1) rotate(0deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(0.8) rotate(0deg);
+    opacity: 0;
+  }
+}
+
 .drag-preview.over-dropzone {
   transform: rotate(3deg) scale(1.05);
   opacity: 0.9;
@@ -371,20 +500,64 @@ body {
 
 /* Game completion celebration */
 .win-celebration {
-  animation: celebration 0.8s ease-out;
+  animation: celebration 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 @keyframes celebration {
   0% { 
     opacity: 0; 
-    transform: scale(0.8) rotateY(-180deg);
+    transform: scale(0.5) rotateY(-180deg) translateY(-50px);
   }
-  50% {
-    transform: scale(1.1) rotateY(0deg);
+  30% {
+    opacity: 0.8;
+    transform: scale(1.2) rotateY(-90deg) translateY(-20px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.9) rotateY(0deg) translateY(10px);
+  }
+  80% {
+    transform: scale(1.1) rotateY(0deg) translateY(-5px);
   }
   100% { 
     opacity: 1; 
-    transform: scale(1) rotateY(0deg);
+    transform: scale(1) rotateY(0deg) translateY(0px);
+  }
+}
+
+/* Confetti animation for background */
+.win-overlay {
+  animation: winOverlay 0.6s ease-out;
+}
+
+@keyframes winOverlay {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(2px);
+  }
+}
+
+/* Foundation pile cascade animation for win */
+.foundation-win-cascade {
+  animation: foundationCascade 0.8s ease-out forwards;
+}
+
+@keyframes foundationCascade {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 6px 20px rgba(34, 197, 94, 0.2);
   }
 }
 
@@ -445,6 +618,149 @@ body {
   }
 }
 
+/* Shuffle animation for new game */
+.shuffle-animation {
+  animation: shuffle 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes shuffle {
+  0% {
+    transform: scale(1) rotate(0deg) translateY(0);
+    opacity: 1;
+  }
+  15% {
+    transform: scale(0.95) rotate(-2deg) translateY(-5px);
+    opacity: 0.9;
+  }
+  30% {
+    transform: scale(1.05) rotate(2deg) translateY(-10px);
+    opacity: 0.8;
+  }
+  45% {
+    transform: scale(0.98) rotate(-1deg) translateY(-8px);
+    opacity: 0.85;
+  }
+  60% {
+    transform: scale(1.02) rotate(1deg) translateY(-12px);
+    opacity: 0.7;
+  }
+  75% {
+    transform: scale(0.99) rotate(-0.5deg) translateY(-6px);
+    opacity: 0.9;
+  }
+  90% {
+    transform: scale(1.01) rotate(0.5deg) translateY(-3px);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1) rotate(0deg) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Individual card cascade animation for shuffle */
+.card-shuffle-cascade {
+  animation: cardCascade 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Stock pile shuffle animation - cards cascade down into position */
+.stock-shuffle-cascade {
+  animation: stockShuffleCascade 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes stockShuffleCascade {
+  0% {
+    transform: translateY(-20px) translateX(10px) rotate(8deg) scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(5px) translateX(-3px) rotate(-2deg) scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes cardCascade {
+  0% {
+    transform: translateY(-100px) translateX(50px) rotate(25deg) scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(10px) translateX(-10px) rotate(-5deg) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Stock pile flip animation for cycling - subtle and professional */
+.stock-flip-to-waste {
+  animation: flipToWaste 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.waste-flip-from-stock {
+  animation: flipFromStock 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes flipToWaste {
+  0% {
+    transform: translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(25px) rotateY(45deg) scale(1.02);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(50px) rotateY(90deg) scale(1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes flipFromStock {
+  0% {
+    transform: translateX(-50px) rotateY(-90deg) scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(-25px) rotateY(-45deg) scale(1.02);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Recycle animation (waste back to stock) */
+.waste-recycle-to-stock {
+  animation: recycleToStock 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes recycleToStock {
+  0% {
+    transform: translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: translateX(-30px) rotateY(-45deg) scale(1.2);
+    opacity: 0.8;
+  }
+  70% {
+    transform: translateX(-70px) rotateY(-135deg) scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(-100px) rotateY(-180deg) scale(1);
+    opacity: 1;
+  }
+}
+
 /* Pile shake animation for invalid drops */
 .pile-shake {
   animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
@@ -467,10 +783,18 @@ main.pt-32 {
   border-radius: 0;
   padding: 0; /* Remove padding to align with header */
   background: transparent;
+  margin-top: 7.5rem;
 }
 
 /* Medium screen adjustments (768px - 1024px) for better fit */
 @media (min-width: 768px) and (max-width: 1024px) {
+  /* Smaller center suit icon */
+  .card .opacity-25 {
+    font-size: 4.2rem !important;
+    width: 4.2rem !important;
+    height: 4.2rem !important;
+  }
+
   .card {
     width: 112px;
     height: 160px;
@@ -497,13 +821,11 @@ main.pt-32 {
   
   /* Fix face-down card overflow at tablet resolutions */
   .card.face-down::after {
-    font-size: 1rem;
-    letter-spacing: 0.25rem;
+    font-size: 1.8rem;
   }
   
   .stock-pile.face-down::after {
-    font-size: 1rem;
-    letter-spacing: 0.25rem;
+    font-size: 1.8rem;
   }
 }
 
@@ -511,89 +833,133 @@ main.pt-32 {
 @media (max-width: 768px) {
   .card-playing-area {
     padding: 0; /* Remove padding to align with header */
+    margin-top: 10rem;
   }
   
   .card {
-    width: 88px;
-    height: 126px;
-    font-size: 0.75rem;
+    width: 44px;
+    height: 62px;
+    font-size: 0.55rem;
   }
   
   .tableau-pile {
     width: 100%;
-    max-width: 88px;  
-    height: 380px; /* Optimized for mobile with 24px stacking: 88 + (12×24) + buffer */
+    max-width: 44px; /* Further reduced to prevent overflow */
+    height: 250px; /* Adjusted for smaller cards */
   }
   
   /* Tighter card stacking for mobile */
   .tableau-card-position {
-    top: calc(var(--card-index) * 24px); /* Reduced stacking for mobile space efficiency */
+    top: calc(var(--card-index) * 10px); /* Even tighter stacking to prevent overlap */
   }
   
   .stock-pile, .waste-pile, .foundation-pile {
-    width: 88px;
-    height: 126px;
-    min-width: 88px;
-    min-height: 126px;
+    width: 44px;
+    height: 62px;
+    min-width: 44px;
+    min-height: 62px;
   }
   
   
   .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
-    width: 88px;
-    height: 126px;
+    width: 44px;
+    height: 62px;
+  }
+  
+  /* Face-down card text sizing for mobile */
+  .card.face-down {
+    width: 44px !important;
+    height: 62px !important;
+  }
+  
+  /* Ensure tableau cards are consistent at mobile */
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 44px !important;
+    height: 62px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    min-height: 62px !important;
+    max-height: 62px !important;
+  }
+  
+  .card.face-down::after {
+    font-size: 1.2rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 1.2rem;
   }
   
   /* Improve mobile touch targets */
   .card {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    min-height: 44px; /* Minimum touch target size */
+    min-height: 62px; /* Match the card height */
   }
   
   .stock-pile, .waste-pile, .foundation-pile {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
-    min-height: 44px;
+    min-height: 62px; /* Match the card height */
   }
   
-  /* Better mobile text sizing */
+  /* Better mobile text sizing - reduce card font sizes to prevent overlap */
   .card .rank, .card .suit {
     font-size: 0.7rem;
   }
   
+  /* Reduce card text sizes for mobile to prevent suit overlap */
+  .card span {
+    font-size: 1rem !important;
+  }
+  
+  .card svg {
+    font-size: 0.8rem !important;
+    width: 0.8rem !important;
+    height: 0.8rem !important;
+  }
+  
+  /* Smaller center suit icon */
+  .card .opacity-25 {
+    font-size: 3.5rem !important;
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+  }
+  
   /* Fix face-down card overflow on mobile */
   .card.face-down::after {
-    font-size: 0.7rem;
-    letter-spacing: 0.15rem;
+    font-size: 1.4rem;
   }
   
   .stock-pile.face-down::after {
-    font-size: 0.7rem;
-    letter-spacing: 0.15rem;
+    font-size: 1.4rem;
   }
-  
-  /* Improve button sizes for mobile */
-  button {
-    min-height: 44px;
-    min-width: 44px;
+}
+
+/* Responsive spacing adjustments for mobile */
+@media (max-width: 639px) {
+  .card-playing-area {
+    padding: 0; /* Remove padding to align with header */
+    margin-top: 8.4rem;
   }
 }
 
 /* Extra small mobile adjustments */
-@media (max-width: 480px) {
+@media (max-width: 575px) {
   .card-playing-area {
     gap: 12px;
   }
   
   .card {
-    width: 76px;
-    height: 110px;
+    width: 49px;
+    height: 76px;
     font-size: 0.65rem;
   }
   
   .tableau-pile {
     width: 100%;
-    max-width: 76px;
+    max-width: 49px;
     height: 340px; /* Optimized for small mobile with tighter stacking */
   }
   
@@ -603,14 +969,14 @@ main.pt-32 {
   }
   
   .stock-pile, .waste-pile, .foundation-pile {
-    width: 76px;
-    height: 110px;
+    width: 49px;
+    height: 76px;
   }
   
   
   .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
-    width: 76px;
-    height: 110px;
+    width: 49px;
+    height: 76px;
   }
   
   /* Smaller text for very small screens */
@@ -618,20 +984,70 @@ main.pt-32 {
     font-size: 0.6rem;
   }
   
+  /* Extra small mobile card text sizing */
+  .card span {
+    font-size: 1rem !important;
+  }
+  
+  .card svg {
+    font-size: 0.7rem !important;
+    width: 0.7rem !important;
+    height: 0.7rem !important;
+  }
+  
+  /* Even smaller center suit icon */
+  .card .opacity-25 {
+    font-size: 2.5rem !important;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+  }
+  
   /* Further adjust face-down cards for very small screens */
   .card.face-down::after {
-    font-size: 0.5rem;
-    letter-spacing: 0.08rem;
+    font-size: 1.0rem;
   }
   
   .stock-pile.face-down::after {
-    font-size: 0.5rem;
-    letter-spacing: 0.08rem;
+    font-size: 1.0rem;
   }
+  
+  /* Ensure tableau cards are consistent at extra small mobile */
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 49px !important;
+    min-width: 49px !important;
+    max-width: 49px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+  }
+}
+
+/* Global animation performance improvements */
+button, .button, [role="button"] {
+  will-change: transform, box-shadow;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover, .button:hover, [role="button"]:hover {
+  transform: translateY(-1px) translateZ(0);
+}
+
+button:active, .button:active, [role="button"]:active {
+  transform: translateY(0) scale(0.98) translateZ(0);
 }
 
 /* Enhanced accessibility and contrast */
 @media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
   .card, .stock-pile, .waste-pile, .foundation-pile {
     transition: none;
   }
@@ -697,40 +1113,115 @@ main.pt-32 {
   transition: none;
 }
 
-/* Responsive bottom padding for game area */
-.pb-bottom-responsive {
-  padding-bottom: 12rem; /* 192px - extra space for mobile/tablet */
-}
-
 /* Force mutually exclusive tableau layouts */
 .desktop-tableau {
-  display: none !important;
-}
-
-.mobile-tableau {
   display: flex !important;
 }
 
 @media (min-width: 992px) {
-  .pb-bottom-responsive {
-    padding-bottom: 5rem; /* 80px - reduced space for desktop */
-  }
-  
-  .desktop-tableau {
-    display: flex !important;
-  }
-  
-  .mobile-tableau {
-    display: none !important;
+  /* Ensure face-down cards have proper dimensions on desktop */
+  .card.face-down {
+    width: 128px !important;
+    height: 184px !important;
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
-  .desktop-tableau {
-    display: none !important;
+/* Small tablet breakpoint with optimized larger cards */
+@media (min-width: 480px) and (max-width: 767px) {
+  .card {
+    width: 49px;
+    height: 76px;
+    font-size: 0.85rem;
   }
   
-  .mobile-tableau {
-    display: flex !important;
+  .tableau-pile {
+    max-width: 49px;
+    height: 420px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 24px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 49px;
+    height: 76px;
+    min-width: 49px;
+    min-height: 76px;
+  }
+  
+  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
+    width: 49px;
+    height: 76px;
+  }
+  
+  /* Face-down card text sizing for small tablet */
+  .card.face-down::after {
+    font-size: 1.6rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 1.6rem;
+  }
+  
+  /* Ensure tableau cards are consistent at small tablet */
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 49px !important;
+    min-width: 49px !important;
+    max-width: 49px !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Large tablet gets significantly bigger cards to maximize space usage */
+  .card {
+    width: 100px;
+    height: 145px;
+    font-size: 1rem;
+  }
+  
+  .tableau-pile {
+    max-width: 100px;
+    height: 500px;
+  }
+  
+  .tableau-card-position {
+    top: calc(var(--card-index) * 28px);
+  }
+  
+  .stock-pile, .waste-pile, .foundation-pile {
+    width: 100px;
+    height: 145px;
+    min-width: 100px;
+    min-height: 145px;
+  }
+  
+  .stock-pile-responsive, .waste-pile-responsive, .foundation-pile-responsive {
+    width: 100px;
+    height: 145px;
+  }
+  
+  /* Face-down card text sizing for large tablet */
+  .card.face-down::after {
+    font-size: 2.0rem;
+  }
+  
+  .stock-pile.face-down::after {
+    font-size: 2.0rem;
+  }
+  
+  /* Ensure tableau cards are consistent at large tablet */
+  .tableau-pile .card,
+  .tableau-pile .card.face-down {
+    width: 100px !important;
+    height: 145px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    min-height: 145px !important;
+    max-height: 145px !important;
   }
 }

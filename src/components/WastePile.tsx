@@ -6,14 +6,24 @@ interface WastePileProps {
   cards: Card[];
   onCardClick?: (cardId: string) => void;
   onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
+  isCardBeingDragged?: (cardId: string) => boolean;
+  isAnimating?: boolean;
+  animationType?: 'fromStock' | 'toStock';
 }
 
-const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart }) => {
+const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart, isCardBeingDragged, isAnimating = false, animationType }) => {
   const topCard = cards.length > 0 ? cards[cards.length - 1] : null;
+
+  const getAnimationClass = () => {
+    if (!isAnimating) return '';
+    if (animationType === 'fromStock') return 'waste-flip-from-stock';
+    if (animationType === 'toStock') return 'waste-recycle-to-stock';
+    return '';
+  };
 
   return (
     <div
-      className="flex-shrink-0 waste-pile-responsive"
+      className={`flex-shrink-0 waste-pile-responsive ${getAnimationClass()}`}
       style={{ position: 'relative', zIndex: 1 }}
       aria-label="Waste pile"
       role="list"
@@ -35,6 +45,8 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
                 suit={card.suit}
                 rank={card.rank}
                 faceUp={card.faceUp}
+                cardId={card.id}
+                isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
                 onClick={index === visibleCards.length - 1 ? () => onCardClick && onCardClick(card.id) : undefined}
                 onMouseDown={index === visibleCards.length - 1 && card.draggable ? 
                   (e) => onCardDragStart && onCardDragStart(card.id, e) : undefined}

@@ -17,6 +17,22 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
   const [currentHintIndex, setCurrentHintIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Convert rank number to readable name
+  const getRankName = (rank: number): string => {
+    switch (rank) {
+      case 1: return 'Ace';
+      case 11: return 'Jack';
+      case 12: return 'Queen';
+      case 13: return 'King';
+      default: return rank.toString();
+    }
+  };
+
+  // Convert suit to proper capitalization
+  const getSuitName = (suit: string): string => {
+    return suit.charAt(0).toUpperCase() + suit.slice(1);
+  };
+
   // Generate hints based on game state
   useEffect(() => {
     const generateHints = (): Hint[] => {
@@ -32,7 +48,7 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
             if (foundationIndex !== -1) {
               hints.push({
                 id: `hint-${hintId++}`,
-                message: `Move Ace of ${topCard.suit} to foundation`,
+                message: `Move ${getRankName(topCard.rank)} of ${getSuitName(topCard.suit)} to suit pile`,
                 priority: 10
               });
             }
@@ -48,7 +64,7 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
           if (foundationIndex !== -1) {
             hints.push({
               id: `hint-${hintId++}`,
-              message: `Move Ace of ${wasteCard.suit} from waste to foundation`,
+              message: `Move ${getRankName(wasteCard.rank)} of ${getSuitName(wasteCard.suit)} from waste to suit pile`,
               priority: 9
             });
           }
@@ -64,7 +80,7 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
             if (wasteCard.suit === topFoundationCard.suit && wasteCard.rank === topFoundationCard.rank + 1) {
               hints.push({
                 id: `hint-${hintId++}`,
-                message: `Build foundation with ${wasteCard.rank} of ${wasteCard.suit}`,
+                message: `Build suit pile with ${getRankName(wasteCard.rank)} of ${getSuitName(wasteCard.suit)}`,
                 priority: 8
               });
             }
@@ -87,7 +103,7 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
                      (targetTop.suit === 'hearts' || targetTop.suit === 'diamonds'))) {
                   hints.push({
                     id: `hint-${hintId++}`,
-                    message: `Move ${topCard.rank} of ${topCard.suit} to reveal hidden card`,
+                    message: `Move ${getRankName(topCard.rank)} of ${getSuitName(topCard.suit)} to reveal hidden card`,
                     priority: 7
                   });
                 }
@@ -107,7 +123,7 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
             if (topCard.faceUp && topCard.rank === 13) {
               hints.push({
                 id: `hint-${hintId++}`,
-                message: `Move King to empty tableau space`,
+                message: `Move ${getRankName(topCard.rank)} to empty space`,
                 priority: 6
               });
             }
@@ -119,7 +135,7 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
           if (wasteCard.rank === 13) {
             hints.push({
               id: `hint-${hintId++}`,
-              message: `Move King from waste to empty space`,
+              message: `Move ${getRankName(wasteCard.rank)} from waste to empty space`,
               priority: 6
             });
           }

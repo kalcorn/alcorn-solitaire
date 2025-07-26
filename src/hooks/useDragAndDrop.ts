@@ -8,6 +8,7 @@ interface DragState {
   dragOffset: { x: number; y: number };
   dragPosition: { x: number; y: number };
   isAnimating: boolean;
+  isSnapBack: boolean;
 }
 
 interface DropZone {
@@ -26,7 +27,8 @@ export function useDragAndDrop() {
     dragSource: null,
     dragOffset: { x: 0, y: 0 },
     dragPosition: { x: 0, y: 0 },
-    isAnimating: false
+    isAnimating: false,
+    isSnapBack: false
   });
 
   const [dropZones, setDropZones] = useState<DropZone[]>([]);
@@ -60,7 +62,8 @@ export function useDragAndDrop() {
       dragSource: source,
       dragOffset: { x: offsetX, y: offsetY },
       dragPosition: { x: clientX, y: clientY },
-      isAnimating: false
+      isAnimating: false,
+      isSnapBack: false
     });
 
     // Initialize drop zones
@@ -99,6 +102,8 @@ export function useDragAndDrop() {
     let clientX: number, clientY: number;
     
     if ('touches' in event) {
+      // Prevent scrolling and other touch behaviors during drag
+      event.preventDefault();
       clientX = event.touches[0].clientX;
       clientY = event.touches[0].clientY;
     } else {
@@ -137,7 +142,7 @@ export function useDragAndDrop() {
   /**
    * Ends drag operation
    */
-  const endDrag = useCallback((onDrop?: (source: CardPosition, target: CardPosition, cards: Card[]) => void) => {
+  const endDrag = useCallback((onDrop?: (source: CardPosition, target: CardPosition, cards: Card[]) => { success: boolean; error?: string }) => {
     if (!dragState.isDragging) return null;
 
     const result = {
@@ -150,23 +155,52 @@ export function useDragAndDrop() {
       cards: dragState.draggedCards
     };
 
+    let dropSuccessful = false;
+
     // Call drop handler if provided and we have a valid target
     if (onDrop && result.target) {
-      onDrop(result.source, result.target, result.cards);
+      const dropResult = onDrop(result.source, result.target, result.cards);
+      dropSuccessful = dropResult.success;
     }
 
-    // Reset drag state with animation
-    setDragState({
-      isDragging: false,
-      draggedCards: [],
-      dragSource: null,
-      dragOffset: { x: 0, y: 0 },
-      dragPosition: { x: 0, y: 0 },
-      isAnimating: false
-    });
-    
-    setDropZones([]);
-    setHoveredZone(null);
+    // If drop failed or no valid target, trigger snap-back animation
+    if (!dropSuccessful) {
+      setDragState(prev => ({
+        ...prev,
+        isSnapBack: true,
+        isAnimating: true
+      }));
+
+      // After snap-back animation, reset state
+      setTimeout(() => {
+        setDragState({
+          isDragging: false,
+          draggedCards: [],
+          dragSource: null,
+          dragOffset: { x: 0, y: 0 },
+          dragPosition: { x: 0, y: 0 },
+          isAnimating: false,
+          isSnapBack: false
+        });
+        setDropZones([]);
+        setHoveredZone(null);
+      }, 300); // Match animation duration
+    } else {
+      // Successful drop - reset with slight delay to ensure smooth transition
+      requestAnimationFrame(() => {
+        setDragState({
+          isDragging: false,
+          draggedCards: [],
+          dragSource: null,
+          dragOffset: { x: 0, y: 0 },
+          dragPosition: { x: 0, y: 0 },
+          isAnimating: false,
+          isSnapBack: false
+        });
+        setDropZones([]);
+        setHoveredZone(null);
+      });
+    }
 
     return result;
   }, [dragState, hoveredZone]);
@@ -181,12 +215,21 @@ export function useDragAndDrop() {
       dragSource: null,
       dragOffset: { x: 0, y: 0 },
       dragPosition: { x: 0, y: 0 },
-      isAnimating: false
+      isAnimating: false,
+      isSnapBack: false
     });
     
     setDropZones([]);
     setHoveredZone(null);
   }, []);
+
+  /**
+   * Checks if a card should be hidden during drag
+   */
+  const isCardBeingDragged = useCallback((cardId: string): boolean => {
+    return dragState.isDragging && !dragState.isSnapBack && 
+           dragState.draggedCards.some(card => card.id === cardId);
+  }, [dragState]);
 
   /**
    * Checks if a drop zone is currently being hovered
@@ -205,16 +248,22 @@ export function useDragAndDrop() {
     const rotation = hoveredZone ? '3deg' : '5deg';
     const opacity = hoveredZone ? 0.9 : 0.8;
 
+    // Responsive card dimensions for mobile
+    const isMobile = window.innerWidth <= 768;
+    const cardWidth = isMobile ? (window.innerWidth <= 480 ? 76 : 44) : 128;
+    const cardHeight = isMobile ? (window.innerWidth <= 480 ? 110 : 62) : 184;
+
     return {
       position: 'fixed' as const,
-      left: dragState.dragPosition.x - dragState.dragOffset.x - 64, // Half card width
-      top: dragState.dragPosition.y - dragState.dragOffset.y - 92, // Half card height
+      left: dragState.dragPosition.x - dragState.dragOffset.x - (cardWidth / 2),
+      top: dragState.dragPosition.y - dragState.dragOffset.y - (cardHeight / 2),
       zIndex: 1000,
       pointerEvents: 'none' as const,
       transform: `rotate(${rotation}) scale(${scale})`,
       opacity,
       transition: 'transform 0.15s ease-out, opacity 0.15s ease-out',
-      filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))'
+      filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3))',
+      willChange: 'transform, opacity'
     };
   }, [dragState, hoveredZone]);
 
@@ -232,6 +281,7 @@ export function useDragAndDrop() {
     
     // Utilities
     isZoneHovered,
+    isCardBeingDragged,
     getDragPreviewStyle
   };
 }
