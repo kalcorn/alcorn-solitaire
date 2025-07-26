@@ -1,10 +1,26 @@
 import { useCallback } from 'react';
 import { GameState, GameHistoryEntry } from '@/types';
 
-export const useUndoRedo = (gameState: GameState, setGameState: (state: GameState) => void) => {
+export const useUndoRedo = (
+  setGameState: (state: GameState) => void
+) => {
   
-  const saveState = useCallback((action: string, currentState?: GameState) => {
-    const stateToUse = currentState || gameState;
+  const saveState = useCallback((
+    action: string, 
+    currentState: GameState,
+    history: GameHistoryEntry[],
+    historyIndex: number
+  ) => {
+    const stateToUse = currentState;
+    
+    console.log('SAVE STATE DEBUG:', {
+      action,
+      moves: stateToUse.moves,
+      wasteTop: stateToUse.wastePile.length > 0 ? stateToUse.wastePile[stateToUse.wastePile.length - 1] : 'empty',
+      wasteLength: stateToUse.wastePile.length,
+      historyIndex: historyIndex,
+      historyLength: history.length
+    });
     
     const stateToSave = {
       tableauPiles: stateToUse.tableauPiles,
@@ -28,20 +44,18 @@ export const useUndoRedo = (gameState: GameState, setGameState: (state: GameStat
       action
     };
 
-    // Remove any future history if we're not at the end
-    const newHistory = stateToUse.history.slice(0, stateToUse.historyIndex + 1);
+    const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(historyEntry);
 
-    // Limit history to last 50 moves to prevent memory issues
     const limitedHistory = newHistory.slice(-50);
 
     return {
       history: limitedHistory,
       historyIndex: limitedHistory.length - 1
     };
-  }, [gameState]);
+  }, []);
 
-  const undo = useCallback(() => {
+  const undo = useCallback((gameState: GameState) => {
     if (gameState.historyIndex > 0 && gameState.history.length > 0) {
       const previousIndex = gameState.historyIndex - 1;
       const historyEntry = gameState.history[previousIndex];
@@ -53,6 +67,18 @@ export const useUndoRedo = (gameState: GameState, setGameState: (state: GameStat
       
       const previousState = historyEntry.state;
       
+      console.log('UNDO DEBUG:', {
+        currentIndex: gameState.historyIndex,
+        previousIndex,
+        currentMoves: gameState.moves,
+        previousMoves: previousState.moves,
+        currentWasteTop: gameState.wastePile.length > 0 ? gameState.wastePile[gameState.wastePile.length - 1] : 'empty',
+        previousWasteTop: previousState.wastePile.length > 0 ? previousState.wastePile[previousState.wastePile.length - 1] : 'empty',
+        currentWasteLength: gameState.wastePile.length,
+        previousWasteLength: previousState.wastePile.length,
+        action: historyEntry.action
+      });
+      
       setGameState({
         ...previousState,
         history: gameState.history,
@@ -62,15 +88,11 @@ export const useUndoRedo = (gameState: GameState, setGameState: (state: GameStat
       return true;
     }
     return false;
-  }, [gameState, setGameState]);
-
-  const canUndo = gameState.historyIndex > 0 && 
-                  gameState.history.length > 0;
+  }, [setGameState]);
 
   return {
     saveState,
     undo,
-    canUndo,
-    historyLength: gameState.history.length
+    canUndo: (gameState: GameState) => gameState.historyIndex > 0 && gameState.history.length > 0,
   };
 };

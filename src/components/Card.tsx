@@ -130,9 +130,14 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
 
   return (
     <div
+      role="button"
+      tabIndex={faceUp ? 0 : -1}
+      aria-label={faceUp ? `${displayRank} of ${suit}` : 'Face-down card'}
+      aria-describedby={faceUp ? undefined : 'card-back-description'}
       className={`card rounded-lg shadow-xl
         flex items-center justify-center select-none cursor-pointer
-        transition-all duration-200 hover:shadow-2xl hover:-translate-y-1 active:scale-95
+        transition-all duration-200 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 active:scale-95
+        focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75
         ${faceUp ? "face-up" : "face-down"}
         ${isBeingDragged ? "opacity-0 pointer-events-none" : ""}`
       }
@@ -219,7 +224,11 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
           )}
         </div>
       ) : (
-        <div className="w-full h-full flex items-center justify-center" />
+        <div 
+          className="w-full h-full flex items-center justify-center"
+          id="card-back-description"
+          aria-hidden="true"
+        />
       )}
     </div>
   );

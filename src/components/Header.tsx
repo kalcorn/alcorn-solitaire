@@ -43,8 +43,9 @@ const Header: React.FC<HeaderProps> = ({
           {/* Portrait Mobile + Button */}
           <button
             onClick={onNewGame}
-            className="w-10 h-10 text-xl font-bold text-white bg-emerald-700 rounded-lg border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 transition-all flex items-center justify-center flex-shrink-0 shadow-md"
+            className="w-10 h-10 text-xl font-bold text-white bg-emerald-700 rounded-lg border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center flex-shrink-0 shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400"
             title="New game"
+            aria-label="Start a new game"
           >
             +
           </button>
@@ -85,8 +86,9 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={onNewGame}
-              className="landscape-mobile-new-game text-base sm:text-lg font-semibold text-white bg-emerald-700 rounded-lg px-4 py-3 border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 transition-all shadow-md"
+              className="landscape-mobile-new-game text-base sm:text-lg font-semibold text-white bg-emerald-700 rounded-lg px-4 py-3 border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 hover:scale-105 active:scale-95 transition-all duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400"
               title="Start new game"
+              aria-label="Start a new game"
             >
               New Game
             </button>
@@ -137,8 +139,9 @@ const Header: React.FC<HeaderProps> = ({
             {/* Compact + button for landscape mobile - next to settings */}
             <button
               onClick={onNewGame}
-              className="landscape-mobile-plus-button w-10 h-10 text-xl font-bold text-white bg-emerald-700 rounded-lg border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 transition-all flex items-center justify-center shadow-md"
+              className="landscape-mobile-plus-button w-10 h-10 text-xl font-bold text-white bg-emerald-700 rounded-lg border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400"
               title="New game"
+              aria-label="Start a new game"
             >
               +
             </button>

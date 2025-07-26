@@ -42,7 +42,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="text-sm sm:text-base font-mono font-bold text-white bg-slate-800 rounded-lg px-4 py-3 border border-slate-600 shadow-lg hover:bg-slate-700 transition-all"
+        className="text-sm sm:text-base font-mono font-bold text-white bg-slate-800 rounded-lg px-4 py-3 border border-slate-600 shadow-lg hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
         title="Game Settings"
       >
         <div className="flex items-center justify-center" style={{ minHeight: '36px' }}>
@@ -52,14 +52,14 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
       {/* Settings Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4 shadow-2xl border border-slate-600">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-3xl font-bold text-white">Game Settings</h2>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded hover:bg-slate-700 transition-colors"
+                className="p-1 rounded hover:bg-slate-700 hover:scale-110 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
               >
                 <BsX className="w-7 h-7 text-slate-300" />
               </button>
@@ -139,7 +139,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="flex justify-center mt-8 pt-4 border-t border-slate-600">
               <button
                 onClick={() => setIsOpen(false)}
-                className="px-8 py-3 rounded-lg bg-emerald-700 text-white text-lg font-semibold hover:bg-emerald-800 transition-colors shadow-lg"
+                className="px-8 py-3 rounded-lg bg-emerald-700 text-white text-lg font-semibold hover:bg-emerald-800 hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
               >
                 Close
               </button>

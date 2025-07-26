@@ -27,7 +27,7 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
       {/* Always show suit icon/text as background */}
       <div className={`flex flex-col items-center justify-center h-full absolute inset-0 ${cards.length > 0 ? 'opacity-15' : 'opacity-40'}`}>
         {React.createElement(suitIcons[index], { 
-          className: `text-2xl md:text-4xl ${suitColors[index]} mb-1 md:mb-2` 
+          className: `text-2xl lg:text-4xl ${suitColors[index]} mb-1 md:mb-2 lg:mb-3` 
         })}
         <div className="text-gray-300 text-xs md:text-base font-semibold text-center">{suits[index]}</div>
       </div>

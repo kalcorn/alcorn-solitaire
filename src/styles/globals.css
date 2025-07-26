@@ -6,14 +6,12 @@
 
 /* Playful but professional background */
 body {
-  background: linear-gradient(
-    135deg,
-    #e0f7fa 0%,
-    #f3e5f5 25%,
-    #e8f5e8 50%,
-    #fff3e0 75%,
-    #fce4ec 100%
-  );
+  background: linear-gradient(135deg,
+      #e0f7fa 0%,
+      #f3e5f5 25%,
+      #e8f5e8 50%,
+      #fff3e0 75%,
+      #fce4ec 100%);
   min-height: 100vh;
 }
 
@@ -26,23 +24,28 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', system-ui, sans-serif;
-  background: 
+  background:
     radial-gradient(circle at center, #1a5e35 0%, #0d3e22 60%, #0a2f1a 100%),
-    radial-gradient(ellipse at 20% 30%, rgba(255,255,255,0.04) 0%, transparent 40%),
-    radial-gradient(ellipse at 80% 70%, rgba(0,0,0,0.08) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(26,94,53,0.3) 0%, transparent 70%);
+    radial-gradient(ellipse at 20% 30%, rgba(255, 255, 255, 0.04) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 70%, rgba(0, 0, 0, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(26, 94, 53, 0.3) 0%, transparent 70%);
   background-size: 100% 100%, 600px 400px, 800px 600px, 1200px 900px;
   background-position: center, 20% 30%, 80% 70%, center;
-  background-attachment: scroll; /* Better performance on mobile/tablet */
-  overflow: auto; /* Allow scrolling on mobile/tablet */
-  height: auto; /* Allow body to expand */
-  min-height: 100vh; /* Maintain minimum height */
+  background-attachment: scroll;
+  /* Better performance on mobile/tablet */
+  overflow: auto;
+  /* Allow scrolling on mobile/tablet */
+  height: auto;
+  /* Allow body to expand */
+  min-height: 100vh;
+  /* Maintain minimum height */
 }
 
 /* Desktop body adjustments */
 @media (min-width: 1024px) {
   body {
-    background-attachment: fixed; /* Can use fixed on desktop */
+    background-attachment: fixed;
+    /* Can use fixed on desktop */
     overflow: hidden;
     height: 100vh;
   }
@@ -55,7 +58,7 @@ body {
 .card {
   border-radius: 8px;
   border: 1px solid #374151;
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.35),
     0 4px 8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -63,7 +66,8 @@ body {
   display: flex;
   will-change: transform, box-shadow;
   backface-visibility: hidden;
-  transform: translateZ(0); /* Force hardware acceleration */
+  transform: translateZ(0);
+  /* Force hardware acceleration */
   flex-direction: column;
   justify-content: space-between;
   font-weight: 700;
@@ -77,7 +81,7 @@ body {
 /* Removed card hover effects for stock/waste piles - they should not move */
 .card:hover:not(.stock-pile .card):not(.waste-pile .card) {
   transform: translateY(-6px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.5),
     0 12px 20px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
@@ -87,14 +91,14 @@ body {
 .stock-pile .card:hover,
 .waste-pile .card:hover {
   transform: none;
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.35),
     0 4px 8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .card.playable {
-  box-shadow: 
+  box-shadow:
     0 8px 20px rgba(0, 0, 0, 0.3),
     0 3px 6px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
@@ -103,7 +107,7 @@ body {
 
 .card.selected {
   transform: translateY(-4px);
-  box-shadow: 
+  box-shadow:
     0 15px 30px rgba(0, 0, 0, 0.5),
     0 8px 15px rgba(0, 0, 0, 0.3),
     0 0 0 3px rgba(59, 130, 246, 0.8);
@@ -112,14 +116,14 @@ body {
 /* Enhanced face-up cards */
 .card.face-up {
   background-color: #ffffff !important;
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.08) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(255,255,255,0.06) 0%, transparent 50%),
-    linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%);
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
   color: #f9fafb;
   border-width: 1px;
   border-color: #374151;
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.25),
     0 4px 8px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -128,44 +132,22 @@ body {
 .card.face-down {
   width: inherit !important;
   height: inherit !important;
-  background-color: #111827;
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      #1e293b 0px,
-      #1e293b 2px,
-      #111827 2px,
-      #111827 12px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      #1e293b 0px,
-      #1e293b 2px,
-      #111827 2px,
-      #111827 12px
-    );
+  background-color: #1a202c;
+  background-image: url('/card-back-pattern.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border-width: 1px;
-  border-color: #a16207;
+  border-color: #4a5568;
   color: transparent;
-  box-shadow: 
+  box-shadow:
     0 8px 20px rgba(0, 0, 0, 0.4),
     0 3px 6px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(217, 119, 6, 0.2);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
 }
 
-.card.face-down::after {
-  content: '𝒜';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', 'Apple Chancery', cursive, serif;
-  color: rgba(255, 255, 255, 0.45);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.1);
-  font-weight: 600;
-  white-space: nowrap;
-}
+/* Card back pattern replaces the ::after content */
 
 /* =================================================================
    TABLEAU PILE STYLING
@@ -176,7 +158,7 @@ body {
   position: relative;
 }
 
-.tableau-pile > * {
+.tableau-pile>* {
   margin-top: 0 !important;
 }
 
@@ -198,57 +180,57 @@ body {
    STOCK, WASTE, AND FOUNDATION PILE STYLES
    ================================================================= */
 
-.stock-pile, .waste-pile, .foundation-pile {
+.stock-pile,
+.waste-pile,
+.foundation-pile {
   border-radius: 8px;
   border: 1px solid #4b5563;
   position: relative;
   overflow: hidden;
-  background: 
+  background:
     radial-gradient(circle at center, rgba(26, 46, 37, 0.8) 0%, rgba(13, 62, 34, 0.6) 100%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.1) 100%);
-  box-shadow: 
+  box-shadow:
     inset 0 4px 8px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.stock-pile.face-down::after {
-  content: '𝒜';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-family: 'Dancing Script', 'Brush Script MT', 'Lucida Handwriting', 'Apple Chancery', cursive, serif;
-  color: rgba(255, 255, 255, 0.3);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+.stock-pile.face-down {
+  background-image: url('/card-back-pattern.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .foundation-pile {
-  background: 
+  background:
     radial-gradient(circle at center, rgba(26, 46, 37, 0.6) 0%, rgba(13, 62, 34, 0.4) 100%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%);
 }
 
 /* Container classes for layout stability */
-.stock-pile-container, .waste-pile-container {
+.stock-pile-container,
+.waste-pile-container {
   display: block;
   position: static;
   flex-shrink: 0;
 }
 
 /* Responsive pile containers */
-.stock-pile-responsive, .waste-pile-responsive {
+.stock-pile-responsive,
+.waste-pile-responsive {
   position: relative;
   flex-shrink: 0;
 }
 
 /* Foundation pile improvements - better visibility */
 .foundation-pile {
-  background: 
+  background:
     radial-gradient(circle at center, rgba(26, 46, 37, 0.85) 0%, rgba(13, 62, 34, 0.75) 100%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.15) 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 
+  box-shadow:
     inset 0 4px 8px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.15),
     0 2px 6px rgba(0, 0, 0, 0.3);
@@ -260,11 +242,13 @@ body {
 }
 
 .foundation-pile .text-5xl.text-red-500 {
-  color: rgba(239, 68, 68, 0.8) !important; /* Red suits with transparency */
+  color: rgba(239, 68, 68, 0.8) !important;
+  /* Red suits with transparency */
 }
 
 .foundation-pile .text-5xl.text-gray-800 {
-  color: rgb(3, 7, 18) !important; /* Black suits with transparency */
+  color: rgb(3, 7, 18) !important;
+  /* Black suits with transparency */
 }
 
 .foundation-pile .text-xs {
@@ -280,20 +264,20 @@ body {
 /* Base Layout - Proportional spacing from header */
 .card-playing-area {
   background: transparent;
-  margin-top: 8.0rem; /* Proportional to mobile screen height */
   padding-top: 0.5rem;
 }
 
-/* MOBILE (default - up to 639px) - Increased sizes */
+/* MOBILE (default - up to 639px) - Optimized proportions */
 .card {
-  width: 50px;
-  height: 70px; /* 5:7 ratio */
+  width: 52px;
+  height: 72px;
+  /* 13:18 ratio for better proportions */
   font-size: 0.9rem;
   line-height: 1;
 }
 
 .tableau-pile {
-  max-width: 50px;
+  max-width: 52px;
   height: 350px;
 }
 
@@ -301,23 +285,27 @@ body {
   top: calc(var(--card-index) * 18px);
 }
 
-.stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
-  width: 50px;
-  height: 70px;
+.stock-pile,
+.waste-pile,
+.foundation-pile,
+.stock-pile-responsive,
+.waste-pile-responsive {
+  width: 52px;
+  height: 72px;
 }
 
 .tableau-container {
-  width: 50px;
+  width: 52px;
 }
 
 .tableau-pile .card,
 .tableau-pile .card.face-down {
-  width: 50px !important;
-  height: 70px !important;
-  min-width: 50px !important;
-  max-width: 50px !important;
-  min-height: 70px !important;
-  max-height: 70px !important;
+  width: 52px !important;
+  height: 72px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 72px !important;
+  max-height: 72px !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex: none !important;
@@ -346,7 +334,7 @@ body {
   display: none;
 }
 
-.foundation-pile > div:first-child {
+.foundation-pile>div:first-child {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,34 +343,38 @@ body {
 /* SMALL (sm: 640px+) - Increased sizes */
 @media (min-width: 640px) {
   .card-playing-area {
-    margin-top: 9rem; /* Proportional increase for small screens */
     padding-top: 0.75rem;
   }
-  
+
   .card {
     width: 65px;
-    height: 91px; /* 5:7 ratio */
+    height: 91px;
+    /* 5:7 ratio */
     font-size: 1rem;
   }
-  
+
   .tableau-pile {
     max-width: 65px;
     height: 420px;
   }
-  
+
   .tableau-card-position {
     top: calc(var(--card-index) * 20px);
   }
-  
-  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+
+  .stock-pile,
+  .waste-pile,
+  .foundation-pile,
+  .stock-pile-responsive,
+  .waste-pile-responsive {
     width: 65px;
     height: 91px;
   }
-  
+
   .tableau-container {
     width: 65px;
   }
-  
+
   .tableau-pile .card,
   .tableau-pile .card.face-down {
     width: 65px !important;
@@ -392,62 +384,61 @@ body {
     min-height: 91px !important;
     max-height: 91px !important;
   }
-  
+
   .card span {
     font-size: 1.8rem !important;
   }
-  
+
   .card .opacity-25 {
     font-size: 3.4rem !important;
     width: 3.4rem !important;
     height: 3.4rem !important;
   }
-  
+
   .card.face-down::after {
     font-size: 2.1rem;
   }
-  
+
   .stock-pile.face-down::after {
     font-size: 2.1rem;
-  }
-  
-  /* Show foundation pile text on small screens and up */
-  .foundation-pile .text-xs {
-    display: block;
   }
 }
 
 /* MEDIUM (md: 768px+) - Increased sizes */
 @media (min-width: 768px) {
   .card-playing-area {
-    margin-top: 6rem; /* Balanced for tablet header */
     padding-top: 1rem;
   }
-  
+
   .card {
     width: 85px;
-    height: 119px; /* 5:7 ratio */
+    height: 119px;
+    /* 5:7 ratio */
     font-size: 1.1rem;
   }
-  
+
   .tableau-pile {
     max-width: 85px;
     height: 520px;
   }
-  
+
   .tableau-card-position {
     top: calc(var(--card-index) * 26px);
   }
-  
-  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+
+  .stock-pile,
+  .waste-pile,
+  .foundation-pile,
+  .stock-pile-responsive,
+  .waste-pile-responsive {
     width: 85px;
     height: 119px;
   }
-  
+
   .tableau-container {
     width: 85px;
   }
-  
+
   .tableau-pile .card,
   .tableau-pile .card.face-down {
     width: 85px !important;
@@ -457,57 +448,66 @@ body {
     min-height: 119px !important;
     max-height: 119px !important;
   }
-  
+
   .card span {
     font-size: 2rem !important;
   }
-  
+
   .card .opacity-25 {
     font-size: 4.8rem !important;
     width: 4.8rem !important;
     height: 4.8rem !important;
   }
-  
+
   .card.face-down::after {
     font-size: 2.8rem;
   }
-  
+
   .stock-pile.face-down::after {
     font-size: 2.8rem;
+  }
+
+  /* Show foundation pile text on small screens and up */
+  .foundation-pile .text-xs {
+    display: block;
   }
 }
 
 /* LARGE (lg: 1024px+) - Increased sizes */
 @media (min-width: 1024px) {
   .card-playing-area {
-    margin-top: 6rem; /* Proportional to desktop viewport */
     padding-top: 1rem;
   }
-  
+
   .card {
     width: 100px;
-    height: 140px; /* 5:7 ratio */
+    height: 140px;
+    /* 5:7 ratio */
     font-size: 1.25rem;
   }
-  
+
   .tableau-pile {
     max-width: 100px;
     height: 600px;
   }
-  
+
   .tableau-card-position {
     top: calc(var(--card-index) * 30px);
   }
-  
-  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+
+  .stock-pile,
+  .waste-pile,
+  .foundation-pile,
+  .stock-pile-responsive,
+  .waste-pile-responsive {
     width: 100px;
     height: 140px;
   }
-  
+
   .tableau-container {
     width: 100px;
   }
-  
+
   .tableau-pile .card,
   .tableau-pile .card.face-down {
     width: 100px !important;
@@ -517,21 +517,21 @@ body {
     min-height: 140px !important;
     max-height: 140px !important;
   }
-  
+
   .card span {
     font-size: 2.2rem !important;
   }
-  
+
   .card .opacity-25 {
     font-size: 5.4rem !important;
     width: 5.4rem !important;
     height: 5.4rem !important;
   }
-  
+
   .card.face-down::after {
     font-size: 3.2rem;
   }
-  
+
   .stock-pile.face-down::after {
     font-size: 3.2rem;
   }
@@ -540,34 +540,40 @@ body {
 /* EXTRA LARGE (xl: 1280px+) - Viewport optimized */
 @media (min-width: 1280px) {
   .card-playing-area {
-    margin-top: 6rem; /* Proportional to XL viewport */
     padding-top: 1rem;
   }
-  
+
   .card {
     width: 132px;
-    height: 185px; /* 5:7 ratio, optimized for viewport fit */
+    height: 185px;
+    /* 5:7 ratio, optimized for viewport fit */
     font-size: 1.35rem;
   }
-  
+
   .tableau-pile {
     max-width: 132px;
-    height: 520px; /* Controlled for viewport */
+    height: 520px;
+    /* Controlled for viewport */
   }
-  
+
   .tableau-card-position {
-    top: calc(var(--card-index) * 24px); /* Compact overlap for viewport fit */
+    top: calc(var(--card-index) * 24px);
+    /* Compact overlap for viewport fit */
   }
-  
-  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+
+  .stock-pile,
+  .waste-pile,
+  .foundation-pile,
+  .stock-pile-responsive,
+  .waste-pile-responsive {
     width: 132px;
     height: 185px;
   }
-  
+
   .tableau-container {
     width: 132px;
   }
-  
+
   .tableau-pile .card,
   .tableau-pile .card.face-down {
     width: 132px !important;
@@ -577,21 +583,21 @@ body {
     min-height: 185px !important;
     max-height: 185px !important;
   }
-  
+
   .card span {
     font-size: 2.4rem !important;
   }
-  
+
   .card .opacity-25 {
     font-size: 5.8rem !important;
     width: 5.8rem !important;
     height: 5.8rem !important;
   }
-  
+
   .card.face-down::after {
     font-size: 3rem;
   }
-  
+
   .stock-pile.face-down::after {
     font-size: 3rem;
   }
@@ -600,34 +606,40 @@ body {
 /* 2X LARGE (2xl: 1536px+) - Maximum viewport optimization */
 @media (min-width: 1536px) {
   .card-playing-area {
-    margin-top: 6.0rem; /* Proportional to 2XL viewport */
     padding-top: 1.5rem;
   }
-  
+
   .card {
     width: 132px;
-    height: 185px; /* 5:7 ratio, viewport constrained */
+    height: 185px;
+    /* 5:7 ratio, viewport constrained */
     font-size: 1.4rem;
   }
-  
+
   .tableau-pile {
     max-width: 132px;
-    height: 580px; /* Viewport fit priority */
+    height: 580px;
+    /* Viewport fit priority */
   }
-  
+
   .tableau-card-position {
-    top: calc(var(--card-index) * 28px); /* Efficient overlap */
+    top: calc(var(--card-index) * 28px);
+    /* Efficient overlap */
   }
-  
-  .stock-pile, .waste-pile, .foundation-pile, .stock-pile-responsive, .waste-pile-responsive {
+
+  .stock-pile,
+  .waste-pile,
+  .foundation-pile,
+  .stock-pile-responsive,
+  .waste-pile-responsive {
     width: 132px;
     height: 185px;
   }
-  
+
   .tableau-container {
     width: 132px;
   }
-  
+
   .tableau-pile .card,
   .tableau-pile .card.face-down {
     width: 132px !important;
@@ -637,21 +649,21 @@ body {
     min-height: 185px !important;
     max-height: 185px !important;
   }
-  
+
   .card span {
     font-size: 2.6rem !important;
   }
-  
+
   .card .opacity-25 {
     font-size: 6.2rem !important;
     width: 6.2rem !important;
     height: 6.2rem !important;
   }
-  
+
   .card.face-down::after {
     font-size: 3.4rem;
   }
-  
+
   .stock-pile.face-down::after {
     font-size: 3.4rem;
   }
@@ -661,20 +673,20 @@ body {
    LANDSCAPE PHONE OPTIMIZATION
    ================================================================= */
 @media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
-  
+
   /* Hide standard layout elements in landscape mobile */
   .standard-layout,
   .standard-tableau {
     display: none !important;
   }
-  
+
   /* Show landscape mobile specific elements */
   .landscape-mobile-left-sidebar,
   .landscape-mobile-right-sidebar,
   .landscape-mobile-tableau {
     display: block !important;
   }
-  
+
   /* Landscape Mobile Layout Structure */
   .card-playing-area {
     display: flex !important;
@@ -684,51 +696,53 @@ body {
     margin-top: 1rem !important;
     padding-top: 0.5rem !important;
   }
-  
+
   .landscape-mobile-left-sidebar {
-    position: fixed;
+    /*position: fixed;
     left: 1rem;
     top: 6rem;
-    z-index: 20;
+    z-index: 20;*/
   }
-  
+
   .landscape-mobile-right-sidebar {
-    position: fixed;
+    /*position: fixed;
     right: 1rem;
     top: 6rem;
-    z-index: 20;
+    z-index: 20;*/
   }
-  
+
   .landscape-mobile-tableau {
     flex: 1;
-    padding: 0 6rem; /* Space for sidebars */
+    padding: 0 6rem;
+    /* Space for sidebars */
   }
-  
+
   .landscape-tableau-center {
     display: flex !important;
     gap: 0.5rem !important;
   }
-  
+
   /* Increase tableau card sizes for landscape mobile */
   .landscape-mobile-tableau .card {
     width: 48px !important;
-    height: 67px !important; /* 5:7 ratio */
+    height: 67px !important;
+    /* 5:7 ratio */
     font-size: 0.8rem !important;
   }
-  
+
   .landscape-mobile-tableau .tableau-container {
     width: 48px !important;
   }
-  
+
   .landscape-mobile-tableau .tableau-pile {
     max-width: 48px !important;
     height: 320px !important;
   }
-  
+
   .landscape-mobile-tableau .tableau-card-position {
     top: calc(var(--card-index) * 16px) !important;
   }
-  
+
   .landscape-mobile-tableau .tableau-pile .card,
   .landscape-mobile-tableau .tableau-pile .card.face-down {
     width: 48px !important;
@@ -738,11 +752,11 @@ body {
     min-height: 67px !important;
     max-height: 67px !important;
   }
-  
+
   .landscape-mobile-tableau .card span {
     font-size: 1.4rem !important;
   }
-  
+
   .landscape-mobile-tableau .card .opacity-25 {
     font-size: 2.4rem !important;
     width: 2.4rem !important;
@@ -754,56 +768,57 @@ body {
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
   }
-  
+
   .landscape-mobile-single-line {
     flex-direction: row !important;
     gap: 1rem !important;
   }
-  
+
   .landscape-mobile-logo {
     height: 2.5rem !important;
   }
-  
+
   /* Ensure landscape mobile header elements are visible */
   .landscape-mobile-title {
     display: flex !important;
   }
-  
+
   .landscape-mobile-right {
     display: flex !important;
   }
-  
+
   .header-title {
     display: block !important;
     font-size: 1.25rem !important;
   }
-  
+
   /* Show single line stats, hide regular stats */
   .landscape-mobile-single-stat {
     display: block !important;
   }
-  
+
   .landscape-mobile-regular-stats {
     display: none !important;
   }
-  
+
   /* In landscape mobile, only show the + button in controls, hide both other buttons */
   .landscape-mobile-plus-button {
     display: flex !important;
-    border-radius: 4px !important; /* Square instead of circle */
+    border-radius: 4px !important;
+    /* Square instead of circle */
   }
-  
+
   .landscape-mobile-new-game {
     display: none !important;
   }
-  
+
   /* Hide portrait mobile + button in landscape */
   @media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
     .md\:hidden {
       display: none !important;
     }
   }
-  
+
   /* Position + button next to settings */
   .landscape-mobile-controls {
     order: 3;
@@ -811,11 +826,11 @@ body {
     align-items: center;
     gap: 0.5rem;
   }
-  
+
   .landscape-mobile-stats {
     order: 2;
   }
-  
+
   /* Undo/Redo buttons side by side in landscape */
   .fixed.z-40 {
     flex-direction: row !important;
@@ -824,77 +839,78 @@ body {
     left: 5.75rem !important;
     transform: translateX(-50%) !important;
   }
-  
+
   /* Smaller undo text and icon for landscape mobile */
   .landscape-mobile-undo-text {
     font-size: 0.875rem !important;
   }
-  
+
   .landscape-mobile-undo-icon {
     width: 1rem !important;
     height: 1rem !important;
   }
-  
+
   /* Smaller hints text and components for landscape mobile */
   .landscape-mobile-hints-header {
     padding: 0.25rem 0.5rem !important;
   }
-  
+
   .landscape-mobile-hints-title {
     font-size: 0.75rem !important;
   }
-  
+
   .landscape-mobile-hints-icon {
     width: 0.875rem !important;
     height: 0.875rem !important;
   }
-  
+
   .landscape-mobile-hints-counter {
     font-size: 0.625rem !important;
     padding: 0.125rem 0.375rem !important;
   }
-  
+
   .landscape-mobile-hints-chevron {
     width: 0.75rem !important;
     height: 0.75rem !important;
   }
-  
+
   .landscape-mobile-hints-content {
     padding: 0.375rem 0.5rem 0.375rem 0.5rem !important;
   }
-  
+
   .landscape-mobile-hints-text {
     font-size: 0.75rem !important;
     margin-top: 0.25rem !important;
   }
-  
+
   /* Sidebar card sizes */
   .landscape-mobile-left-sidebar .card,
   .landscape-mobile-right-sidebar .card {
     width: 40px !important;
-    height: 56px !important; /* 5:7 ratio */
+    height: 56px !important;
+    /* 5:7 ratio */
     font-size: 0.75rem !important;
   }
-  
+
   .landscape-mobile-left-sidebar .stock-pile,
   .landscape-mobile-left-sidebar .waste-pile,
   .landscape-mobile-right-sidebar .foundation-pile {
     width: 40px !important;
     height: 56px !important;
   }
-  
+
   .landscape-mobile-left-sidebar .card span,
   .landscape-mobile-right-sidebar .card span {
     font-size: 1.3rem !important;
   }
-  
+
   .landscape-mobile-left-sidebar .card .opacity-25,
   .landscape-mobile-right-sidebar .card .opacity-25 {
     font-size: 1rem !important;
     width: 1rem !important;
     height: 1rem !important;
   }
-  
+
   .foundation-pile .text-xs {
     display: none !important;
   }
@@ -967,18 +983,44 @@ body {
 
 /* Responsive Bottom Padding - Fixed scrolling issues */
 .pb-bottom-responsive {
-  padding-bottom: 2rem; /* Minimal padding for mobile */
+  padding-bottom: 2rem;
+  /* Minimal padding for mobile */
 }
 
 @media (min-width: 768px) {
   .pb-bottom-responsive {
-    padding-bottom: 6rem; /* Reduced from 8rem to prevent scrolling */
+    padding-bottom: 6rem;
+    /* Reduced from 8rem to prevent scrolling */
   }
 }
 
-/* Card Drop Zone Styling - Keep logic but hide visual */
+/* Card Drop Zone Styling - Subtle preview effects */
 .drop-zone {
-  /* Drop zone effects are now hidden but logic remains intact */
+  position: relative;
+  animation: dropZonePulse 1s ease-in-out infinite;
+}
+
+.drop-zone::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px dashed rgba(16, 185, 129, 0.6);
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.05);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes dropZonePulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
 }
 
 /* Fix mouse scroll focus outline and prevent yellow borders */
@@ -1028,20 +1070,47 @@ div:focus {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes bounceIn {
-  0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
-  50% { transform: scale(1.05) rotate(2deg); }
-  70% { transform: scale(0.9) rotate(-1deg); }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  0% {
+    transform: scale(0.3) rotate(-10deg);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.05) rotate(2deg);
+  }
+
+  70% {
+    transform: scale(0.9) rotate(-1deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 @keyframes celebration-pulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-  50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
 }
 
 /* Loading State */
@@ -1050,22 +1119,6 @@ div:focus {
   pointer-events: none;
 }
 
-/* Ensure consistent spacing between game sections */
-.card-playing-area > .flex {
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .card-playing-area > .flex {
-    gap: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .card-playing-area > .flex {
-    gap: 2rem;
-  }
-}
 
 /* =================================================================
    STOCK PILE ANIMATIONS & INTERACTIONS
@@ -1084,14 +1137,17 @@ div:focus {
 }
 
 @keyframes recycleGlow {
-  0%, 100% {
-    box-shadow: 
+
+  0%,
+  100% {
+    box-shadow:
       0 8px 24px rgba(0, 0, 0, 0.35),
       0 4px 8px rgba(0, 0, 0, 0.2),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
+
   50% {
-    box-shadow: 
+    box-shadow:
       0 12px 32px rgba(16, 185, 129, 0.4),
       0 6px 12px rgba(16, 185, 129, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -1112,6 +1168,7 @@ div:focus {
     transform: translateX(0) scale(1);
     opacity: 1;
   }
+
   100% {
     transform: translateX(70px) scale(1);
     opacity: 0;
@@ -1123,6 +1180,7 @@ div:focus {
     transform: translateX(-70px) scale(0.9);
     opacity: 0;
   }
+
   100% {
     transform: translateX(0) scale(1);
     opacity: 1;
@@ -1139,6 +1197,7 @@ div:focus {
     transform: translateX(0) scale(1);
     opacity: 1;
   }
+
   100% {
     transform: translateX(-70px) scale(1);
     opacity: 0;
@@ -1167,13 +1226,103 @@ div:focus {
     transform: scale(1) rotate(5deg);
     opacity: 0.8;
   }
+
   50% {
     transform: scale(1.1) rotate(-5deg);
     opacity: 0.9;
   }
+
   100% {
     transform: scale(1) rotate(0deg);
     opacity: 1;
+  }
+}
+
+/* =================================================================
+   CARD FLIP ANIMATIONS
+   ================================================================= */
+
+.card-flip-container {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+
+.card-flip {
+  animation: flipCard 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center;
+}
+
+.card-flip-to-face-up {
+  animation: flipToFaceUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-flip-to-face-down {
+  animation: flipToFaceDown 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes flipCard {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotateY(90deg) scale(1.05);
+  }
+
+  100% {
+    transform: rotateY(180deg) scale(1);
+  }
+}
+
+@keyframes flipToFaceUp {
+  0% {
+    transform: rotateY(180deg) scale(1);
+  }
+
+  50% {
+    transform: rotateY(90deg) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  100% {
+    transform: rotateY(0deg) scale(1);
+  }
+}
+
+@keyframes flipToFaceDown {
+  0% {
+    transform: rotateY(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotateY(90deg) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  100% {
+    transform: rotateY(180deg) scale(1);
+  }
+}
+
+/* Card reveal animation for newly dealt cards */
+.card-reveal {
+  animation: cardReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) rotateY(180deg) scale(0.8);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: translateY(10px) rotateY(90deg) scale(1.1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateY(0deg) scale(1);
   }
 }
 
@@ -1183,22 +1332,48 @@ div:focus {
 
 .card.playable {
   animation: subtle-glow 2s ease-in-out infinite;
+  position: relative;
+}
+
+.card.playable::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid rgba(59, 130, 246, 0.4);
+  border-radius: 10px;
+  pointer-events: none;
+  animation: playableGlow 2s ease-in-out infinite;
 }
 
 @keyframes subtle-glow {
-  0%, 100% { 
-    box-shadow: 
+
+  0%,
+  100% {
+    box-shadow:
       0 8px 20px rgba(0, 0, 0, 0.3),
       0 3px 6px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 0 0 2px rgba(59, 130, 246, 0.3);
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
+
   50% {
-    box-shadow: 
+    box-shadow:
       0 12px 30px rgba(0, 0, 0, 0.4),
       0 6px 12px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      0 0 0 2px rgba(59, 130, 246, 0.6);
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+}
+
+@keyframes playableGlow {
+
+  0%,
+  100% {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.2);
+  }
+
+  50% {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.3);
   }
 }
 
@@ -1206,13 +1381,37 @@ div:focus {
   animation: cardLand 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
+/* Enhanced card placement animation */
+.card-place {
+  animation: cardPlace 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes cardPlace {
+  0% {
+    transform: translateY(-10px) scale(1.05) rotate(2deg);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translateY(2px) scale(0.98) rotate(-1deg);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
 @keyframes cardLand {
   0% {
     transform: translateY(-20px) scale(1.1);
   }
+
   60% {
     transform: translateY(5px) scale(0.95);
   }
+
   100% {
     transform: translateY(0) scale(1);
   }
@@ -1231,26 +1430,32 @@ div:focus {
     transform: scale(1) rotate(0deg) translateY(0);
     opacity: 1;
   }
+
   15% {
     transform: scale(1.1) rotate(5deg) translateY(-10px);
     opacity: 0.9;
   }
+
   30% {
     transform: scale(0.9) rotate(-5deg) translateY(10px);
     opacity: 0.7;
   }
+
   45% {
     transform: scale(1.05) rotate(3deg) translateY(-5px);
     opacity: 0.8;
   }
+
   60% {
     transform: scale(0.95) rotate(-2deg) translateY(8px);
     opacity: 0.6;
   }
+
   80% {
     transform: scale(1.02) rotate(1deg) translateY(-3px);
     opacity: 0.9;
   }
+
   100% {
     transform: scale(1) rotate(0deg) translateY(0);
     opacity: 1;
@@ -1266,10 +1471,12 @@ div:focus {
     opacity: 0;
     transform: translateY(-30px) rotate(-10deg) scale(0.8);
   }
+
   60% {
     opacity: 0.8;
     transform: translateY(5px) rotate(2deg) scale(1.05);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) rotate(0deg) scale(1);
@@ -1285,9 +1492,26 @@ div:focus {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
-  20%, 40%, 60%, 80% { transform: translateX(3px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-3px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(3px);
+  }
 }
 
 /* =================================================================
@@ -1295,23 +1519,88 @@ div:focus {
    ================================================================= */
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
-  .card, .stock-pile, .waste-pile, .foundation-pile {
+
+  .card,
+  .stock-pile,
+  .waste-pile,
+  .foundation-pile {
     transition: none !important;
     animation: none !important;
   }
 }
 
 /* Global animation performance improvements */
-button, .button, [role="button"] {
+button,
+.button,
+[role="button"] {
   will-change: transform, box-shadow;
   backface-visibility: hidden;
   transform: translateZ(0);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =================================================================
+   CONSISTENT 8PX GRID SPACING SYSTEM
+   ================================================================= */
+
+/* Apply consistent spacing throughout the game */
+.card-playing-area {
+  gap: 16px;
+  /* 2 * 8px */
+}
+
+.card-playing-area>.flex {
+  gap: 16px;
+  /* 2 * 8px */
+}
+
+@media (min-width: 768px) {
+  .card-playing-area>.flex {
+    gap: 24px;
+    /* 3 * 8px */
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-playing-area>.flex {
+    gap: 32px;
+    /* 4 * 8px */
+  }
+}
+
+/* Foundation pile improvements for better visual hierarchy */
+.foundation-pile {
+  padding: 8px;
+}
+
+/* Consistent border radius across components */
+.card,
+.stock-pile,
+.waste-pile,
+.foundation-pile {
+  border-radius: 8px;
+}
+
+/* Enhanced shadow system for depth */
+.card {
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 8px 16px rgba(0, 0, 0, 0.1),
+    0 16px 24px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover:not(.stock-pile .card):not(.waste-pile .card) {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    0 16px 32px rgba(0, 0, 0, 0.15),
+    0 24px 48px rgba(0, 0, 0, 0.1);
 }
