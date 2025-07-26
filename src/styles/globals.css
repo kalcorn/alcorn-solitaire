@@ -360,7 +360,7 @@ body {
 
 .tableau-pile {
   max-width: 52px;
-  height: 350px;
+  /*height: 350px;*/
 }
 
 .tableau-card-position {
@@ -430,7 +430,7 @@ body {
 
   .tableau-pile {
     max-width: 65px;
-    height: 420px;
+    /*height: 420px;*/
   }
 
   .tableau-card-position {
@@ -492,7 +492,7 @@ body {
 
   .tableau-pile {
     max-width: 85px;
-    height: 520px;
+    /*height: 520px;*/
   }
 
   .tableau-card-position {
@@ -504,8 +504,8 @@ body {
   .foundation-pile,
   .stock-pile-responsive,
   .waste-pile-responsive {
-    width: 85px;
-    height: 119px;
+    /*width: 85px;*/
+    /*height: 119px;*/
   }
 
   .tableau-container {
@@ -758,27 +758,26 @@ body {
     flex-direction: row !important;
     align-items: flex-start !important;
     gap: 1rem !important;
-    margin-top: 1rem !important;
-    padding-top: 0.5rem !important;
+    margin-top: 0rem !important;
+    padding-top: 0rem !important;
   }
 
   .landscape-mobile-left-sidebar {
-    /*position: fixed;
-    left: 1rem;
-    top: 6rem;
-    z-index: 20;*/
+    height: calc(100vh - 80px) !important; /* Full height minus header */
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .landscape-mobile-right-sidebar {
-    /*position: fixed;
-    right: 1rem;
-    top: 6rem;
-    z-index: 20;*/
+    height: calc(100vh - 80px) !important; /* Full height minus header */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .landscape-mobile-tableau {
     flex: 1;
-    padding: 0 6rem;
+    padding: 1rem 2.5rem;
     /* Space for sidebars */
   }
 
@@ -801,7 +800,7 @@ body {
 
   .landscape-mobile-tableau .tableau-pile {
     max-width: 60px !important;
-    height: 380px !important;
+    /*height: 380px !important;*/
   }
 
   .landscape-mobile-tableau .tableau-card-position {
@@ -828,10 +827,41 @@ body {
     height: 2.8rem !important;
   }
 
-  /* Header optimizations for landscape mobile */
+  /* Header optimizations for landscape mobile - minimal padding */
   .landscape-mobile-header {
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
+    padding-top: 0rem !important;
+    padding-bottom: 0rem !important;
+  }
+
+  /* Reduce header element sizes to match stats bar height */
+  .landscape-mobile-logo {
+    height: 24px !important;
+    width: auto !important;
+  }
+
+  .landscape-mobile-title h1 {
+    font-size: 1.25rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .landscape-mobile-new-game {
+    font-size: 0.875rem !important;
+    padding: 0.375rem 0.75rem !important;
+    min-height: 32px !important;
+  }
+
+  /* Reduce settings button size in landscape mobile */
+  button[title="Game Settings"] {
+    /*padding: 0.375rem 0.75rem !important;*/
+    
+  }
+  
+  button[title="Game Settings"] .w-5,
+  button[title="Game Settings"] .h-5,
+  button[title="Game Settings"] .sm\\:w-6,
+  button[title="Game Settings"] .sm\\:h-6 {
+    width: 1rem !important;
+    height: 1rem !important;
   }
 
   .landscape-mobile-single-line {
@@ -948,36 +978,72 @@ body {
     margin-top: 0.25rem !important;
   }
 
-  /* Sidebar card sizes */
+  /* Sidebar card sizes - match tableau cards */
   .landscape-mobile-left-sidebar .card,
   .landscape-mobile-right-sidebar .card {
-    width: 40px !important;
-    height: 56px !important;
-    /* 5:7 ratio */
-    font-size: 0.75rem !important;
+    width: 60px !important;
+    height: 84px !important;
+    /* 5:7 ratio - matches tableau */
+    font-size: 0.9rem !important;
   }
 
   .landscape-mobile-left-sidebar .stock-pile,
   .landscape-mobile-left-sidebar .waste-pile,
   .landscape-mobile-right-sidebar .foundation-pile {
-    width: 40px !important;
-    height: 56px !important;
+    width: 60px !important;
+    height: 84px !important;
   }
 
   .landscape-mobile-left-sidebar .card span,
   .landscape-mobile-right-sidebar .card span {
-    font-size: 1.3rem !important;
+    font-size: 1.6rem !important;
   }
 
   .landscape-mobile-left-sidebar .card .opacity-25,
   .landscape-mobile-right-sidebar .card .opacity-25 {
-    font-size: 1rem !important;
-    width: 1rem !important;
-    height: 1rem !important;
+    font-size: 2.8rem !important;
+    width: 2.8rem !important;
+    height: 2.8rem !important;
+  }
+
+  /* Foundation piles 2x2 grid layout */
+  .landscape-mobile-right-sidebar {
+    display: grid !important;
+    grid-template-columns: repeat(2, 60px) !important;
+    grid-template-rows: repeat(2, 84px) !important;
+    gap: 0.5rem !important;
+    width: fit-content !important;
+    /*max-width: 131px !important; /* 2 cards + gap */
+    /*max-height: 172px !important; /* 2 cards + gap */
+    overflow: visible !important;
+  }
+
+  .landscape-mobile-right-sidebar > div {
+    width: 60px !important;
+    height: 84px !important;
+    overflow: visible !important;
   }
 
   .foundation-pile .text-xs {
     display: none !important;
+  }
+
+  /* Center undo button in landscape mobile */
+  .landscape-mobile-undo-button {
+    position: fixed !important;
+    bottom: 0.5rem !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 50 !important;
+  }
+
+  /* Override undo button container positioning in landscape mobile */
+  div:has(.landscape-mobile-undo-button) {
+    position: static !important;
+    transform: none !important;
+    left: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
   }
 }
 

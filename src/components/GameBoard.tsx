@@ -286,16 +286,16 @@ const GameBoard: React.FC = () => {
         onSettingsChange={updateSettings}
       />
       <div 
-        className={` w-full flex flex-col items-center bg-transparent ${!isClient ? 'hydration-loading' : ''}`}
+        className={` w-full flex grow flex-col items-center bg-transparent ${!isClient ? 'hydration-loading' : ''}`}
         role="main"
         aria-label="Solitaire game board"
       >
-        <div className="w-full max-w-7xl mx-auto px-1 sm:px-4 md:px-6 lg:px-0">
-          <div className="card-playing-area flex flex-col gap-3 w-full pt-6 md:pt-8 lg:pt-10 pb-bottom-responsive">
+        <div className="w-full flex grow max-w-7xl mx-auto">
+          <div className="card-playing-area flex flex-col grow gap-3 w-full pt-6 md:pt-8 lg:pt-10">
 
             {/* Landscape Mobile: Left Side Piles (Stock, Waste) */}
-            <div className="landscape-mobile-left-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 rounded-xl p-4 shadow-lg border border-green-700 border-opacity-30">
-              <div className="flex flex-col gap-2">
+            <div className="landscape-mobile-left-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 p-3 shadow-lg border border-green-700 border-opacity-30">
+              <div className="flex flex-col">
                 <StockPile 
                   cards={gameState.stockPile} 
                   onClick={handleAnimatedStockFlip}
@@ -444,8 +444,7 @@ const GameBoard: React.FC = () => {
             </div>
 
             {/* Landscape Mobile: Right Side Foundation Piles */}
-            <div className="landscape-mobile-right-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 rounded-xl p-4 shadow-lg border border-green-700 border-opacity-30">
-              <div className="flex flex-col gap-2">
+            <div className="landscape-mobile-right-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 p-4 shadow-lg border border-green-700 border-opacity-30">
                 {[0, 1, 2, 3].map(i => (
                   <div
                     key={i}
@@ -477,7 +476,6 @@ const GameBoard: React.FC = () => {
                     />
                   </div>
                 ))}
-              </div>
             </div>
 
             {/* Tableau Section - Standard Tableau for Desktop/Portrait Mobile */}

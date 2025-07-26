@@ -42,17 +42,17 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="text-sm sm:text-base font-mono font-bold text-white bg-slate-800 rounded-lg px-4 py-3 border border-slate-600 shadow-lg hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+        className="text-sm sm:text-lg font-mono font-bold text-white bg-slate-800 rounded-lg px-4 py-3 border border-slate-600 shadow-lg hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
         title="Game Settings"
       >
-        <div className="flex items-center justify-center" style={{ minHeight: '36px' }}>
-          <BsGear className="w-5 h-5 sm:w-6 sm:h-6" />
+        <div className="flex items-center justify-center">
+          { <BsGear className="w-5 h-5 sm:w-6 sm:h-6" />  }
         </div>
       </button>
 
       {/* Settings Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4 shadow-2xl border border-slate-600">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
