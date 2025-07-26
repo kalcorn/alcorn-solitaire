@@ -17,7 +17,6 @@ export function saveSettings(settings: GameState['settings']): void {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   } catch (error) {
-    console.warn('Failed to save settings to localStorage:', error);
   }
 }
 
@@ -33,7 +32,6 @@ export function loadSettings(): GameState['settings'] | null {
       return JSON.parse(saved);
     }
   } catch (error) {
-    console.warn('Failed to load settings from localStorage:', error);
   }
   
   return null;
@@ -66,7 +64,6 @@ export function saveGameState(gameState: GameState): void {
     
     localStorage.setItem(GAME_STATE_KEY, JSON.stringify(stateToSave));
   } catch (error) {
-    console.warn('Failed to save game state to localStorage:', error);
   }
 }
 
@@ -92,7 +89,6 @@ export function loadGameState(): Partial<GameState> | null {
       return parsed;
     }
   } catch (error) {
-    console.warn('Failed to load game state from localStorage:', error);
   }
   
   return null;
@@ -107,7 +103,6 @@ export function clearGameState(): void {
   try {
     localStorage.removeItem(GAME_STATE_KEY);
   } catch (error) {
-    console.warn('Failed to clear game state from localStorage:', error);
   }
 }
 
@@ -121,6 +116,5 @@ export function clearAllSavedData(): void {
     localStorage.removeItem(SETTINGS_KEY);
     localStorage.removeItem(GAME_STATE_KEY);
   } catch (error) {
-    console.warn('Failed to clear all saved data from localStorage:', error);
   }
 }

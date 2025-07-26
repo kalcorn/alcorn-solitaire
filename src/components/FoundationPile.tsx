@@ -15,7 +15,7 @@ interface FoundationPileProps {
 const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardClick, onCardDragStart, isDropZone, isCardBeingDragged }) => {
   const suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades'];
   const suitIcons = [BsSuitHeartFill, BsSuitDiamondFill, BsSuitClubFill, BsSuitSpadeFill];
-  const suitColors = ['text-red-500', 'text-red-500', 'text-gray-800', 'text-gray-800'];
+  const suitColors = ['text-red-500', 'text-red-500', 'text-gray-100', 'text-gray-100'];
   const topCard = cards.length > 0 ? cards[cards.length - 1] : null;
   
   return (
@@ -25,7 +25,7 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
       aria-label={`${suits[index]} suit pile`}
     >
       {/* Always show suit icon/text as background */}
-      <div className={`flex flex-col items-center justify-center h-full absolute inset-0 ${cards.length > 0 ? 'opacity-15' : 'opacity-40'}`}>
+      <div className={`flex flex-col items-center justify-center h-full absolute inset-0 ${cards.length > 0 ? 'opacity-15 md:opacity-15' : 'opacity-60 md:opacity-40'}`}>
         {React.createElement(suitIcons[index], { 
           className: `text-2xl lg:text-4xl ${suitColors[index]} mb-1 md:mb-2 lg:mb-3` 
         })}

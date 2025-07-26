@@ -22,17 +22,26 @@ export function createDeck(): Card[] {
   return deck;
 }
 
+// Simple seedable PRNG (Mulberry32)
+function mulberry32(seed: number) {
+  return function() {
+    let t = seed += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
 /**
- * Fisher-Yates shuffle algorithm for unbiased random shuffling
+ * Shuffles a deck using a seedable PRNG for deterministic results
  */
-export function shuffleDeck(deck: Card[]): Card[] {
+export function shuffleDeck(deck: Card[], seed: number = 42): Card[] {
   const shuffled = [...deck];
-  
+  const random = mulberry32(seed);
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  
   return shuffled;
 }
 
@@ -41,40 +50,33 @@ export function shuffleDeck(deck: Card[]): Card[] {
  * - 7 tableau piles with 1,2,3,4,5,6,7 cards respectively
  * - Top card of each pile is face up
  * - Remaining cards go to stock pile
+ * Accepts a seed for deterministic shuffling
  */
-export function dealInitialCards(): {
+export function dealInitialCards(seed: number = 42): {
   tableauPiles: Card[][];
   stockPile: Card[];
   foundationPiles: Card[][];
   wastePile: Card[];
 } {
-  const deck = shuffleDeck(createDeck());
+  const deck = shuffleDeck(createDeck(), seed);
   const tableauPiles: Card[][] = [[], [], [], [], [], [], []];
   let cardIndex = 0;
-
-  // Deal tableau piles (1, 2, 3, 4, 5, 6, 7 cards)
   for (let pile = 0; pile < 7; pile++) {
     for (let card = 0; card <= pile; card++) {
       const currentCard = { ...deck[cardIndex] };
-      // Only the top card (last dealt) should be face up
       currentCard.faceUp = card === pile;
       currentCard.draggable = currentCard.faceUp;
       tableauPiles[pile].push(currentCard);
       cardIndex++;
     }
   }
-
-  // Remaining cards go to stock pile
   const stockPile = deck.slice(cardIndex).map(card => ({
     ...card,
     faceUp: false,
     draggable: false
   }));
-
-  // Initialize empty foundation and waste piles
   const foundationPiles: Card[][] = [[], [], [], []];
   const wastePile: Card[] = [];
-
   return {
     tableauPiles,
     stockPile,
@@ -84,11 +86,10 @@ export function dealInitialCards(): {
 }
 
 /**
- * Creates initial game state
+ * Creates initial game state with deterministic seed
  */
-export function createInitialGameState(): GameState {
-  const { tableauPiles, stockPile, foundationPiles, wastePile } = dealInitialCards();
-  
+export function createInitialGameState(seed: number = 42): GameState {
+  const { tableauPiles, stockPile, foundationPiles, wastePile } = dealInitialCards(seed);
   return {
     tableauPiles,
     foundationPiles,

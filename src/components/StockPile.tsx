@@ -6,12 +6,11 @@ interface StockPileProps {
   onClick?: () => void;
   cyclesRemaining?: number;
   canCycle?: boolean;
-  isAnimating?: boolean;
   wasteCardCount?: number;
   isShuffling?: boolean;
 }
 
-const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, canCycle = true, isAnimating = false, wasteCardCount = 0, isShuffling = false }) => {
+const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, canCycle = true, wasteCardCount = 0, isShuffling = false }) => {
   const isRecycleAvailable = cards.length === 0 && wasteCardCount > 0 && canCycle;
   
   return (
@@ -31,12 +30,16 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
         }} 
       />
     ))}
-    {/* Top card - maintain cards during animation */}
-    {(cards.length > 0 || isAnimating) ? (
+    {/* Top card */}
+    {cards.length > 0 ? (
       <div
         className={`card face-down ${
-          canCycle && !isAnimating ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+          canCycle ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
         } ${isShuffling ? 'stock-shuffle-cascade' : ''}`}
+        role="button"
+        tabIndex={canCycle ? 0 : -1}
+        aria-label={`Stock pile with ${cards.length} cards. Click to deal cards to waste pile.`}
+        aria-disabled={!canCycle}
         style={{ 
           position: 'absolute', 
           top: 0, 
@@ -44,7 +47,7 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
           zIndex: 10,
           animationDelay: isShuffling ? '0.4s' : '0s'
         }}
-        onClick={canCycle && !isAnimating ? onClick : undefined}
+        onClick={canCycle ? onClick : undefined}
         title={canCycle ? "Stock pile" : "No more cycles allowed"}
       />
     ) : (
@@ -54,6 +57,10 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
         } ${
           canCycle ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'
         }`}
+        role="button"
+        tabIndex={canCycle ? 0 : -1}
+        aria-label={isRecycleAvailable ? "Empty stock pile. Click to recycle waste cards." : "Empty stock pile"}
+        aria-disabled={!canCycle}
         style={{ position: 'absolute', top: 0, left: 0, zIndex: 10 }}
         onClick={canCycle ? onClick : undefined}
         title={canCycle ? "Click to recycle" : "No more cycles allowed"}

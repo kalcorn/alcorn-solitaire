@@ -14,8 +14,20 @@ interface HeaderProps {
 }
 
 const formatTime = (seconds: number) => {
-  const mins = Math.floor(seconds / 60);
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
+  
+  if (hours > 0) {
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    
+    if (days > 0) {
+      return `${days}d ${remainingHours}h ${mins}m`;
+    }
+    return `${hours}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  }
+  
   return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
@@ -43,7 +55,8 @@ const Header: React.FC<HeaderProps> = ({
           {/* Portrait Mobile + Button */}
           <button
             onClick={onNewGame}
-            className="w-10 h-10 text-xl font-bold text-white bg-emerald-700 rounded-lg border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center flex-shrink-0 shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            className="px-4 py-3 text-xl font-bold text-white bg-emerald-700 rounded-lg border border-emerald-600 hover:bg-emerald-800 hover:border-emerald-700 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center flex-shrink-0 shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            style={{ minHeight: '36px' }}
             title="New game"
             aria-label="Start a new game"
           >

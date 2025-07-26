@@ -54,13 +54,11 @@ export function useDragAndDrop() {
 
     const cardElement = event.currentTarget as HTMLElement;
     if (!cardElement) {
-      console.warn('Card element not found for drag operation');
       return;
     }
     
     const rect = cardElement.getBoundingClientRect();
     if (!rect) {
-      console.warn('Could not get bounding rect for card element');
       return;
     }
     
@@ -286,10 +284,32 @@ export function useDragAndDrop() {
     const rotation = hoveredZone ? '2deg' : '3deg';
     const opacity = hoveredZone ? 0.95 : 0.85;
 
-    // Responsive card dimensions for mobile
+    // Responsive card dimensions for different layouts
     const isMobile = window.innerWidth <= 768;
-    const cardWidth = isMobile ? (window.innerWidth <= 480 ? 76 : 44) : 128;
-    const cardHeight = isMobile ? (window.innerWidth <= 480 ? 110 : 62) : 184;
+    const isLandscape = window.innerWidth > window.innerHeight;
+    const isLandscapeMobile = isMobile && isLandscape;
+    
+    let cardWidth: number;
+    let cardHeight: number;
+    
+    if (isLandscapeMobile) {
+      // Landscape mobile: Check if card is from sidebar or tableau
+      const isLandscapeActive = document.querySelector('.landscape-mobile-left-sidebar')?.checkVisibility();
+      if (isLandscapeActive) {
+        // Use tableau card size for drag preview in landscape mobile
+        cardWidth = 60;  // Matches .landscape-mobile-tableau .card width
+        cardHeight = 84; // Matches .landscape-mobile-tableau .card height
+      } else {
+        cardWidth = 44;
+        cardHeight = 62;
+      }
+    } else if (isMobile) {
+      cardWidth = window.innerWidth <= 480 ? 76 : 44;
+      cardHeight = window.innerWidth <= 480 ? 110 : 62;
+    } else {
+      cardWidth = 128;
+      cardHeight = 184;
+    }
 
     return {
       position: 'fixed' as const,

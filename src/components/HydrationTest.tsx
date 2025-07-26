@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react';
+import { useIsClient } from '@/utils/hydrationUtils';
 
 /**
  * Component to test and verify proper hydration
  * This component should not cause any hydration mismatches
  */
 export const HydrationTest: React.FC = () => {
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useIsClient();
   const [timestamp, setTimestamp] = useState<number | null>(null);
   const [randomValue, setRandomValue] = useState<number | null>(null);
   const [documentTitle, setDocumentTitle] = useState<string>('');
 
   useEffect(() => {
-    // Mark as client-side
-    setIsClient(true);
-    
-    // Safe client-only operations
-    setTimestamp(Date.now());
-    setRandomValue(Math.random());
-    
-    if (typeof document !== 'undefined') {
-      setDocumentTitle(document.title);
+    if (isClient) {
+      setTimestamp(Date.now());
+      setRandomValue(Math.random());
+      if (typeof document !== 'undefined') {
+        setDocumentTitle(document.title);
+      }
     }
-  }, []);
+  }, [isClient]);
 
   // During SSR and initial render, show consistent content
   if (!isClient) {

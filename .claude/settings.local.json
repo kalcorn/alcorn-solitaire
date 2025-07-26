@@ -10,7 +10,16 @@
       "Bash(ls:*)",
       "Bash(npm run dev:*)",
       "Bash(pkill:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(dir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run lint)",
+      "Bash(npx next lint:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm test)"
     ],
     "deny": []
   }

@@ -33,128 +33,133 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
     return suit.charAt(0).toUpperCase() + suit.slice(1);
   };
 
-  // Generate hints based on game state
-  useEffect(() => {
-    const generateHints = (): Hint[] => {
-      const hints: Hint[] = [];
-      let hintId = 0;
+  /**
+   * Generates a prioritized list of hints for the current game state.
+   * Hints include moves for Aces, foundation building, revealing hidden cards, moving Kings, and flipping stock.
+   * @returns {Hint[]} Array of hint objects sorted by priority.
+   */
+  const generateHints = (): Hint[] => {
+    const hints: Hint[] = [];
+    let hintId = 0;
 
-      // Check for Aces that can go to foundation
-      gameState.tableauPiles.forEach((pile, pileIndex) => {
-        if (pile.length > 0) {
-          const topCard = pile[pile.length - 1];
-          if (topCard.faceUp && topCard.rank === 1) {
-            const foundationIndex = gameState.foundationPiles.findIndex(fp => fp.length === 0);
-            if (foundationIndex !== -1) {
-              hints.push({
-                id: `hint-${hintId++}`,
-                message: `Move ${getRankName(topCard.rank)} of ${getSuitName(topCard.suit)} to suit pile`,
-                priority: 10
-              });
-            }
-          }
-        }
-      });
-
-      // Check waste pile for Aces
-      if (gameState.wastePile.length > 0) {
-        const wasteCard = gameState.wastePile[gameState.wastePile.length - 1];
-        if (wasteCard.rank === 1) {
+    // 1. Check for Aces that can go to foundation
+    gameState.tableauPiles.forEach((pile, pileIndex) => {
+      if (pile.length > 0) {
+        const topCard = pile[pile.length - 1];
+        if (topCard.faceUp && topCard.rank === 1) {
           const foundationIndex = gameState.foundationPiles.findIndex(fp => fp.length === 0);
           if (foundationIndex !== -1) {
             hints.push({
               id: `hint-${hintId++}`,
-              message: `Move ${getRankName(wasteCard.rank)} of ${getSuitName(wasteCard.suit)} from waste to suit pile`,
-              priority: 9
+              message: `Move ${getRankName(topCard.rank)} of ${getSuitName(topCard.suit)} to suit pile`,
+              priority: 10
             });
           }
         }
       }
+    });
 
-      // Check for foundation building opportunities
-      if (gameState.wastePile.length > 0) {
-        const wasteCard = gameState.wastePile[gameState.wastePile.length - 1];
-        gameState.foundationPiles.forEach((foundationPile, foundationIndex) => {
-          if (foundationPile.length > 0) {
-            const topFoundationCard = foundationPile[foundationPile.length - 1];
-            if (wasteCard.suit === topFoundationCard.suit && wasteCard.rank === topFoundationCard.rank + 1) {
-              hints.push({
-                id: `hint-${hintId++}`,
-                message: `Build suit pile with ${getRankName(wasteCard.rank)} of ${getSuitName(wasteCard.suit)}`,
-                priority: 8
-              });
-            }
-          }
-        });
+    // 2. Check waste pile for Aces
+    if (gameState.wastePile.length > 0) {
+      const wasteCard = gameState.wastePile[gameState.wastePile.length - 1];
+      if (wasteCard.rank === 1) {
+        const foundationIndex = gameState.foundationPiles.findIndex(fp => fp.length === 0);
+        if (foundationIndex !== -1) {
+          hints.push({
+            id: `hint-${hintId++}`,
+            message: `Move ${getRankName(wasteCard.rank)} of ${getSuitName(wasteCard.suit)} from waste to suit pile`,
+            priority: 9
+          });
+        }
       }
+    }
 
-      // Check for moves that reveal hidden cards
-      gameState.tableauPiles.forEach((pile, pileIndex) => {
-        if (pile.length > 1) {
-          const topCard = pile[pile.length - 1];
-          if (topCard.faceUp && pile.length > 1 && !pile[pile.length - 2].faceUp) {
-            // Check if this card can be moved somewhere
-            gameState.tableauPiles.forEach((targetPile, targetIndex) => {
-              if (targetIndex !== pileIndex && targetPile.length > 0) {
-                const targetTop = targetPile[targetPile.length - 1];
-                if (targetTop.faceUp && 
-                    topCard.rank === targetTop.rank - 1 && 
-                    ((topCard.suit === 'hearts' || topCard.suit === 'diamonds') !== 
-                     (targetTop.suit === 'hearts' || targetTop.suit === 'diamonds'))) {
-                  hints.push({
-                    id: `hint-${hintId++}`,
-                    message: `Move ${getRankName(topCard.rank)} of ${getSuitName(topCard.suit)} to reveal hidden card`,
-                    priority: 7
-                  });
-                }
-              }
+    // 3. Check for foundation building opportunities
+    if (gameState.wastePile.length > 0) {
+      const wasteCard = gameState.wastePile[gameState.wastePile.length - 1];
+      gameState.foundationPiles.forEach((foundationPile, foundationIndex) => {
+        if (foundationPile.length > 0) {
+          const topFoundationCard = foundationPile[foundationPile.length - 1];
+          if (wasteCard.suit === topFoundationCard.suit && wasteCard.rank === topFoundationCard.rank + 1) {
+            hints.push({
+              id: `hint-${hintId++}`,
+              message: `Build suit pile with ${getRankName(wasteCard.rank)} of ${getSuitName(wasteCard.suit)}`,
+              priority: 8
             });
           }
         }
       });
+    }
 
-      // Check for Kings in empty spaces
-      const emptyTableauPiles = gameState.tableauPiles.map((pile, index) => pile.length === 0 ? index : -1).filter(i => i !== -1);
-      if (emptyTableauPiles.length > 0) {
-        // Look for Kings
-        gameState.tableauPiles.forEach((pile, pileIndex) => {
-          if (pile.length > 0) {
-            const topCard = pile[pile.length - 1];
-            if (topCard.faceUp && topCard.rank === 13) {
-              hints.push({
-                id: `hint-${hintId++}`,
-                message: `Move ${getRankName(topCard.rank)} to empty space`,
-                priority: 6
-              });
+    // 4. Check for moves that reveal hidden cards in tableau
+    gameState.tableauPiles.forEach((pile, pileIndex) => {
+      if (pile.length > 1) {
+        const topCard = pile[pile.length - 1];
+        if (topCard.faceUp && pile.length > 1 && !pile[pile.length - 2].faceUp) {
+          // Try to move the top card to another tableau pile
+          gameState.tableauPiles.forEach((targetPile, targetIndex) => {
+            if (targetIndex !== pileIndex && targetPile.length > 0) {
+              const targetTop = targetPile[targetPile.length - 1];
+              if (targetTop.faceUp && 
+                  topCard.rank === targetTop.rank - 1 && 
+                  ((topCard.suit === 'hearts' || topCard.suit === 'diamonds') !== 
+                   (targetTop.suit === 'hearts' || targetTop.suit === 'diamonds'))) {
+                hints.push({
+                  id: `hint-${hintId++}`,
+                  message: `Move ${getRankName(topCard.rank)} of ${getSuitName(topCard.suit)} to reveal hidden card`,
+                  priority: 7
+                });
+              }
             }
-          }
-        });
+          });
+        }
+      }
+    });
 
-        if (gameState.wastePile.length > 0) {
-          const wasteCard = gameState.wastePile[gameState.wastePile.length - 1];
-          if (wasteCard.rank === 13) {
+    // 5. Check for Kings in empty tableau spaces
+    const emptyTableauPiles = gameState.tableauPiles.map((pile, index) => pile.length === 0 ? index : -1).filter(i => i !== -1);
+    if (emptyTableauPiles.length > 0) {
+      // Look for Kings in tableau
+      gameState.tableauPiles.forEach((pile, pileIndex) => {
+        if (pile.length > 0) {
+          const topCard = pile[pile.length - 1];
+          if (topCard.faceUp && topCard.rank === 13) {
             hints.push({
               id: `hint-${hintId++}`,
-              message: `Move ${getRankName(wasteCard.rank)} from waste to empty space`,
+              message: `Move ${getRankName(topCard.rank)} to empty space`,
               priority: 6
             });
           }
         }
+      });
+      // Look for Kings in waste
+      if (gameState.wastePile.length > 0) {
+        const wasteCard = gameState.wastePile[gameState.wastePile.length - 1];
+        if (wasteCard.rank === 13) {
+          hints.push({
+            id: `hint-${hintId++}`,
+            message: `Move ${getRankName(wasteCard.rank)} from waste to empty space`,
+            priority: 6
+          });
+        }
       }
+    }
 
-      // If no specific moves, suggest flipping stock
-      if (hints.length === 0 && gameState.stockPile.length > 0) {
-        hints.push({
-          id: `hint-${hintId++}`,
-          message: `Try flipping cards from the stock pile`,
-          priority: 3
-        });
-      }
+    // 6. If no specific moves, suggest flipping stock
+    if (hints.length === 0 && gameState.stockPile.length > 0) {
+      hints.push({
+        id: `hint-${hintId++}`,
+        message: `Try flipping cards from the stock pile`,
+        priority: 3
+      });
+    }
 
-      // Sort by priority and return top hints
-      return hints.sort((a, b) => b.priority - a.priority).slice(0, 3);
-    };
+    // Sort by priority and return top hints
+    return hints.sort((a, b) => b.priority - a.priority).slice(0, 3);
+  };
 
+  // Generate hints based on game state
+  useEffect(() => {
     const hints = generateHints();
     setCurrentHints(hints);
     setCurrentHintIndex(0);

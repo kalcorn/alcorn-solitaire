@@ -5,47 +5,14 @@ import { validateAndExecuteMove, flipStock, autoMoveToFoundation } from '@/utils
 import { soundManager, playSoundEffect } from '@/utils/soundUtils';
 import { saveSettings, loadSettings, saveGameState, loadGameState, clearGameState } from '@/utils/localStorage';
 import { useUndoRedo } from './useUndoRedo';
+import { useGameTimer } from './useGameTimer';
+import { useGameHydration } from './useGameHydration';
 
 /**
  * Custom hook for managing game state and actions
  */
 export function useGameState() {
-  const [gameState, setGameState] = useState<GameState>(() => {
-    // Return a static, placeholder state for SSR to avoid hydration errors
-    return {
-      tableauPiles: [[], [], [], [], [], [], []],
-      foundationPiles: [[], [], [], []],
-      stockPile: [],
-      wastePile: [],
-      moves: 0,
-      score: 0,
-      isGameWon: false,
-      selectedCards: [],
-      selectedPileType: null,
-      selectedPileIndex: null,
-      stockCycles: 0,
-      settings: {
-        deckCyclingLimit: 0,
-        drawCount: 1,
-        autoMoveToFoundation: false,
-        soundEnabled: true,
-        showHints: false
-      },
-      stats: {
-        gamesPlayed: 0,
-        gamesWon: 0,
-        totalTime: 0,
-        bestTime: 0,
-        currentStreak: 0,
-        longestStreak: 0,
-        averageMoves: 0,
-        totalMoves: 0,
-        lastPlayed: 0
-      },
-      history: [],
-      historyIndex: -1
-    };
-  });
+  const [gameState, setGameState] = useState<GameState>(() => createInitialGameState());
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -53,62 +20,10 @@ export function useGameState() {
   const { saveState, undo } = useUndoRedo(setGameState);
 
   // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (gameStarted && !gameState.isGameWon) {
-      interval = setInterval(() => {
-        setTimeElapsed(prev => prev + 1);
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [gameStarted, gameState.isGameWon]);
+  useGameTimer(gameStarted, gameState.isGameWon, setTimeElapsed);
 
   // Main hydration and state initialization effect
-  useEffect(() => {
-    if (!isHydrated) {
-      const savedSettings = loadSettings();
-      const savedGameState = loadGameState();
-      let initialState: GameState;
-
-      if (savedGameState && !savedGameState.isGameWon) {
-        initialState = {
-          ...createInitialGameState(), // Base structure
-          ...savedGameState, // Overwrite with saved data
-          selectedCards: [],
-          selectedPileType: null,
-          selectedPileIndex: null,
-        };
-        if (savedSettings) {
-          initialState.settings = { ...initialState.settings, ...savedSettings };
-        }
-        if (savedGameState.gameStartTime) {
-          setTimeElapsed(Math.floor((Date.now() - savedGameState.gameStartTime) / 1000));
-        }
-        setGameStarted(true);
-      } else {
-        initialState = createInitialGameState();
-        if (savedSettings) {
-          initialState.settings = { ...initialState.settings, ...savedSettings };
-        }
-        // This is a new game, so save its initial state for undo
-        const historyUpdate = saveState('New game', initialState, [], -1);
-        initialState.history = historyUpdate.history;
-        initialState.historyIndex = historyUpdate.historyIndex;
-        setGameStarted(false);
-        setTimeElapsed(0);
-      }
-
-      setGameState(initialState);
-      setIsHydrated(true);
-
-      if (initialState.settings.soundEnabled !== undefined) {
-        soundManager.setEnabled(initialState.settings.soundEnabled);
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHydrated, saveState]);
+  useGameHydration(isHydrated, setGameState, setTimeElapsed, setGameStarted, setIsHydrated, saveState);
 
   // Auto-save game state
   useEffect(() => {

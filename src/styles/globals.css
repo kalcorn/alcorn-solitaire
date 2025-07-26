@@ -64,27 +64,31 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
   user-select: none;
   display: flex;
-  will-change: transform, box-shadow;
+  /* Only use will-change during animations */
   backface-visibility: hidden;
-  transform: translateZ(0);
-  /* Force hardware acceleration */
   flex-direction: column;
   justify-content: space-between;
   font-weight: 700;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease-out;
   position: relative;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Removed card hover effects for stock/waste piles - they should not move */
+/* Add will-change for interactive cards only */
 .card:hover:not(.stock-pile .card):not(.waste-pile .card) {
+  will-change: transform, box-shadow;
   transform: translateY(-6px) scale(1.02);
   box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.5),
     0 12px 20px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Remove will-change after animation */
+.card:not(:hover) {
+  will-change: auto;
 }
 
 /* Stock and waste pile cards should not have hover effects */
@@ -132,19 +136,61 @@ body {
 .card.face-down {
   width: inherit !important;
   height: inherit !important;
-  background-color: #1a202c;
-  background-image: url('/card-back-pattern.svg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-width: 1px;
-  border-color: #4a5568;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
+  background-size: 200% 200%;
+  animation: subtle-shimmer 8s ease-in-out infinite;
+  border-width: 2px;
+  border-color: #475569;
   color: transparent;
   box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.4),
-    0 3px 6px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 12px 24px rgba(0, 0, 0, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 0 20px rgba(71, 85, 105, 0.3);
   position: relative;
+  overflow: hidden;
+}
+
+.card.face-down::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 30%,
+    transparent 60%
+  );
+  border-radius: 50%;
+}
+
+.card.face-down::after {
+  content: 'A';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.6);
+  text-shadow: 
+    0 0 10px rgba(148, 163, 184, 0.3),
+    0 0 20px rgba(148, 163, 184, 0.1);
+  z-index: 3;
+}
+
+@keyframes subtle-shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* Card back pattern replaces the ::after content */
@@ -197,10 +243,46 @@ body {
 }
 
 .stock-pile.face-down {
-  background-image: url('/card-back-pattern.svg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
+  background-size: 200% 200%;
+  animation: subtle-shimmer 8s ease-in-out infinite;
+  border-width: 2px;
+  border-color: #475569;
+  overflow: hidden;
+  position: relative;
+}
+
+.stock-pile.face-down::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 30%,
+    transparent 60%
+  );
+  border-radius: 50%;
+}
+
+.stock-pile.face-down::after {
+  content: 'A';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.6);
+  text-shadow: 
+    0 0 10px rgba(148, 163, 184, 0.3),
+    0 0 20px rgba(148, 163, 184, 0.1);
+  z-index: 3;
 }
 
 .foundation-pile {
@@ -321,13 +403,6 @@ body {
   height: 2.8rem !important;
 }
 
-.card.face-down::after {
-  font-size: 1.8rem;
-}
-
-.stock-pile.face-down::after {
-  font-size: 1.8rem;
-}
 
 /* Mobile Foundation Piles - Hide text, center symbols */
 .foundation-pile .text-xs {
@@ -389,19 +464,17 @@ body {
     font-size: 1.8rem !important;
   }
 
+  .card.face-down::after,
+  .stock-pile.face-down::after {
+    font-size: 1.8rem;
+  }
+
   .card .opacity-25 {
     font-size: 3.4rem !important;
     width: 3.4rem !important;
     height: 3.4rem !important;
   }
 
-  .card.face-down::after {
-    font-size: 2.1rem;
-  }
-
-  .stock-pile.face-down::after {
-    font-size: 2.1rem;
-  }
 }
 
 /* MEDIUM (md: 768px+) - Increased sizes */
@@ -453,19 +526,17 @@ body {
     font-size: 2rem !important;
   }
 
+  .card.face-down::after,
+  .stock-pile.face-down::after {
+    font-size: 2.4rem;
+  }
+
   .card .opacity-25 {
     font-size: 4.8rem !important;
     width: 4.8rem !important;
     height: 4.8rem !important;
   }
 
-  .card.face-down::after {
-    font-size: 2.8rem;
-  }
-
-  .stock-pile.face-down::after {
-    font-size: 2.8rem;
-  }
 
   /* Show foundation pile text on small screens and up */
   .foundation-pile .text-xs {
@@ -522,19 +593,17 @@ body {
     font-size: 2.2rem !important;
   }
 
+  .card.face-down::after,
+  .stock-pile.face-down::after {
+    font-size: 2.8rem;
+  }
+
   .card .opacity-25 {
     font-size: 5.4rem !important;
     width: 5.4rem !important;
     height: 5.4rem !important;
   }
 
-  .card.face-down::after {
-    font-size: 3.2rem;
-  }
-
-  .stock-pile.face-down::after {
-    font-size: 3.2rem;
-  }
 }
 
 /* EXTRA LARGE (xl: 1280px+) - Viewport optimized */
@@ -588,19 +657,17 @@ body {
     font-size: 2.4rem !important;
   }
 
+  .card.face-down::after,
+  .stock-pile.face-down::after {
+    font-size: 3.2rem;
+  }
+
   .card .opacity-25 {
     font-size: 5.8rem !important;
     width: 5.8rem !important;
     height: 5.8rem !important;
   }
 
-  .card.face-down::after {
-    font-size: 3rem;
-  }
-
-  .stock-pile.face-down::after {
-    font-size: 3rem;
-  }
 }
 
 /* 2X LARGE (2xl: 1536px+) - Maximum viewport optimization */
@@ -654,19 +721,17 @@ body {
     font-size: 2.6rem !important;
   }
 
+  .card.face-down::after,
+  .stock-pile.face-down::after {
+    font-size: 3.6rem;
+  }
+
   .card .opacity-25 {
     font-size: 6.2rem !important;
     width: 6.2rem !important;
     height: 6.2rem !important;
   }
 
-  .card.face-down::after {
-    font-size: 3.4rem;
-  }
-
-  .stock-pile.face-down::after {
-    font-size: 3.4rem;
-  }
 }
 
 /* =================================================================
@@ -722,45 +787,45 @@ body {
     gap: 0.5rem !important;
   }
 
-  /* Increase tableau card sizes for landscape mobile */
+  /* Optimized tableau card sizes for landscape mobile - larger for better visibility */
   .landscape-mobile-tableau .card {
-    width: 48px !important;
-    height: 67px !important;
+    width: 60px !important;
+    height: 84px !important;
     /* 5:7 ratio */
-    font-size: 0.8rem !important;
+    font-size: 0.9rem !important;
   }
 
   .landscape-mobile-tableau .tableau-container {
-    width: 48px !important;
+    width: 60px !important;
   }
 
   .landscape-mobile-tableau .tableau-pile {
-    max-width: 48px !important;
-    height: 320px !important;
+    max-width: 60px !important;
+    height: 380px !important;
   }
 
   .landscape-mobile-tableau .tableau-card-position {
-    top: calc(var(--card-index) * 16px) !important;
+    top: calc(var(--card-index) * 18px) !important;
   }
 
   .landscape-mobile-tableau .tableau-pile .card,
   .landscape-mobile-tableau .tableau-pile .card.face-down {
-    width: 48px !important;
-    height: 67px !important;
-    min-width: 48px !important;
-    max-width: 48px !important;
-    min-height: 67px !important;
-    max-height: 67px !important;
+    width: 60px !important;
+    height: 84px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    min-height: 84px !important;
+    max-height: 84px !important;
   }
 
   .landscape-mobile-tableau .card span {
-    font-size: 1.4rem !important;
+    font-size: 1.6rem !important;
   }
 
   .landscape-mobile-tableau .card .opacity-25 {
-    font-size: 2.4rem !important;
-    width: 2.4rem !important;
-    height: 2.4rem !important;
+    font-size: 2.8rem !important;
+    width: 2.8rem !important;
+    height: 2.8rem !important;
   }
 
   /* Header optimizations for landscape mobile */
@@ -997,18 +1062,12 @@ body {
 /* Card Drop Zone Styling - Subtle preview effects */
 .drop-zone {
   position: relative;
-  animation: dropZonePulse 1s ease-in-out infinite;
+  /* Removed visual effects - functionality remains */
 }
 
 .drop-zone::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border: 2px dashed rgba(16, 185, 129, 0.6);
-  border-radius: 12px;
-  background: rgba(16, 185, 129, 0.05);
-  pointer-events: none;
-  z-index: 1;
+  /* Disabled visual drop zone indicator */
+  display: none;
 }
 
 @keyframes dropZonePulse {
@@ -1212,9 +1271,10 @@ div:focus {
   pointer-events: none;
   z-index: 1000;
   will-change: transform;
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease-out;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s ease-out;
   transform: rotate(5deg) scale(1.05);
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+  /* Use box-shadow instead of filter for better performance */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
 }
 
 .drag-preview.snap-back {
@@ -1427,37 +1487,17 @@ div:focus {
 
 @keyframes shuffle {
   0% {
-    transform: scale(1) rotate(0deg) translateY(0);
+    transform: scale(1) rotate(0deg);
     opacity: 1;
   }
 
-  15% {
-    transform: scale(1.1) rotate(5deg) translateY(-10px);
-    opacity: 0.9;
-  }
-
-  30% {
-    transform: scale(0.9) rotate(-5deg) translateY(10px);
-    opacity: 0.7;
-  }
-
-  45% {
-    transform: scale(1.05) rotate(3deg) translateY(-5px);
+  50% {
+    transform: scale(1.1) rotate(5deg);
     opacity: 0.8;
   }
 
-  60% {
-    transform: scale(0.95) rotate(-2deg) translateY(8px);
-    opacity: 0.6;
-  }
-
-  80% {
-    transform: scale(1.02) rotate(1deg) translateY(-3px);
-    opacity: 0.9;
-  }
-
   100% {
-    transform: scale(1) rotate(0deg) translateY(0);
+    transform: scale(1) rotate(0deg);
     opacity: 1;
   }
 }
@@ -1469,17 +1509,12 @@ div:focus {
 @keyframes cascade {
   0% {
     opacity: 0;
-    transform: translateY(-30px) rotate(-10deg) scale(0.8);
-  }
-
-  60% {
-    opacity: 0.8;
-    transform: translateY(5px) rotate(2deg) scale(1.05);
+    transform: translateY(-20px) scale(0.9);
   }
 
   100% {
     opacity: 1;
-    transform: translateY(0) rotate(0deg) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 

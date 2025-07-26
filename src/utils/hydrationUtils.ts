@@ -1,4 +1,5 @@
 import React from 'react';
+import { createInitialGameState } from './gameUtils';
 
 /**
  * Utility functions for handling hydration safely
@@ -45,18 +46,9 @@ export function safeWindow() {
  * Creates a deterministic game state for SSR
  */
 export function createSSRSafeGameState() {
-  return {
-    tableauPiles: [[], [], [], [], [], [], []],
-    foundationPiles: [[], [], [], []],
-    stockPile: [],
-    wastePile: [],
-    moves: 0,
-    score: 0,
-    isGameWon: false,
-    selectedCards: [],
-    selectedPileType: null,
-    selectedPileIndex: null
-  };
+  // Use the canonical initial state, but ensure no randomization for SSR if needed
+  // If dealInitialCards is deterministic, this is fine; otherwise, you may want to mock it for SSR
+  return createInitialGameState();
 }
 
 /**

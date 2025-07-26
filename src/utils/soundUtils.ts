@@ -21,7 +21,7 @@ class SoundManager {
         this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
     } catch (error) {
-      console.warn('Web Audio API not supported:', error);
+      console.error('Failed to initialize audio context:', error);
     }
   }
 
@@ -209,7 +209,9 @@ class SoundManager {
    * Initialize sound effects
    */
   public initializeSounds() {
-    if (!this.audioContext) return;
+    if (!this.audioContext) {
+      return;
+    }
 
     // Generate different tones for different actions
     const cardFlip = this.generateCardFlipSound();
@@ -254,7 +256,7 @@ class SoundManager {
       
       source.start();
     } catch (error) {
-      console.warn('Error playing sound:', error);
+      // Silent error handling in production
     }
   }
 

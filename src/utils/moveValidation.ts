@@ -96,73 +96,6 @@ export function getMovableCardsFromTableau(pile: Card[], startIndex: number): Ca
 }
 
 /**
- * Validates and executes a card move
- */
-export function validateAndExecuteMove(
-  gameState: GameState,
-  from: CardPosition,
-  to: CardPosition,
-  cards: Card[]
-): MoveResult {
-  // Input validation
-  if (!cards || cards.length === 0) {
-    return { success: false, error: 'No cards to move' };
-  }
-
-  // Clone game state to avoid mutations
-  const newState = cloneGameState(gameState);
-  
-  try {
-    // Validate source pile and get cards
-    const sourceCards = getCardsFromPosition(newState, from);
-    if (!sourceCards) {
-      return { success: false, error: 'Invalid source position' };
-    }
-    
-    // Validate that the cards to move match the source
-    const cardsToMove = sourceCards.slice(from.cardIndex);
-    if (cardsToMove.length !== cards.length || 
-        !cardsToMove.every((card, index) => card.id === cards[index].id)) {
-      return { success: false, error: 'Card mismatch' };
-    }
-    
-    // Validate destination
-    const targetPile = getCardsFromPosition(newState, { ...to, cardIndex: 0 });
-    if (!targetPile && to.pileType !== 'tableau' && to.pileType !== 'foundation') {
-      return { success: false, error: 'Invalid destination' };
-    }
-    
-    // Validate the move based on destination type
-    const moveValidation = validateMoveByDestination(cards[0], to, newState);
-    if (!moveValidation.success) {
-      return moveValidation;
-    }
-    
-    // Execute the move
-    const executionResult = executeMoveOnState(newState, from, to, cardsToMove);
-    if (!executionResult.success) {
-      return executionResult;
-    }
-    
-    // Update game state
-    newState.moves++;
-    newState.score += calculateScoreForMove(from, to, cards.length);
-    newState.isGameWon = checkWinCondition(newState);
-    
-    // Update draggable states and clear selection
-    const finalState = updateDraggableStates(newState);
-    finalState.selectedCards = [];
-    finalState.selectedPileType = null;
-    finalState.selectedPileIndex = null;
-    
-    return { success: true, newGameState: finalState };
-    
-  } catch (error) {
-    return { success: false, error: `Move execution failed: ${error}` };
-  }
-}
-
-/**
  * Validates move based on destination type
  */
 function validateMoveByDestination(card: Card, to: CardPosition, gameState: GameState): MoveResult {
@@ -407,4 +340,99 @@ export function autoMoveToFoundation(gameState: GameState, card: Card): MoveResu
   };
   
   return validateAndExecuteMove(newState, sourcePosition, targetPosition, [card]);
+}
+
+function validateMoveInput(cards: Card[]): MoveResult | null {
+  if (!cards || cards.length === 0) {
+    return { success: false, error: 'No cards to move' };
+  }
+  return null;
+}
+
+function validateSource(gameState: GameState, from: CardPosition): Card[] | null {
+  return getCardsFromPosition(gameState, from);
+}
+
+function validateCardsToMove(sourceCards: Card[], from: CardPosition, cards: Card[]): MoveResult | Card[] {
+  const cardsToMove = sourceCards.slice(from.cardIndex);
+  if (cardsToMove.length !== cards.length ||
+      !cardsToMove.every((card, index) => card.id === cards[index].id)) {
+    return { success: false, error: 'Card mismatch' };
+  }
+  return cardsToMove;
+}
+
+function validateDestination(gameState: GameState, to: CardPosition, card: Card): MoveResult {
+  const targetPile = getCardsFromPosition(gameState, { ...to, cardIndex: 0 });
+  if (!targetPile && to.pileType !== 'tableau' && to.pileType !== 'foundation') {
+    return { success: false, error: 'Invalid destination' };
+  }
+  return validateMoveByDestination(card, to, gameState);
+}
+
+function executeMoveAndUpdateState(gameState: GameState, from: CardPosition, to: CardPosition, cardsToMove: Card[]): MoveResult {
+  const executionResult = executeMoveOnState(gameState, from, to, cardsToMove);
+  if (!executionResult.success) {
+    return executionResult;
+  }
+  // Update game state
+  gameState.moves++;
+  gameState.score += calculateScoreForMove(from, to, cardsToMove.length);
+  gameState.isGameWon = checkWinCondition(gameState);
+  return { success: true, newGameState: gameState };
+}
+
+function finalizeMoveState(gameState: GameState): GameState {
+  const finalState = updateDraggableStates(gameState);
+  finalState.selectedCards = [];
+  finalState.selectedPileType = null;
+  finalState.selectedPileIndex = null;
+  return finalState;
+}
+
+export function validateAndExecuteMove(
+  gameState: GameState,
+  from: CardPosition,
+  to: CardPosition,
+  cards: Card[]
+): MoveResult {
+  // Input validation
+  const inputError = validateMoveInput(cards);
+  if (inputError) return inputError;
+
+  // Clone game state to avoid mutations
+  const newState = cloneGameState(gameState);
+
+  try {
+    // Validate source pile and get cards
+    const sourceCards = validateSource(newState, from);
+    if (!sourceCards) {
+      return { success: false, error: 'Invalid source position' };
+    }
+
+    // Validate that the cards to move match the source
+    const cardsToMoveOrError = validateCardsToMove(sourceCards, from, cards);
+    if ('success' in cardsToMoveOrError && !cardsToMoveOrError.success) {
+      return cardsToMoveOrError;
+    }
+    const cardsToMove = cardsToMoveOrError as Card[];
+
+    // Validate destination
+    const destValidation = validateDestination(newState, to, cards[0]);
+    if (!destValidation.success) {
+      return destValidation;
+    }
+
+    // Execute the move and update state
+    const execResult = executeMoveAndUpdateState(newState, from, to, cardsToMove);
+    if (!execResult.success) {
+      return execResult;
+    }
+
+    // Finalize state
+    const finalState = finalizeMoveState(execResult.newGameState!);
+    return { success: true, newGameState: finalState };
+  } catch (error) {
+    return { success: false, error: `Move execution failed: ${error}` };
+  }
 }

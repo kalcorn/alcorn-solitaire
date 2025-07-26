@@ -13,15 +13,6 @@ export const useUndoRedo = (
   ) => {
     const stateToUse = currentState;
     
-    console.log('SAVE STATE DEBUG:', {
-      action,
-      moves: stateToUse.moves,
-      wasteTop: stateToUse.wastePile.length > 0 ? stateToUse.wastePile[stateToUse.wastePile.length - 1] : 'empty',
-      wasteLength: stateToUse.wastePile.length,
-      historyIndex: historyIndex,
-      historyLength: history.length
-    });
-    
     const stateToSave = {
       tableauPiles: stateToUse.tableauPiles,
       foundationPiles: stateToUse.foundationPiles,
@@ -61,23 +52,10 @@ export const useUndoRedo = (
       const historyEntry = gameState.history[previousIndex];
       
       if (!historyEntry || !historyEntry.state) {
-        console.warn('Invalid history entry at index', previousIndex);
         return false;
       }
       
       const previousState = historyEntry.state;
-      
-      console.log('UNDO DEBUG:', {
-        currentIndex: gameState.historyIndex,
-        previousIndex,
-        currentMoves: gameState.moves,
-        previousMoves: previousState.moves,
-        currentWasteTop: gameState.wastePile.length > 0 ? gameState.wastePile[gameState.wastePile.length - 1] : 'empty',
-        previousWasteTop: previousState.wastePile.length > 0 ? previousState.wastePile[previousState.wastePile.length - 1] : 'empty',
-        currentWasteLength: gameState.wastePile.length,
-        previousWasteLength: previousState.wastePile.length,
-        action: historyEntry.action
-      });
       
       setGameState({
         ...previousState,
