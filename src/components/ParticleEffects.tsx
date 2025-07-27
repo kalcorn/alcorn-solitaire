@@ -16,16 +16,14 @@ interface Particle {
 }
 
 interface ParticleEffectsProps {
-  trigger: {
-    type: 'win' | 'validMove' | null;
-    position?: { x: number; y: number };
-  };
+  trigger: number;
 }
 
 const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const animationFrameRef = useRef<number>(0);
   const particleIdRef = useRef(0);
+  const lastTriggerRef = useRef(0);
 
   const colors = useMemo(() => ({
     confetti: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF'],
@@ -89,26 +87,31 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
   }, [colors.sparkle]);
 
   useEffect(() => {
-    if (!trigger.type) return;
-
-    const centerX = trigger.position?.x ?? window.innerWidth / 2;
-    const centerY = trigger.position?.y ?? window.innerHeight / 2;
+    if (trigger === lastTriggerRef.current) return;
+    
+    lastTriggerRef.current = trigger;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
 
     let newParticles: Particle[] = [];
 
-    if (trigger.type === 'win') {
-      // Create confetti from multiple points across the screen
-      for (let i = 0; i < 5; i++) {
-        const x = (window.innerWidth / 6) * (i + 1);
-        const y = window.innerHeight * 0.2;
-        newParticles.push(...createConfetti(x, y));
-      }
-    } else if (trigger.type === 'validMove') {
-      newParticles = createSparkles(centerX, centerY);
-    }
+    // Create sparkles for valid moves
+    newParticles = createSparkles(centerX, centerY);
 
     setParticles(prev => [...prev, ...newParticles]);
-  }, [trigger, createConfetti, createSparkles]);
+  }, [trigger, createSparkles]);
+
+  // Win effect is handled separately in useGameAnimations
+  useEffect(() => {
+    if (trigger > 0) {
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      
+      // Create confetti for win effect
+      const confettiParticles = createConfetti(centerX, centerY);
+      setParticles(prev => [...prev, ...confettiParticles]);
+    }
+  }, [trigger, createConfetti]);
 
   useEffect(() => {
     const animate = () => {
@@ -137,7 +140,8 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
     };
 
     // Start animation when particles are added
-    if (particles.length > 0 && animationFrameRef.current === 0) {
+    const hasParticles = particles.length > 0;
+    if (hasParticles && animationFrameRef.current === 0) {
       animationFrameRef.current = requestAnimationFrame(animate);
     }
 
@@ -147,7 +151,7 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
         animationFrameRef.current = 0;
       }
     };
-  }, [particles.length > 0]); // Only depend on whether there are particles, not the exact count
+  }, [particles.length]); // Include particles.length in dependencies
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40">

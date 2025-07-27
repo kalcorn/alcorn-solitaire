@@ -1,10 +1,18 @@
 import { soundManager, playSoundEffect } from '@/utils/soundUtils';
 
-// Mock AudioContext since it's already mocked in jest.setup.js
+// Mock fetch to return a mock audio buffer
+const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
+
 describe('soundUtils', () => {
   beforeEach(() => {
     // Reset any mocks before each test
     jest.clearAllMocks();
+    
+    // Mock fetch to return a mock response by default
+    mockFetch.mockResolvedValue({
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024)),
+    } as any);
   });
 
   describe('soundManager', () => {
@@ -29,6 +37,14 @@ describe('soundUtils', () => {
     });
 
     it('should initialize sounds without errors', async () => {
+      await expect(soundManager.initializeSounds()).resolves.not.toThrow();
+    });
+
+    it('should handle sound initialization errors gracefully', async () => {
+      // Mock fetch to fail
+      mockFetch.mockRejectedValue(new Error('Network error'));
+      
+      // Should not throw even if initialization fails
       await expect(soundManager.initializeSounds()).resolves.not.toThrow();
     });
   });

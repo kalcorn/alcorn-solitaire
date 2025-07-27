@@ -430,6 +430,10 @@ body {
 
 /* Override for landscape mobile to prevent size conflicts */
 @media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
+  .landscape-mobile-layout {
+    display: block !important;
+  }
+  
   .landscape-mobile-left-sidebar .stock-pile-responsive,
   .landscape-mobile-left-sidebar .waste-pile-responsive,
   .landscape-mobile-right-sidebar .foundation-pile {
@@ -931,18 +935,32 @@ body {
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
+    height: 100% !important;
+    min-height: 100% !important;
   }
 
   .landscape-mobile-right-sidebar {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    height: 100% !important;
+    min-height: 100% !important;
   }
 
   .landscape-mobile-tableau {
     flex: 1;
     padding: 1rem 2.5rem;
     /* Space for sidebars */
+  }
+
+  /* Ensure the landscape mobile layout container uses full height minus header */
+  .landscape-mobile-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    height: calc(100vh - 64px) !important; /* Subtract header height */
+    min-height: calc(100vh - 64px) !important;
+    overflow: hidden !important; /* Prevent scrolling */
   }
 
   .landscape-tableau-center {
