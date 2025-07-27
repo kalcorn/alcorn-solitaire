@@ -339,7 +339,7 @@ body {
 /* Base Layout - Proportional spacing from header */
 .card-playing-area {
   background: transparent;
-  padding-top: 0.5rem;
+  padding-top: 1rem;
 }
 
 /* MOBILE (default - up to 639px) - Optimized proportions */

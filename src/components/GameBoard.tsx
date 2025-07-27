@@ -291,7 +291,7 @@ const GameBoard: React.FC = () => {
         aria-label="Solitaire game board"
       >
         {/* Top Piles Section - Full Width Background */}
-        <div className="standard-layout w-full bg-gradient-to-r from-slate-800 via-green-900 to-slate-800 bg-opacity-90 py-4 mb-0 md:mb-4 lg:mb-6 shadow-lg border-y border-slate-600/30">
+        <div className="standard-layout w-full  bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-opacity-90 from-slate-800 via-green-900 to-slate-800 bg-opacity-90 py-4 mb-0 md:mb-4 lg:mb-6 shadow-lg border-y border-slate-600/30">
           <div className="w-full max-w-6xl mx-auto px-4 xl:px-0">
             <div 
               className="flex flex-row items-start justify-between w-full"
@@ -368,7 +368,7 @@ const GameBoard: React.FC = () => {
         </div>
 
         <div className="w-full flex grow max-w-6xl mx-auto px-4 xl:px-0">
-          <div className="card-playing-area flex flex-col grow gap-3 w-full pt-6 md:pt-8 lg:pt-10">
+          <div className="card-playing-area flex flex-col grow gap-3 w-full pt-6 md:pt-0 lg:pt-0">
 
             {/* Landscape Mobile: Left Side Piles (Stock, Waste) */}
             <div className="landscape-mobile-left-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 p-3 shadow-lg border border-green-700 border-opacity-30">
