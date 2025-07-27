@@ -2,6 +2,26 @@ import { Card, GameState, MoveResult, CardPosition } from '@/types';
 import { areOppositeColors, cloneGameState, updateDraggableStates, checkWinCondition } from './gameUtils';
 
 /**
+ * Helper function to update a pile in game state immutably
+ */
+function updatePileInGameState(gameState: GameState, position: CardPosition, newPile: Card[]): void {
+  switch (position.pileType) {
+    case 'tableau':
+      gameState.tableauPiles[position.pileIndex] = newPile;
+      break;
+    case 'foundation':
+      gameState.foundationPiles[position.pileIndex] = newPile;
+      break;
+    case 'waste':
+      gameState.wastePile = newPile;
+      break;
+    case 'stock':
+      gameState.stockPile = newPile;
+      break;
+  }
+}
+
+/**
  * Validates if a card can be placed on a tableau pile
  */
 export function canPlaceOnTableau(card: Card, targetPile: Card[]): boolean {
@@ -173,18 +193,26 @@ function executeMoveOnState(
     return { success: false, error: 'Can only move cards from the end of a pile' };
   }
   
-  sourcePile.splice(from.cardIndex, cards.length);
+  // Create immutable updates instead of mutations
+  const newSourcePile = sourcePile.slice(0, from.cardIndex);
   
   // Flip the newly exposed card if it exists and is face down
-  if (from.pileType === 'tableau' && sourcePile.length > 0) {
-    const newTopCard = sourcePile[sourcePile.length - 1];
+  if (from.pileType === 'tableau' && newSourcePile.length > 0) {
+    const newTopCardIndex = newSourcePile.length - 1;
+    const newTopCard = newSourcePile[newTopCardIndex];
     if (!newTopCard.faceUp) {
-      newTopCard.faceUp = true;
-      newTopCard.draggable = true;
+      newSourcePile[newTopCardIndex] = {
+        ...newTopCard,
+        faceUp: true,
+        draggable: true
+      };
     }
   }
   
-  // Add cards to destination
+  // Update source pile in game state immutably
+  updatePileInGameState(gameState, from, newSourcePile);
+  
+  // Add cards to destination immutably
   const targetPile = getCardsFromPosition(gameState, to);
   if (!targetPile) {
     return { success: false, error: 'Target pile not found' };
@@ -197,7 +225,8 @@ function executeMoveOnState(
     draggable: false // Will be updated by updateDraggableStates
   }));
   
-  targetPile.push(...cardsToAdd);
+  const newTargetPile = [...targetPile, ...cardsToAdd];
+  updatePileInGameState(gameState, to, newTargetPile);
   
   return { success: true };
 }

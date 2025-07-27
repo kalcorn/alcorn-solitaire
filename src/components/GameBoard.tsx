@@ -104,7 +104,7 @@ const GameBoard: React.FC = () => {
     }
   };
 
-  const handleDrop = (source: CardPosition, target: CardPosition, cards: CardType[]) => {
+  const handleDrop = React.useCallback((source: CardPosition, target: CardPosition, cards: CardType[]) => {
     const result = moveCards(source, target, cards);
     if (result.success) {
       // Trigger sparkle effect for valid moves
@@ -116,7 +116,7 @@ const GameBoard: React.FC = () => {
       setTimeout(() => setParticleTrigger({ type: null }), 100);
     }
     return result;
-  };
+  }, [moveCards, setParticleTrigger]);
 
   const getCardById = (cardId: string): CardType | null => {
     // Search all piles for the card
@@ -329,7 +329,7 @@ const GameBoard: React.FC = () => {
       document.removeEventListener('touchend', handleTouchEnd);
       document.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, [dragState.isDragging, updateDrag, endDrag]);
+  }, [dragState.isDragging, updateDrag, endDrag, handleDrop]);
 
   // Keyboard navigation support
   React.useEffect(() => {

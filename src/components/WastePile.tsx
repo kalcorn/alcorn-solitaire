@@ -11,6 +11,10 @@ interface WastePileProps {
 
 const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart, isCardBeingDragged }) => {
   const topCard = cards.length > 0 ? cards[cards.length - 1] : null;
+  
+  // Check if the only card(s) are being dragged (making the pile effectively empty)
+  const visibleCards = cards.filter(card => !isCardBeingDragged?.(card.id));
+  const hasVisibleCards = visibleCards.length > 0;
 
   return (
     <div
@@ -19,10 +23,10 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
       aria-label="Waste pile"
       role="list"
     >
-      {topCard ? (
+      {hasVisibleCards ? (
         <>
           {/* Show multiple cards with slight offset for depth */}
-          {cards.slice(-3).map((card, index, visibleCards) => (
+          {visibleCards.slice(-3).map((card, index, slicedCards) => (
             <div
               key={card.id}
               style={{
@@ -38,10 +42,10 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
                 faceUp={card.faceUp}
                 cardId={card.id}
                 isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
-                onClick={index === visibleCards.length - 1 ? () => onCardClick && onCardClick(card.id) : undefined}
-                onMouseDown={index === visibleCards.length - 1 && card.draggable ? 
+                onClick={index === slicedCards.length - 1 ? () => onCardClick && onCardClick(card.id) : undefined}
+                onMouseDown={index === slicedCards.length - 1 && card.draggable ? 
                   (e) => onCardDragStart && onCardDragStart(card.id, e) : undefined}
-                onTouchStart={index === visibleCards.length - 1 && card.draggable ? 
+                onTouchStart={index === slicedCards.length - 1 && card.draggable ? 
                   (e) => onCardDragStart && onCardDragStart(card.id, e) : undefined}
               />
             </div>
@@ -49,8 +53,17 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
         </>
       ) : (
         <div 
-          className={`waste-pile ${cards.length === 0 ? 'empty' : ''} flex items-center justify-center waste-pile-responsive`}
-          style={{ position: 'absolute', top: 0, left: 0 }}
+          className="waste-pile empty flex items-center justify-center"
+          style={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            width: '100%', 
+            height: '100%',
+            zIndex: 1
+          }}
+          role="button"
+          aria-label="Empty waste pile"
         >
           <div className="text-white text-sm font-medium opacity-60"></div>
         </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import { Suit } from '@/types';
 import { BsSuitHeartFill, BsSuitDiamondFill, BsSuitClubFill, BsSuitSpadeFill } from 'react-icons/bs';
 
@@ -161,9 +162,11 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
           {isFaceCard ? (
             /* Face Card SVG Display */
             <div className="relative w-full h-full overflow-hidden rounded-lg flex flex-col justify-end">
-              <img 
+              <Image 
                 src={getFaceCardSvg()!} 
                 alt={`${displayRank} of ${suit}`}
+                width={120}
+                height={168}
                 className="w-3/4 h-3/4 object-cover object-bottom rounded-lg mx-auto"
                 style={{ imageRendering: 'crisp-edges', objectPosition: 'bottom' }}
                 draggable={false}
@@ -174,7 +177,7 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
                 <span className={`${suitColor} font-bold leading-none text-xs`}>{displayRank}</span>
               </div>
               <div className="absolute top-0.5 right-0.5">
-                <SuitIcon className={`${suitColor} w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4`} />
+                <SuitIcon className={`${suitColor} w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6`} />
               </div>
             </div>
           ) : (

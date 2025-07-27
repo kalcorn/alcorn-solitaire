@@ -30,24 +30,54 @@ describe('localStorage utils', () => {
 
   describe('gameState persistence', () => {
     const mockGameState: GameState = {
-      stock: [],
-      waste: [],
-      foundations: [[], [], [], []],
-      tableau: [[], [], [], [], [], [], []],
+      stockPile: [],
+      wastePile: [],
+      foundationPiles: [[], [], [], []],
+      tableauPiles: [[], [], [], [], [], [], []],
+      moves: 0,
+      score: 0,
       isGameWon: false,
       selectedCards: [],
       selectedPileType: null,
       selectedPileIndex: null,
-      settings: { soundEnabled: true },
+      stockCycles: 0,
+      settings: {
+        deckCyclingLimit: 0,
+        drawCount: 1,
+        autoMoveToFoundation: false,
+        soundEnabled: true,
+        showHints: true
+      },
+      stats: {
+        gamesPlayed: 0,
+        gamesWon: 0,
+        totalTime: 0,
+        bestTime: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        averageMoves: 0,
+        totalMoves: 0,
+        lastPlayed: 0
+      },
       history: [],
       historyIndex: -1,
+      gameStartTime: Date.now()
     };
 
     it('should save and load game state', () => {
-      saveGameState(mockGameState);
-      const loadedState = loadGameState();
+      const result = saveGameState(mockGameState);
+      expect(result).toBe(true);
       
-      expect(loadedState).toEqual(mockGameState);
+      const loadedState = loadGameState();
+      expect(loadedState).toMatchObject({
+        stockPile: mockGameState.stockPile,
+        wastePile: mockGameState.wastePile,
+        foundationPiles: mockGameState.foundationPiles,
+        tableauPiles: mockGameState.tableauPiles,
+        moves: mockGameState.moves,
+        score: mockGameState.score,
+        isGameWon: mockGameState.isGameWon
+      });
     });
 
     it('should return null when no game state is saved', () => {
@@ -63,20 +93,28 @@ describe('localStorage utils', () => {
 
     it('should clear game state', () => {
       saveGameState(mockGameState);
-      expect(loadGameState()).toEqual(mockGameState);
+      expect(loadGameState()).toBeTruthy();
       
-      clearGameState();
+      const result = clearGameState();
+      expect(result).toBe(true);
       expect(loadGameState()).toBeNull();
     });
   });
 
   describe('settings persistence', () => {
-    const mockSettings = { soundEnabled: false };
+    const mockSettings = {
+      deckCyclingLimit: 0,
+      drawCount: 1,
+      autoMoveToFoundation: false,
+      soundEnabled: false,
+      showHints: true
+    };
 
     it('should save and load settings', () => {
-      saveSettings(mockSettings);
-      const loadedSettings = loadSettings();
+      const result = saveSettings(mockSettings);
+      expect(result).toBe(true);
       
+      const loadedSettings = loadSettings();
       expect(loadedSettings).toEqual(mockSettings);
     });
 

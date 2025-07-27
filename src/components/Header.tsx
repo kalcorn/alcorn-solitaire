@@ -1,4 +1,5 @@
 import React from 'react';
+import Image from 'next/image';
 import SettingsPanel, { GameSettings } from './SettingsPanel';
 
 interface HeaderProps {
@@ -45,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-0 landscape-mobile-single-line">
         {/* Portrait Mobile: First row centered logo and title */}
         <div className="flex md:hidden w-full justify-center items-center gap-2 mb-1">
-          <img src="./alcorn-logo.svg" alt="Alcorn Solitaire Logo" className="h-8 sm:h-10 lg:h-12 w-auto landscape-mobile-logo" />
+          <Image src="/alcorn-logo.svg" alt="Alcorn Solitaire Logo" width={48} height={48} className="h-8 sm:h-10 lg:h-12 w-auto landscape-mobile-logo" />
           <h1 className="header-title text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
         </div>
         
@@ -89,7 +90,7 @@ const Header: React.FC<HeaderProps> = ({
         
         {/* Desktop and Landscape Mobile Layout */}
         <div className="hidden md:flex items-center gap-2 landscape-mobile-title">
-          <img src="./alcorn-logo.svg" alt="Alcorn Solitaire Logo" className="h-8 sm:h-10 lg:h-12 w-auto landscape-mobile-logo" />
+          <Image src="/alcorn-logo.svg" alt="Alcorn Solitaire Logo" width={48} height={48} className="h-8 sm:h-10 lg:h-12 w-auto landscape-mobile-logo" />
           <h1 className="header-title text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
         </div>
         

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 
 interface Particle {
   id: number;
@@ -27,12 +27,12 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
   const animationFrameRef = useRef<number>(0);
   const particleIdRef = useRef(0);
 
-  const colors = {
+  const colors = useMemo(() => ({
     confetti: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF'],
     sparkle: ['#FFD700', '#FFF', '#FFEB3B', '#FFE082']
-  };
+  }), []);
 
-  const createConfetti = (centerX: number, centerY: number) => {
+  const createConfetti = useCallback((centerX: number, centerY: number) => {
     const newParticles: Particle[] = [];
     const count = 50;
 
@@ -58,9 +58,9 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
     }
 
     return newParticles;
-  };
+  }, [colors.confetti]);
 
-  const createSparkles = (centerX: number, centerY: number) => {
+  const createSparkles = useCallback((centerX: number, centerY: number) => {
     const newParticles: Particle[] = [];
     const count = 12;
 
@@ -86,7 +86,7 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
     }
 
     return newParticles;
-  };
+  }, [colors.sparkle]);
 
   useEffect(() => {
     if (!trigger.type) return;
@@ -108,12 +108,12 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
     }
 
     setParticles(prev => [...prev, ...newParticles]);
-  }, [trigger]);
+  }, [trigger, createConfetti, createSparkles]);
 
   useEffect(() => {
     const animate = () => {
       setParticles(prevParticles => {
-        return prevParticles
+        const updatedParticles = prevParticles
           .map(particle => ({
             ...particle,
             x: particle.x + particle.vx,
@@ -124,21 +124,30 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
             rotation: particle.rotation + particle.rotationSpeed,
           }))
           .filter(particle => particle.life > 0 && particle.y < window.innerHeight + 100);
-      });
 
-      animationFrameRef.current = requestAnimationFrame(animate);
+        // Continue animation only if there are particles left
+        if (updatedParticles.length > 0) {
+          animationFrameRef.current = requestAnimationFrame(animate);
+        } else {
+          animationFrameRef.current = 0;
+        }
+
+        return updatedParticles;
+      });
     };
 
-    if (particles.length > 0) {
+    // Start animation when particles are added
+    if (particles.length > 0 && animationFrameRef.current === 0) {
       animationFrameRef.current = requestAnimationFrame(animate);
     }
 
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = 0;
       }
     };
-  }, [particles.length]);
+  }, [particles.length > 0]); // Only depend on whether there are particles, not the exact count
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40">

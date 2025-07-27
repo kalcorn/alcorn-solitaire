@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BsLightbulb, BsChevronUp, BsChevronDown } from 'react-icons/bs';
 import { GameState } from '@/types';
 
@@ -38,7 +38,7 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
    * Hints include moves for Aces, foundation building, revealing hidden cards, moving Kings, and flipping stock.
    * @returns {Hint[]} Array of hint objects sorted by priority.
    */
-  const generateHints = (): Hint[] => {
+  const generateHints = useCallback((): Hint[] => {
     const hints: Hint[] = [];
     let hintId = 0;
 
@@ -156,14 +156,14 @@ const SubtleHints: React.FC<SubtleHintsProps> = ({ gameState }) => {
 
     // Sort by priority and return top hints
     return hints.sort((a, b) => b.priority - a.priority).slice(0, 3);
-  };
+  }, [gameState]);
 
   // Generate hints based on game state
   useEffect(() => {
     const hints = generateHints();
     setCurrentHints(hints);
     setCurrentHintIndex(0);
-  }, [gameState]);
+  }, [gameState, generateHints]);
 
   // Auto-rotate hints every 10 seconds
   useEffect(() => {

@@ -214,6 +214,13 @@ body {
   position: absolute;
   left: 0;
   right: 0;
+  /* Fallback for when dynamic spacing is not available */
+  top: calc(var(--card-index, 0) * var(--static-spacing, 18px));
+}
+
+/* Dynamic spacing override when set inline */
+.tableau-card-position[style*="top"] {
+  /* Inline top style takes precedence over CSS calc */
 }
 
 .desktop-tableau {
@@ -440,9 +447,7 @@ body {
   /*height: 350px;*/
 }
 
-.tableau-card-position {
-  top: calc(var(--card-index) * 18px);
-}
+/* tableau-card-position spacing now handled dynamically in component */
 
 .stock-pile,
 .waste-pile,
@@ -511,9 +516,7 @@ body {
     /*height: 420px;*/
   }
 
-  .tableau-card-position {
-    top: calc(var(--card-index) * 20px);
-  }
+  /* tableau-card-position spacing now handled dynamically in component */
 
   .tableau-empty-placeholder {
     width: 65px;
@@ -588,9 +591,7 @@ body {
     /*height: 520px;*/
   }
 
-  .tableau-card-position {
-    top: calc(var(--card-index) * 26px);
-  }
+  /* tableau-card-position spacing now handled dynamically in component */
 
   .tableau-empty-placeholder {
     width: 85px;
@@ -669,9 +670,7 @@ body {
     height: 600px;
   }
 
-  .tableau-card-position {
-    top: calc(var(--card-index) * 30px);
-  }
+  /* tableau-card-position spacing now handled dynamically in component */
 
   .tableau-empty-placeholder {
     width: 100px;
@@ -746,10 +745,7 @@ body {
     /* Controlled for viewport */
   }
 
-  .tableau-card-position {
-    top: calc(var(--card-index) * 20px);
-    /* Compact overlap for viewport fit */
-  }
+  /* tableau-card-position spacing now handled dynamically in component */
 
   .tableau-empty-placeholder {
     width: 100px;
@@ -824,10 +820,7 @@ body {
     /* Viewport fit priority */
   }
 
-  .tableau-card-position {
-    top: calc(var(--card-index) * 22px);
-    /* Efficient overlap */
-  }
+  /* tableau-card-position spacing now handled dynamically in component */
 
   .tableau-empty-placeholder {
     width: 110px;
@@ -975,9 +968,6 @@ body {
     /*height: 380px !important;*/
   }
 
-  .landscape-mobile-tableau .tableau-card-position {
-    top: calc(var(--card-index) * 18px) !important;
-  }
 
   .landscape-mobile-tableau .tableau-pile .card,
   .landscape-mobile-tableau .tableau-pile .card.face-down {
