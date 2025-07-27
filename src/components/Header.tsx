@@ -1,6 +1,5 @@
 import React from 'react';
 import SettingsPanel, { GameSettings } from './SettingsPanel';
-import { BsArrowCounterclockwise, BsArrowClockwise } from 'react-icons/bs';
 
 interface HeaderProps {
   timeElapsed: number;

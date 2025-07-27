@@ -12,24 +12,28 @@ interface TableauPileProps {
 
 const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDragStart, isDropZone, isCardBeingDragged }) => (
   <div className={`tableau-pile relative ${isDropZone ? 'drop-zone-active' : ''}`} role="list" aria-label="Play pile">
-    {cards.map((card, index) => (
-      <div
-        key={card.id}
-        className="tableau-card-position"
-        style={{ '--card-index': index } as React.CSSProperties}
-      >
-        <Card
-          suit={card.suit}
-          rank={card.rank}
-          faceUp={card.faceUp}
-          cardId={card.id}
-          isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
-          onClick={() => onCardClick && onCardClick(card.id)}
-          onMouseDown={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e)}
-          onTouchStart={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e)}
-        />
-      </div>
-    ))}
+    {cards.length === 0 ? (
+      <div className="tableau-empty-placeholder" />
+    ) : (
+      cards.map((card, index) => (
+        <div
+          key={card.id}
+          className="tableau-card-position"
+          style={{ '--card-index': index } as React.CSSProperties}
+        >
+          <Card
+            suit={card.suit}
+            rank={card.rank}
+            faceUp={card.faceUp}
+            cardId={card.id}
+            isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
+            onClick={() => onCardClick && onCardClick(card.id)}
+            onMouseDown={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e)}
+            onTouchStart={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e)}
+          />
+        </div>
+      ))
+    )}
   </div>
 );
 

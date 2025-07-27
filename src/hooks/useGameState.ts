@@ -35,8 +35,10 @@ export function useGameState() {
     }
   }, [gameState, isHydrated]);
 
-  const startNewGame = useCallback(() => {
-    let newState = createInitialGameState();
+  const startNewGame = useCallback((skipSound = false) => {
+    // Generate a random seed for each new game to ensure different layouts
+    const randomSeed = Math.floor(Math.random() * 1000000);
+    let newState = createInitialGameState(randomSeed);
     newState.settings = { ...gameState.settings };
     newState.gameStartTime = Date.now();
     clearGameState();
@@ -52,7 +54,7 @@ export function useGameState() {
     setTimeElapsed(0);
     setGameStarted(false);
 
-    if (newState.settings.soundEnabled) {
+    if (newState.settings.soundEnabled && !skipSound) {
       playSoundEffect.shuffle();
     }
   }, [gameState.settings, saveState]);
@@ -99,7 +101,7 @@ export function useGameState() {
     return result;
   }, [gameState, gameStarted, saveState]);
 
-  const handleStockFlip = useCallback((): MoveResult => {
+  const handleStockFlip = useCallback((skipSound = false): MoveResult => {
     if (!gameStarted) setGameStarted(true);
 
     const result = flipStock(gameState);
@@ -112,7 +114,7 @@ export function useGameState() {
         historyIndex: historyUpdate.historyIndex
       });
 
-      if (gameState.settings.soundEnabled) playSoundEffect.cardFlip();
+      if (gameState.settings.soundEnabled && !skipSound) playSoundEffect.cardFlip();
     }
     return result;
   }, [gameState, gameStarted, saveState]);

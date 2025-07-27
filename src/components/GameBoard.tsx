@@ -49,6 +49,14 @@ const GameBoard: React.FC = () => {
     endPosition?: { x: number; y: number };
     isLandscapeMobile?: boolean;
   }>(null);
+  const [flyingCards, setFlyingCards] = React.useState<Array<{
+    id: string;
+    card: CardType;
+    startPosition: { x: number; y: number };
+    endPosition: { x: number; y: number };
+    flyX: number;
+    flyRotation: number;
+  }>>([]);
 
   const {
     dragState,
@@ -137,6 +145,54 @@ const GameBoard: React.FC = () => {
     return { x: rect.left, y: rect.top };
   };
 
+  // Create flying cards animation for shuffle effect
+  const createShuffleCardsAnimation = () => {
+    const wastePosition = getElementPosition('.standard-layout .waste-pile-responsive') || 
+                         getElementPosition('.landscape-mobile-left-sidebar .waste-pile-responsive') ||
+                         { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    
+    const stockPosition = getElementPosition('.standard-layout .stock-pile-responsive') ||
+                         getElementPosition('.landscape-mobile-left-sidebar .stock-pile-responsive') ||
+                         { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 };
+
+    // Create multiple flying cards for the animation
+    const numCards = Math.min(8, gameState.wastePile.length);
+    const newFlyingCards = [];
+
+    for (let i = 0; i < numCards; i++) {
+      const cardIndex = Math.floor(Math.random() * gameState.wastePile.length);
+      const card = gameState.wastePile[cardIndex] || gameState.wastePile[0] || { 
+        id: `temp-${i}`, 
+        suit: 'hearts' as const, 
+        rank: 1, 
+        faceUp: false, 
+        draggable: false 
+      };
+
+      newFlyingCards.push({
+        id: `flying-${i}-${Date.now()}`,
+        card,
+        startPosition: {
+          x: wastePosition.x + Math.random() * 20 - 10,
+          y: wastePosition.y + Math.random() * 20 - 10
+        },
+        endPosition: {
+          x: stockPosition.x + Math.random() * 30 - 15,
+          y: stockPosition.y + Math.random() * 30 - 15
+        },
+        flyX: (Math.random() - 0.5) * 200,
+        flyRotation: (Math.random() - 0.5) * 60
+      });
+    }
+
+    setFlyingCards(newFlyingCards);
+    
+    // Clear flying cards after animation completes
+    setTimeout(() => {
+      setFlyingCards([]);
+    }, 1000);
+  };
+
   // Animated stock flip handler
   const handleAnimatedStockFlip = () => {
     if (animatingCard) return;
@@ -171,8 +227,15 @@ const GameBoard: React.FC = () => {
     }
     
     if (isRecycling) {
-      // Animate waste to stock (recycle) - only ghost card, no pile animations
+      // Animate waste to stock (recycle) - trigger flying cards animation
       if (gameState.wastePile.length === 0) return;
+      
+      // Play shuffle sound for recycling and create flying cards animation
+      if (gameState.settings.soundEnabled) {
+        playSoundEffect.shuffle();
+      }
+      createShuffleCardsAnimation();
+      
       const card = gameState.wastePile[gameState.wastePile.length - 1];
       setAnimatingCard({ 
         card, 
@@ -183,9 +246,14 @@ const GameBoard: React.FC = () => {
       });
       setTimeout(() => {
         setAnimatingCard(null);
-        handleStockFlip();
-      }, 600);
+        handleStockFlip(true); // Skip sound since we played it early
+      }, 300);
     } else {
+      // Play sound first to account for audio latency for regular flip
+      if (gameState.settings.soundEnabled) {
+        playSoundEffect.cardFlip();
+      }
+      
       // Animate stock to waste - only ghost card, no pile animations
       if (gameState.stockPile.length === 0) return;
       const card = gameState.stockPile[gameState.stockPile.length - 1];
@@ -198,8 +266,8 @@ const GameBoard: React.FC = () => {
       });
       setTimeout(() => {
         setAnimatingCard(null);
-        handleStockFlip();
-      }, 400);
+        handleStockFlip(true); // Skip sound since we played it early
+      }, 300); // Reduced to match faster CSS animation duration
     }
   };
 
@@ -207,9 +275,19 @@ const GameBoard: React.FC = () => {
   const handleAnimatedNewGame = () => {
     if (isShuffling) return;
     
+    // Play shuffle sound first to account for audio latency
+    if (gameState.settings.soundEnabled) {
+      playSoundEffect.shuffle();
+    }
+    
+    // Create flying cards animation for new game shuffle
+    if (gameState.wastePile.length > 0 || gameState.stockPile.length > 0) {
+      createShuffleCardsAnimation();
+    }
+    
     setIsShuffling(true);
     setTimeout(() => {
-      startNewGame();
+      startNewGame(true); // Skip sound since we played it early
       setTimeout(() => {
         setIsShuffling(false);
       }, 1200);
@@ -291,14 +369,14 @@ const GameBoard: React.FC = () => {
         aria-label="Solitaire game board"
       >
         {/* Top Piles Section - Full Width Background */}
-        <div className="standard-layout w-full  bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-opacity-90 from-slate-800 via-green-900 to-slate-800 bg-opacity-90 py-4 mb-0 md:mb-4 lg:mb-6 shadow-lg border-y border-slate-600/30">
+        <div className="standard-layout w-full  bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-opacity-90 from-slate-800 via-green-900 to-slate-800 bg-opacity-90 py-4 mb-0 md:mb-4 lg:mb-6 shadow-lg border-y border-slate-600/30 ">
           <div className="w-full max-w-6xl mx-auto px-4 xl:px-0">
             <div 
               className="flex flex-row items-start justify-between w-full"
               role="region"
               aria-label="Stock, waste, and foundation piles"
             >
-              <div className="flex flex-row items-center gap-2 md:gap-4 lg:gap-6 flex-shrink-0">
+              <div className="flex flex-row items-center gap-2 md:gap-4 lg:gap-6 flex-shrink-0 ">
                 <StockPile 
                   cards={gameState.stockPile} 
                   onClick={handleAnimatedStockFlip}
@@ -565,35 +643,102 @@ const GameBoard: React.FC = () => {
                     window.innerWidth >= 1024 ? '140px' :
                     window.innerWidth >= 768 ? '119px' : 
                     window.innerWidth >= 640 ? '91px' : '72px',
-                  transition: animatingCard.type === 'stockToWaste' 
-                    ? 'all 0.4s cubic-bezier(0.4,0,0.2,1)' 
-                    : 'all 0.6s cubic-bezier(0.4,0,0.2,1)',
-                  transform: `translate(${animatingCard.endPosition.x - animatingCard.startPosition.x}px, ${animatingCard.endPosition.y - animatingCard.startPosition.y}px)`,
-                }}
+                  // Set CSS custom properties for the end position
+                  '--end-x': `${animatingCard.endPosition.x - animatingCard.startPosition.x}px`,
+                  '--end-y': `${animatingCard.endPosition.y - animatingCard.startPosition.y}px`,
+                  // Preserve 3D transforms for the flip effect
+                  transformStyle: 'preserve-3d',
+                } as React.CSSProperties}
+              >
+                {/* Show both sides of the card for flip effect */}
+                <div style={{ 
+                  position: 'relative', 
+                  width: '100%', 
+                  height: '100%',
+                  transformStyle: 'preserve-3d'
+                }}>
+                  {/* Front side (face down) - visible at start for stockToWaste */}
+                  <div style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    backfaceVisibility: 'hidden',
+                    transform: animatingCard.type === 'stockToWaste' ? 'rotateY(0deg)' : 'rotateY(180deg)'
+                  }}>
+                    <Card
+                      suit={animatingCard.card.suit}
+                      rank={animatingCard.card.rank}
+                      faceUp={false}
+                      cardId={animatingCard.card.id}
+                      isBeingDragged={false}
+                      style={{
+                        width: '100%',
+                        height: '100%'
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Back side (face up) - revealed during flip */}
+                  <div style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    backfaceVisibility: 'hidden',
+                    transform: animatingCard.type === 'stockToWaste' ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                  }}>
+                    <Card
+                      suit={animatingCard.card.suit}
+                      rank={animatingCard.card.rank}
+                      faceUp={true}
+                      cardId={animatingCard.card.id}
+                      isBeingDragged={false}
+                      style={{
+                        width: '100%',
+                        height: '100%'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Flying Cards Shuffle Animation */}
+            {flyingCards.map((flyingCard) => (
+              <div
+                key={flyingCard.id}
+                className="card-shuffle-fly"
+                style={{
+                  top: `${flyingCard.startPosition.y}px`,
+                  left: `${flyingCard.startPosition.x}px`,
+                  width: window.innerWidth >= 1536 ? '110px' :
+                    window.innerWidth >= 1280 ? '100px' :
+                    window.innerWidth >= 1024 ? '100px' :
+                    window.innerWidth >= 768 ? '85px' : 
+                    window.innerWidth >= 640 ? '65px' : '52px',
+                  height: window.innerWidth >= 1536 ? '154px' :
+                    window.innerWidth >= 1280 ? '140px' :
+                    window.innerWidth >= 1024 ? '140px' :
+                    window.innerWidth >= 768 ? '119px' : 
+                    window.innerWidth >= 640 ? '91px' : '72px',
+                  '--end-x': `${flyingCard.endPosition.x - flyingCard.startPosition.x}px`,
+                  '--end-y': `${flyingCard.endPosition.y - flyingCard.startPosition.y}px`,
+                  '--fly-x': `${flyingCard.flyX}px`,
+                  '--fly-rotation': `${flyingCard.flyRotation}deg`,
+                } as React.CSSProperties}
               >
                 <Card
-                  suit={animatingCard.card.suit}
-                  rank={animatingCard.card.rank}
-                  faceUp={animatingCard.type === 'stockToWaste' ? true : animatingCard.card.faceUp}
-                  cardId={animatingCard.card.id}
+                  suit={flyingCard.card.suit}
+                  rank={flyingCard.card.rank}
+                  faceUp={flyingCard.card.faceUp}
+                  cardId={flyingCard.card.id}
                   isBeingDragged={false}
                   style={{
-                    width: animatingCard.isLandscapeMobile ? '60px' : 
-                      window.innerWidth >= 1536 ? '110px' :
-                      window.innerWidth >= 1280 ? '100px' :
-                      window.innerWidth >= 1024 ? '100px' :
-                      window.innerWidth >= 768 ? '85px' : 
-                      window.innerWidth >= 640 ? '65px' : '52px',
-                    height: animatingCard.isLandscapeMobile ? '84px' : 
-                      window.innerWidth >= 1536 ? '154px' :
-                      window.innerWidth >= 1280 ? '140px' :
-                      window.innerWidth >= 1024 ? '140px' :
-                      window.innerWidth >= 768 ? '119px' : 
-                      window.innerWidth >= 640 ? '91px' : '72px'
+                    width: '100%',
+                    height: '100%'
                   }}
                 />
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>

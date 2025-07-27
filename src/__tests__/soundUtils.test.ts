@@ -28,8 +28,8 @@ describe('soundUtils', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should initialize sounds without errors', () => {
-      expect(() => soundManager.initializeSounds()).not.toThrow();
+    it('should initialize sounds without errors', async () => {
+      await expect(soundManager.initializeSounds()).resolves.not.toThrow();
     });
   });
 

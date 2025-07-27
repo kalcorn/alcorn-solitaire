@@ -1,62 +1,69 @@
-<svg viewBox="0 0 100 102" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
   <!-- Crown -->
-  <path d="M20 15 L30 8 L35 18 L40 5 L45 18 L50 5 L55 18 L60 5 L65 18 L70 8 L80 15 L75 30 L25 30 Z" 
+  <path d="M20 20 L28 12 L33 24 L38 8 L43 24 L48 8 L53 24 L58 8 L63 24 L68 12 L76 20 L72 36 L24 36 Z" 
         fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
   
-  <!-- Crown jewels (diamond shapes) -->
-  <path d="M40 12 L37 15 L40 18 L43 15 Z" fill="#DC2626"/>
-  <path d="M50 12 L46 16 L50 20 L54 16 Z" fill="#DC2626"/>
-  <path d="M60 12 L57 15 L60 18 L63 15 Z" fill="#DC2626"/>
+  <!-- Crown jewels (diamonds) -->
+  <path d="M38 18 L35 21 L38 24 L41 21 Z" fill="#DC2626"/>
+  <path d="M48 18 L44 22 L48 26 L52 22 Z" fill="#DC2626"/>
+  <path d="M58 18 L55 21 L58 24 L61 21 Z" fill="#DC2626"/>
 
-  <!-- Hair (visible at sides) -->
-  <path d="M25 30 Q20 35 25 40 L75 40 Q80 35 75 30" fill="#654321"/>
+  <!-- Hair -->
+  <path d="M24 36 Q18 42 24 48 L72 48 Q78 42 72 36" fill="#654321"/>
   
   <!-- Face -->
-  <ellipse cx="50" cy="45" rx="18" ry="22" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
+  <ellipse cx="48" cy="58" rx="20" ry="26" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
 
   <!-- Eyes -->
-  <circle cx="44" cy="40" r="2" fill="#2C3E50"/>
-  <circle cx="56" cy="40" r="2" fill="#2C3E50"/>
-  <path d="M41 38 Q44 36 47 38" stroke="#654321" stroke-width="1" fill="none"/>
-  <path d="M53 38 Q56 36 59 38" stroke="#654321" stroke-width="1" fill="none"/>
+  <circle cx="42" cy="52" r="2.5" fill="#2C3E50"/>
+  <circle cx="54" cy="52" r="2.5" fill="#2C3E50"/>
+  <path d="M38 49 Q42 47 46 49" stroke="#654321" stroke-width="1.2" fill="none"/>
+  <path d="M50 49 Q54 47 58 49" stroke="#654321" stroke-width="1.2" fill="none"/>
 
   <!-- Nose -->
-  <path d="M50 45 L49 47 L51 47 Z" fill="#E68A7A"/>
+  <path d="M48 58 L47 61 L49 61 Z" fill="#E68A7A"/>
 
   <!-- Mustache -->
-  <path d="M42 48 Q50 52 58 48" stroke="#654321" stroke-width="3" fill="none"/>
+  <path d="M40 63 Q48 68 56 63" stroke="#654321" stroke-width="3.5" fill="none"/>
 
   <!-- Beard -->
-  <path d="M35 55 Q50 70 65 55 Q60 80 50 80 Q40 80 35 55" fill="#654321"/>
+  <path d="M32 70 Q48 88 64 70 Q58 98 48 98 Q38 98 32 70" fill="#654321"/>
   
-  <!-- Neck (visible above robe) -->
-  <rect x="45" y="62" width="10" height="8" fill="#FDBCB4"/>
+  <!-- Neck -->
+  <rect x="43" y="78" width="10" height="10" fill="#FDBCB4"/>
   
-  <!-- Royal collar with diamonds -->
-  <ellipse cx="50" cy="68" rx="12" ry="3" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
-  <path d="M45 68 L43 70 L45 72 L47 70 Z" fill="#DC2626"/>
-  <path d="M55 68 L53 70 L55 72 L57 70 Z" fill="#DC2626"/>
+  <!-- Royal collar -->
+  <ellipse cx="48" cy="86" rx="14" ry="4" fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
+  <path d="M45 84 L43 87 L45 90 L47 87 Z" fill="#DC2626"/>
+  <path d="M51 84 L49 87 L51 90 L53 87 Z" fill="#DC2626"/>
 
   <!-- Royal robe -->
-  <path d="M15 70 Q50 65 85 70 L85 90 Q50 95 15 90 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <path d="M12 88 Q48 82 84 88 L84 115 Q48 122 12 115 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
   
   <!-- Diamond pattern trim -->
-  <path d="M25 75 L23 77 L25 79 L27 77 Z" fill="#FFD700"/>
-  <path d="M35 76 L33 78 L35 80 L37 78 Z" fill="#FFD700"/>
-  <path d="M45 75 L43 77 L45 79 L47 77 Z" fill="#FFD700"/>
-  <path d="M55 76 L53 78 L55 80 L57 78 Z" fill="#FFD700"/>
-  <path d="M65 75 L63 77 L65 79 L67 77 Z" fill="#FFD700"/>
-  <path d="M75 76 L73 78 L75 80 L77 78 Z" fill="#FFD700"/>
+  <path d="M22 95 L20 98 L22 101 L24 98 Z" fill="#FFD700"/>
+  <path d="M35 96 L33 99 L35 102 L37 99 Z" fill="#FFD700"/>
+  <path d="M48 95 L46 98 L48 101 L50 98 Z" fill="#FFD700"/>
+  <path d="M61 96 L59 99 L61 102 L63 99 Z" fill="#FFD700"/>
+  <path d="M74 95 L72 98 L74 101 L76 98 Z" fill="#FFD700"/>
   
   <!-- Sleeves -->
-  <ellipse cx="15" cy="78" rx="12" ry="16" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
-  <ellipse cx="85" cy="78" rx="12" ry="16" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <ellipse cx="12" cy="98" rx="14" ry="20" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <ellipse cx="84" cy="98" rx="14" ry="20" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
   
   <!-- Arms -->
-  <rect x="8" y="88" width="8" height="14" fill="#FDBCB4" rx="4"/>
-  <rect x="84" y="88" width="8" height="14" fill="#FDBCB4" rx="4"/>
+  <rect x="4" y="112" width="10" height="18" fill="#FDBCB4" rx="5"/>
+  <rect x="82" y="112" width="10" height="18" fill="#FDBCB4" rx="5"/>
   
+  <!-- Axe (right hand) -->
+  <rect x="84" y="118" width="5" height="12" fill="#8B4513"/>
+  <path d="M81 118 L91 118 L89 112 L83 112 Z" fill="#6B7280"/>
+  <path d="M87 115 L86 112 L88 112 Z" fill="#DC2626"/>
+  
+  <!-- Shield (left hand) -->
+  <path d="M9 118 L9 132 Q9 135 12 135 Q15 135 15 132 L15 118 Q12 115 9 118 Z" fill="#FFD700"/>
+  <path d="M12 120 L10 123 L12 126 L14 123 Z" fill="#DC2626"/>
   
   <!-- Robe skirt -->
-  <path d="M20 90 Q50 87 80 90 L82 102 L18 102 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <path d="M18 115 Q48 110 78 115 L78 140 L18 140 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
 </svg>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BsArrowCounterclockwise, BsCheckCircle } from 'react-icons/bs';
+import { BsArrowLeftCircle, BsCheckCircle } from 'react-icons/bs';
 
 interface UndoRedoButtonsProps {
   onUndo: () => void;
@@ -42,7 +42,7 @@ const UndoRedoButtons: React.FC<UndoRedoButtonsProps> = ({
           </>
         ) : (
           <>
-            <BsArrowCounterclockwise className="w-5 h-5 sm:w-7 sm:h-7 landscape-mobile-undo-icon" />
+            <BsArrowLeftCircle className="w-5 h-5 sm:w-7 sm:h-7 landscape-mobile-undo-icon" />
             <span className="text-base sm:text-xl font-bold landscape-mobile-undo-text">Undo</span>
           </>
         )}

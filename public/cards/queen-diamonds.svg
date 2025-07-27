@@ -1,55 +1,67 @@
-<svg viewBox="0 0 100 102" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
   <!-- Crown -->
-  <path d="M25 18 L30 12 L35 22 L40 8 L45 22 L50 8 L55 22 L60 8 L65 22 L70 12 L75 18 L72 28 L28 28 Z" 
+  <path d="M22 24 L28 16 L33 28 L38 12 L43 28 L48 12 L53 28 L58 12 L63 28 L68 16 L74 24 L70 36 L26 36 Z" 
         fill="#FFD700" stroke="#DAA520" stroke-width="1"/>
   
-  <!-- Crown jewels -->
-  <path d="M40 15 L37 18 L40 21 L43 18 Z" fill="#DC2626"/>
-  <path d="M50 15 L47 18 L50 21 L53 18 Z" fill="#DC2626"/>
-  <path d="M60 15 L57 18 L60 21 L63 18 Z" fill="#DC2626"/>
+  <!-- Crown jewels (diamonds) -->
+  <path d="M38 20 L35 23 L38 26 L41 23 Z" fill="#DC2626"/>
+  <path d="M48 20 L45 23 L48 26 L51 23 Z" fill="#DC2626"/>
+  <path d="M58 20 L55 23 L58 26 L61 23 Z" fill="#DC2626"/>
 
   <!-- Hair -->
-  <path d="M28 28 Q22 38 28 48 Q50 38 72 48 Q78 38 72 28" fill="#654321"/>
+  <path d="M26 36 Q20 46 26 58 Q48 46 70 58 Q76 46 70 36" fill="#654321"/>
   
   <!-- Face -->
-  <ellipse cx="50" cy="42" rx="16" ry="20" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
+  <ellipse cx="48" cy="54" rx="18" ry="24" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
 
   <!-- Eyes -->
-  <circle cx="45" cy="39" r="2" fill="#2C3E50"/>
-  <circle cx="55" cy="39" r="2" fill="#2C3E50"/>
-  <path d="M43 37 Q45 35 47 37" stroke="#654321" stroke-width="1" fill="none"/>
-  <path d="M53 37 Q55 35 57 37" stroke="#654321" stroke-width="1" fill="none"/>
+  <circle cx="43" cy="48" r="2.5" fill="#2C3E50"/>
+  <circle cx="53" cy="48" r="2.5" fill="#2C3E50"/>
+  <path d="M40 45 Q43 43 46 45" stroke="#654321" stroke-width="1.2" fill="none"/>
+  <path d="M50 45 Q53 43 56 45" stroke="#654321" stroke-width="1.2" fill="none"/>
 
   <!-- Nose -->
-  <path d="M50 42 L49 44 L51 44 Z" fill="#E68A7A"/>
+  <path d="M48 54 L47 57 L49 57 Z" fill="#E68A7A"/>
 
   <!-- Lips -->
-  <ellipse cx="50" cy="46" rx="3" ry="1.5" fill="#DC2626"/>
+  <ellipse cx="48" cy="60" rx="3.5" ry="2" fill="#DC2626"/>
   
   <!-- Neck -->
-  <rect x="45" y="58" width="10" height="8" fill="#FDBCB4"/>
+  <rect x="43" y="74" width="10" height="10" fill="#FDBCB4"/>
   
   <!-- Necklace -->
-  <ellipse cx="50" cy="62" rx="8" ry="2" fill="none" stroke="#FFD700" stroke-width="2"/>
-  <path d="M50 64 L47 67 L50 70 L53 67 Z" fill="#DC2626"/>
+  <ellipse cx="48" cy="80" rx="10" ry="3" fill="none" stroke="#FFD700" stroke-width="2"/>
+  <path d="M48 82 L46 85 L48 88 L50 85 Z" fill="#DC2626"/>
 
   <!-- Gown bodice -->
-  <path d="M20 66 Q50 62 80 66 L80 88 Q50 92 20 88 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <path d="M18 84 Q48 78 78 84 L78 112 Q48 118 18 112 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  
+  <!-- Diamond decorations on bodice -->
+  <path d="M30 94 L28 97 L30 100 L32 97 Z" fill="#FFD700"/>
+  <path d="M48 95 L46 98 L48 101 L50 98 Z" fill="#FFD700"/>
+  <path d="M66 94 L64 97 L66 100 L68 97 Z" fill="#FFD700"/>
   
   <!-- Sleeves -->
-  <ellipse cx="20" cy="72" rx="10" ry="14" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
-  <ellipse cx="80" cy="72" rx="10" ry="14" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <ellipse cx="18" cy="92" rx="12" ry="18" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <ellipse cx="78" cy="92" rx="12" ry="18" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
   
   <!-- Arms -->
-  <rect x="15" y="82" width="6" height="16" fill="#FDBCB4" rx="3"/>
-  <rect x="79" y="82" width="6" height="16" fill="#FDBCB4" rx="3"/>
+  <rect x="12" y="104" width="8" height="20" fill="#FDBCB4" rx="4"/>
+  <rect x="76" y="104" width="8" height="20" fill="#FDBCB4" rx="4"/>
   
+  <!-- Hands with orbs -->
+  <circle cx="16" cy="120" r="4" fill="#FDBCB4"/>
+  <circle cx="80" cy="120" r="4" fill="#FDBCB4"/>
+  <circle cx="16" cy="118" r="3" fill="#FFD700"/>
+  <circle cx="80" cy="118" r="3" fill="#FFD700"/>
+  <path d="M16 116 L14 119 L16 122 L18 119 Z" fill="#DC2626"/>
+  <path d="M80 116 L78 119 L80 122 L82 119 Z" fill="#DC2626"/>
   
   <!-- Gown skirt -->
-  <path d="M25 88 Q50 85 75 88 L78 102 L22 102 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
+  <path d="M22 112 Q48 108 74 112 L74 140 L22 140 Z" fill="#DC2626" stroke="#B91C1C" stroke-width="1"/>
   
   <!-- Decorative diamond trim -->
-  <path d="M35 75 L32 78 L35 81 L38 78 Z" fill="#FFD700"/>
-  <path d="M50 75 L47 78 L50 81 L53 78 Z" fill="#FFD700"/>
-  <path d="M65 75 L62 78 L65 81 L68 78 Z" fill="#FFD700"/>
+  <path d="M32 120 L30 123 L32 126 L34 123 Z" fill="#FFD700"/>
+  <path d="M48 121 L46 124 L48 127 L50 124 Z" fill="#FFD700"/>
+  <path d="M64 120 L62 123 L64 126 L66 123 Z" fill="#FFD700"/>
 </svg>

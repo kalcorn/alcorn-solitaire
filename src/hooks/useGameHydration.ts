@@ -34,7 +34,9 @@ export function useGameHydration(
         }
         setGameStarted(true);
       } else {
-        initialState = createInitialGameState();
+        // Generate a random seed for new games to ensure different layouts
+        const randomSeed = Math.floor(Math.random() * 1000000);
+        initialState = createInitialGameState(randomSeed);
         if (savedSettings) {
           initialState.settings = { ...initialState.settings, ...savedSettings };
         }

@@ -231,10 +231,71 @@ body {
 .waste-pile,
 .foundation-pile {
   border-radius: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
   position: relative;
   overflow: hidden;
   background: transparent;
+}
+
+/* Empty tableau pile placeholder styling */
+.tableau-empty-placeholder {
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 52px;
+  height: 72px;
+}
+
+/* Enhanced card flip animations */
+.animated-card-flyover {
+  will-change: transform;
+}
+
+.animated-card-flyover.stockToWaste {
+  animation: stockToWasteFlip 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animated-card-flyover.wasteToStock {
+  animation: wasteToStockFlip 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes stockToWasteFlip {
+  0% {
+    transform: translate(0, 0) rotateY(0deg);
+  }
+  25% {
+    transform: translate(15%, -10%) rotateY(-90deg);
+  }
+  50% {
+    transform: translate(50%, -5%) rotateY(-180deg);
+  }
+  75% {
+    transform: translate(85%, 0%) rotateY(-180deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(-180deg);
+  }
+}
+
+@keyframes wasteToStockFlip {
+  0% {
+    transform: translate(0, 0) rotateY(-180deg);
+  }
+  25% {
+    transform: translate(-15%, -10%) rotateY(-90deg);
+  }
+  50% {
+    transform: translate(-50%, -5%) rotateY(0deg);
+  }
+  75% {
+    transform: translate(-85%, 0%) rotateY(0deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(0deg);
+  }
 }
 
 .foundation-pile:hover,
@@ -454,6 +515,11 @@ body {
     top: calc(var(--card-index) * 20px);
   }
 
+  .tableau-empty-placeholder {
+    width: 65px;
+    height: 91px;
+  }
+
   .stock-pile,
   .waste-pile,
   .foundation-pile,
@@ -524,6 +590,11 @@ body {
 
   .tableau-card-position {
     top: calc(var(--card-index) * 26px);
+  }
+
+  .tableau-empty-placeholder {
+    width: 85px;
+    height: 119px;
   }
 
   .stock-pile,
@@ -602,6 +673,11 @@ body {
     top: calc(var(--card-index) * 30px);
   }
 
+  .tableau-empty-placeholder {
+    width: 100px;
+    height: 140px;
+  }
+
   .stock-pile,
   .waste-pile,
   .foundation-pile,
@@ -675,6 +751,11 @@ body {
     /* Compact overlap for viewport fit */
   }
 
+  .tableau-empty-placeholder {
+    width: 100px;
+    height: 140px;
+  }
+
   .stock-pile,
   .waste-pile,
   .foundation-pile,
@@ -746,6 +827,11 @@ body {
   .tableau-card-position {
     top: calc(var(--card-index) * 22px);
     /* Efficient overlap */
+  }
+
+  .tableau-empty-placeholder {
+    width: 110px;
+    height: 154px;
   }
 
   .stock-pile,
@@ -901,6 +987,11 @@ body {
     max-width: 60px !important;
     min-height: 84px !important;
     max-height: 84px !important;
+  }
+
+  .landscape-mobile-tableau .tableau-empty-placeholder {
+    width: 60px !important;
+    height: 84px !important;
   }
 
   .landscape-mobile-tableau .card span {
@@ -1587,6 +1678,64 @@ div:focus {
   }
 }
 
+/* Green glow animation for recyclable stock pile */
+.stock-pile.recycle-available {
+  position: relative;
+  animation: recycleGlow 2s ease-in-out infinite;
+}
+
+.stock-pile.recycle-available::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  border-radius: 12px;
+  pointer-events: none;
+  animation: recycleGlowBorder 2s ease-in-out infinite;
+}
+
+@keyframes recycleGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 12px 3px rgba(34, 197, 94, 0.4);
+  }
+}
+
+@keyframes recycleGlowBorder {
+  0%,
+  100% {
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.2);
+  }
+
+  50% {
+    border-color: rgba(34, 197, 94, 0.7);
+    box-shadow: 0 0 8px 2px rgba(34, 197, 94, 0.4);
+  }
+}
+
+/* Animated green glow for recycle icon */
+.recycle-icon-glow {
+  animation: recycleIconGlow 2s ease-in-out infinite;
+}
+
+@keyframes recycleIconGlow {
+  0%,
+  100% {
+    color: rgb(74, 222, 128); /* text-green-400 */
+    filter: drop-shadow(0 0 2px rgba(34, 197, 94, 0.3));
+  }
+
+  50% {
+    color: rgb(34, 197, 94); /* text-green-500 */
+    filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6)) drop-shadow(0 0 12px rgba(34, 197, 94, 0.4));
+  }
+}
+
 .card-landing {
   animation: cardLand 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
@@ -1665,6 +1814,53 @@ div:focus {
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* Stock pile shuffle animation - cards cascade down into position */
+.stock-shuffle-cascade {
+  animation: stockShuffleCascade 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes stockShuffleCascade {
+  0% {
+    transform: translateY(-20px) translateX(10px) rotate(8deg) scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(5px) translateX(-3px) rotate(-2deg) scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Card shuffle flying animation for recycling/new game */
+.card-shuffle-fly {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  animation: cardShuffleFly 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes cardShuffleFly {
+  0% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+  }
+  30% {
+    opacity: 0.8;
+    transform: translateY(-50px) translateX(var(--fly-x, 0px)) rotate(var(--fly-rotation, 15deg)) scale(0.9);
+  }
+  70% {
+    opacity: 0.6;
+    transform: translateY(-30px) translateX(calc(var(--fly-x, 0px) * 0.5)) rotate(calc(var(--fly-rotation, 15deg) * -0.5)) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--end-y, 0px)) translateX(var(--end-x, 0px)) rotate(0deg) scale(0.8);
   }
 }
 

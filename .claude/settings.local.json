@@ -19,7 +19,10 @@
       "Bash(npx eslint:*)",
       "Bash(npm uninstall:*)",
       "Bash(mkdir:*)",
-      "Bash(npm test)"
+      "Bash(npm test)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }

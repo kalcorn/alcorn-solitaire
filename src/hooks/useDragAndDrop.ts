@@ -298,8 +298,14 @@ export function useDragAndDrop() {
       cardWidth = 60;  // Matches landscape mobile card size
       cardHeight = 84; // Matches landscape mobile card size
     } else if (isMobile) {
-      cardWidth = window.innerWidth <= 480 ? 76 : 44;
-      cardHeight = window.innerWidth <= 480 ? 110 : 62;
+      // Match CSS: base mobile is 52x72, sm+ (640px+) is 65x91
+      if (window.innerWidth >= 640) {
+        cardWidth = 65;
+        cardHeight = 91;
+      } else {
+        cardWidth = 52;
+        cardHeight = 72;
+      }
     } else {
       // Desktop: Match CSS breakpoints
       if (window.innerWidth >= 1536) {

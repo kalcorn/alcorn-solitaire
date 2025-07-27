@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card as CardType } from '@/types';
+import { BsArrowCounterclockwise } from 'react-icons/bs';
 
 interface StockPileProps {
   cards: CardType[];
@@ -65,8 +66,10 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
         onClick={canCycle ? onClick : undefined}
         title={canCycle ? "Click to recycle" : "No more cycles allowed"}
       >
-        <div className={`text-sm text-center font-medium ${isRecycleAvailable ? 'text-white' : 'text-white opacity-60'}`}>
-          {isRecycleAvailable ? '♻️ Recycle' : canCycle ? 'Recycle' : 'Empty'}
+        <div className="flex items-center justify-center">
+          {isRecycleAvailable ? (
+            <BsArrowCounterclockwise size={32} className="text-green-400 recycle-icon-glow" />
+          ) : null}
         </div>
         {cyclesRemaining !== undefined && cyclesRemaining > 0 && (
           <div className="text-white text-xs opacity-50">

@@ -1,52 +1,68 @@
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
   <!-- Hat -->
-  <path d="M30 15 Q50 8 70 15 L68 25 L32 25 Z" fill="#2C3E50" stroke="#1F2937" stroke-width="1"/>
-  <ellipse cx="50" cy="15" rx="12" ry="6" fill="#1F2937"/>
+  <path d="M28 20 Q48 12 68 20 L66 32 L30 32 Z" fill="#2C3E50" stroke="#1F2937" stroke-width="1"/>
+  <ellipse cx="48" cy="20" rx="14" ry="8" fill="#1F2937"/>
   
   <!-- Feather -->
-  <path d="M68 15 Q72 8 76 15" stroke="#1F2937" stroke-width="2" fill="none"/>
-  <path d="M70 12 L72 8 L74 12" stroke="#1F2937" stroke-width="1" fill="none"/>
+  <path d="M66 20 Q70 12 74 20" stroke="#6B7280" stroke-width="2.5" fill="none"/>
+  <path d="M68 16 L70 12 L72 16" stroke="#6B7280" stroke-width="1.5" fill="none"/>
+  <path d="M70 18 Q67 21 67 24 Q67 26 70 26 Q73 26 73 24 Q73 21 70 18 Z" fill="#6B7280"/>
+  <rect x="69" y="24" width="2" height="3" fill="#6B7280"/>
   
   <!-- Hair -->
-  <path d="M32 25 Q28 30 32 35 Q50 30 68 35 Q72 30 68 25" fill="#2C3E50"/>
+  <path d="M30 32 Q26 38 30 44 Q48 36 66 44 Q70 38 66 32" fill="#2C3E50"/>
   
   <!-- Face -->
-  <ellipse cx="50" cy="40" rx="16" ry="18" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
+  <ellipse cx="48" cy="52" rx="18" ry="22" fill="#FDBCB4" stroke="#E68A7A" stroke-width="1"/>
   
   <!-- Eyes -->
-  <circle cx="45" cy="37" r="2" fill="#2C3E50"/>
-  <circle cx="55" cy="37" r="2" fill="#2C3E50"/>
+  <circle cx="43" cy="47" r="2.5" fill="#2C3E50"/>
+  <circle cx="53" cy="47" r="2.5" fill="#2C3E50"/>
   
   <!-- Eyebrows -->
-  <path d="M42 34 Q45 32 48 34" stroke="#2C3E50" stroke-width="1.5" fill="none"/>
-  <path d="M52 34 Q55 32 58 34" stroke="#2C3E50" stroke-width="1.5" fill="none"/>
+  <path d="M39 43 Q43 41 47 43" stroke="#2C3E50" stroke-width="1.5" fill="none"/>
+  <path d="M49 43 Q53 41 57 43" stroke="#2C3E50" stroke-width="1.5" fill="none"/>
   
   <!-- Nose -->
-  <path d="M50 40 L49 42 L51 42 Z" fill="#E68A7A"/>
+  <path d="M48 52 L47 55 L49 55 Z" fill="#E68A7A"/>
   
   <!-- Mouth -->
-  <path d="M47 44 Q50 46 53 44" stroke="#2C3E50" stroke-width="1.5" fill="none"/>
+  <path d="M44 58 Q48 61 52 58" stroke="#6B7280" stroke-width="2" fill="none"/>
   
   <!-- Neck -->
-  <rect x="45" y="55" width="10" height="8" fill="#FDBCB4"/>
+  <rect x="43" y="70" width="10" height="10" fill="#FDBCB4"/>
   
   <!-- Doublet/Tunic -->
-  <path d="M25 63 Q50 58 75 63 L75 85 Q50 90 25 85 Z" fill="#1F2937" stroke="#111827" stroke-width="1"/>
-  
-  <!-- Sleeves -->
-  <ellipse cx="25" cy="70" rx="8" ry="12" fill="#1F2937" stroke="#111827" stroke-width="1"/>
-  <ellipse cx="75" cy="70" rx="8" ry="12" fill="#1F2937" stroke="#111827" stroke-width="1"/>
-  
-  <!-- Arms -->
-  <rect x="20" y="78" width="6" height="16" fill="#FDBCB4" rx="3"/>
-  <rect x="74" y="78" width="6" height="16" fill="#FDBCB4" rx="3"/>
-  
-  
-  <!-- Belt -->
-  <rect x="30" y="82" width="40" height="4" fill="#2C3E50"/>
+  <path d="M22 80 Q48 74 74 80 L74 108 Q48 114 22 108 Z" fill="#1F2937" stroke="#111827" stroke-width="1"/>
   
   <!-- Spade decoration on chest -->
-  <path d="M50 70 Q47 73 47 76 Q47 78 50 78 Q53 78 53 76 Q53 73 50 70 Z" fill="#1F2937"/>
-  <rect x="49" y="76" width="2" height="4" fill="#1F2937"/>
+  <path d="M48 88 Q45 91 45 94 Q45 96 48 96 Q51 96 51 94 Q51 91 48 88 Z" fill="#374151"/>
+  <rect x="47" y="94" width="2" height="4" fill="#374151"/>
   
+  <!-- Sleeves -->
+  <ellipse cx="22" cy="88" rx="10" ry="16" fill="#1F2937" stroke="#111827" stroke-width="1"/>
+  <ellipse cx="74" cy="88" rx="10" ry="16" fill="#1F2937" stroke="#111827" stroke-width="1"/>
+  
+  <!-- Arms -->
+  <rect x="16" y="98" width="8" height="24" fill="#FDBCB4" rx="4"/>
+  <rect x="72" y="98" width="8" height="24" fill="#FDBCB4" rx="4"/>
+  
+  <!-- Hands -->
+  <circle cx="20" cy="118" r="4" fill="#FDBCB4"/>
+  <circle cx="76" cy="118" r="4" fill="#FDBCB4"/>
+  
+  <!-- Belt -->
+  <rect x="28" y="104" width="40" height="5" fill="#2C3E50"/>
+  <path d="M48 103 Q45 106 45 109 Q45 111 48 111 Q51 111 51 109 Q51 106 48 103 Z" fill="#6B7280"/>
+  <rect x="47" y="109" width="2" height="3" fill="#6B7280"/>
+  
+  <!-- Lower tunic -->
+  <rect x="22" y="108" width="52" height="32" fill="#1F2937"/>
+  
+  <!-- Spade decorations on lower tunic -->
+  <path d="M35 120 Q32 123 32 126 Q32 128 35 128 Q38 128 38 126 Q38 123 35 120 Z" fill="#374151"/>
+  <rect x="34" y="126" width="2" height="3" fill="#374151"/>
+  
+  <path d="M61 120 Q58 123 58 126 Q58 128 61 128 Q64 128 64 126 Q64 123 61 120 Z" fill="#374151"/>
+  <rect x="60" y="126" width="2" height="3" fill="#374151"/>
 </svg>

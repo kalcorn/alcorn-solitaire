@@ -47,6 +47,36 @@ describe('gameUtils', () => {
       expect(shuffledDeck).toHaveLength(originalDeck.length);
       expect(shuffledDeck).toEqual(expect.arrayContaining(originalDeck));
     });
+
+    it('should produce identical results with the same seed', () => {
+      const deck: Card[] = [
+        { id: '1', suit: 'hearts', rank: 'A', isFlipped: false },
+        { id: '2', suit: 'spades', rank: '2', isFlipped: false },
+        { id: '3', suit: 'diamonds', rank: '3', isFlipped: false },
+        { id: '4', suit: 'clubs', rank: '4', isFlipped: false },
+      ];
+      
+      const shuffle1 = shuffleDeck([...deck], 42);
+      const shuffle2 = shuffleDeck([...deck], 42);
+      
+      expect(shuffle1).toEqual(shuffle2);
+    });
+
+    it('should produce different results with different seeds', () => {
+      const deck: Card[] = [
+        { id: '1', suit: 'hearts', rank: 'A', isFlipped: false },
+        { id: '2', suit: 'spades', rank: '2', isFlipped: false },
+        { id: '3', suit: 'diamonds', rank: '3', isFlipped: false },
+        { id: '4', suit: 'clubs', rank: '4', isFlipped: false },
+        { id: '5', suit: 'hearts', rank: '5', isFlipped: false },
+        { id: '6', suit: 'spades', rank: '6', isFlipped: false },
+      ];
+      
+      const shuffle1 = shuffleDeck([...deck], 12345);
+      const shuffle2 = shuffleDeck([...deck], 54321);
+      
+      expect(shuffle1).not.toEqual(shuffle2);
+    });
   });
 
   describe('canMoveCard', () => {

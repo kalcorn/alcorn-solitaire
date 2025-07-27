@@ -206,25 +206,60 @@ class SoundManager {
   }
 
   /**
+   * Load an MP3 file and decode it to an AudioBuffer
+   */
+  private async loadMP3Sound(url: string): Promise<AudioBuffer | null> {
+    if (!this.audioContext) return null;
+
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+      return audioBuffer;
+    } catch (error) {
+      console.error(`Failed to load sound: ${url}`, error);
+      return null;
+    }
+  }
+
+  /**
    * Initialize sound effects
    */
-  public initializeSounds() {
+  public async initializeSounds() {
     if (!this.audioContext) {
       return;
     }
 
-    // Generate different tones for different actions
-    const cardFlip = this.generateCardFlipSound();
-    const cardMove = this.generateTone(600, 0.08, 'triangle');
-    const cardDrop = this.generateTone(400, 0.12, 'sine');
-    const shuffleSound = this.generateShuffleSound();
+    // Load MP3 files for card movements and shuffling
+    const cardFlipBuffer = await this.loadMP3Sound('/sounds/card_flip.mp3');
+    const shuffleBuffer = await this.loadMP3Sound('/sounds/card_shuffle.mp3');
+    
+    // Generate remaining sounds using Web Audio API
     const winSound = this.generateTone(1000, 0.3, 'sine');
     const errorSound = this.generateTone(200, 0.2, 'square');
 
-    if (cardFlip) this.sounds.set('cardFlip', cardFlip);
-    if (cardMove) this.sounds.set('cardMove', cardMove);
-    if (cardDrop) this.sounds.set('cardDrop', cardDrop);
-    if (shuffleSound) this.sounds.set('shuffle', shuffleSound);
+    if (cardFlipBuffer) {
+      this.sounds.set('cardFlip', cardFlipBuffer);
+      this.sounds.set('cardMove', cardFlipBuffer); // Use same sound for card movements
+      this.sounds.set('cardDrop', cardFlipBuffer); // Use same sound for card drops
+    } else {
+      // Fallback to generated sounds if MP3 loading fails
+      const cardFlip = this.generateCardFlipSound();
+      const cardMove = this.generateTone(600, 0.08, 'triangle');
+      const cardDrop = this.generateTone(400, 0.12, 'sine');
+      if (cardFlip) this.sounds.set('cardFlip', cardFlip);
+      if (cardMove) this.sounds.set('cardMove', cardMove);
+      if (cardDrop) this.sounds.set('cardDrop', cardDrop);
+    }
+
+    if (shuffleBuffer) {
+      this.sounds.set('shuffle', shuffleBuffer);
+    } else {
+      // Fallback to generated shuffle sound
+      const shuffleSound = this.generateShuffleSound();
+      if (shuffleSound) this.sounds.set('shuffle', shuffleSound);
+    }
+
     if (winSound) this.sounds.set('win', winSound);
     if (errorSound) this.sounds.set('error', errorSound);
   }
@@ -280,9 +315,9 @@ export const soundManager = new SoundManager();
 
 // Initialize sounds on first user interaction (client-side only)
 let soundsInitialized = false;
-const initializeSoundsOnInteraction = () => {
+const initializeSoundsOnInteraction = async () => {
   if (!soundsInitialized) {
-    soundManager.initializeSounds();
+    await soundManager.initializeSounds();
     soundsInitialized = true;
     // Remove listeners after first initialization
     if (typeof document !== 'undefined') {
