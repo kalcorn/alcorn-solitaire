@@ -144,8 +144,8 @@ const GameBoard: React.FC = () => {
     // Determine animation type based on stock pile state
     const isRecycling = gameState.stockPile.length === 0;
     
-    // Check if we're in landscape mobile layout
-    const isLandscapeMobile = document.querySelector('.landscape-mobile-left-sidebar') !== null;
+    // Check if we're in landscape mobile layout - match CSS media query exactly
+    const isLandscapeMobile = window.innerHeight <= 500 && window.innerWidth >= 640 && window.innerWidth <= 1024;
     
     // Get actual positions of stock and waste piles - try multiple selectors for different layouts
     let stockPosition = getElementPosition('.standard-layout .stock-pile-responsive .card');
@@ -290,49 +290,11 @@ const GameBoard: React.FC = () => {
         role="main"
         aria-label="Solitaire game board"
       >
-        <div className="w-full flex grow max-w-7xl mx-auto">
-          <div className="card-playing-area flex flex-col grow gap-3 w-full pt-6 md:pt-8 lg:pt-10">
-
-            {/* Landscape Mobile: Left Side Piles (Stock, Waste) */}
-            <div className="landscape-mobile-left-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 p-3 shadow-lg border border-green-700 border-opacity-30">
-              <div className="flex flex-col">
-                <StockPile 
-                  cards={gameState.stockPile} 
-                  onClick={handleAnimatedStockFlip}
-                  cyclesRemaining={gameState.settings.deckCyclingLimit > 0 ? 
-                    Math.max(0, gameState.settings.deckCyclingLimit - gameState.stockCycles) : 
-                    undefined}
-                  canCycle={gameState.settings.deckCyclingLimit === 0 || 
-                    gameState.stockCycles < gameState.settings.deckCyclingLimit}
-                  wasteCardCount={gameState.wastePile.length}
-                  isShuffling={isShuffling}
-                />
-                <WastePile 
-                  cards={gameState.wastePile}
-                  onCardClick={(cardId) => {
-                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
-                    if (cardIndex !== -1) {
-                      handleCardClick(cardId, 'waste', 0, cardIndex);
-                    }
-                  }}
-                  onCardDragStart={(cardId, event) => {
-                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
-                    if (cardIndex !== -1) {
-                      const movableCards = getMovableCards({ pileType: 'waste', pileIndex: 0, cardIndex });
-                      if (movableCards.length > 0) {
-                        startDrag(movableCards, { pileType: 'waste', pileIndex: 0, cardIndex }, event);
-                      }
-                    }
-                  }}
-                  isCardBeingDragged={isCardBeingDragged}
-                />
-              </div>
-            </div>
-
-
-            {/* Top Piles Section - Standard Layout: Stock, Waste, and Foundations - Desktop/Portrait Mobile */}
+        {/* Top Piles Section - Full Width Background */}
+        <div className="standard-layout w-full bg-gradient-to-r from-slate-800 via-green-900 to-slate-800 bg-opacity-90 py-4 mb-0 md:mb-4 lg:mb-6 shadow-lg border-y border-slate-600/30">
+          <div className="w-full max-w-6xl mx-auto px-4 xl:px-0">
             <div 
-              className="standard-layout flex flex-row items-start justify-between w-full bg-gradient-to-r from-emerald-900 to-green-900 bg-opacity-40 rounded-xl p-6 mb-0 md:mb-4 lg:mb-6 shadow-lg border border-green-700 border-opacity-30"
+              className="flex flex-row items-start justify-between w-full"
               role="region"
               aria-label="Stock, waste, and foundation piles"
             >
@@ -402,6 +364,47 @@ const GameBoard: React.FC = () => {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="w-full flex grow max-w-6xl mx-auto px-4 xl:px-0">
+          <div className="card-playing-area flex flex-col grow gap-3 w-full pt-6 md:pt-8 lg:pt-10">
+
+            {/* Landscape Mobile: Left Side Piles (Stock, Waste) */}
+            <div className="landscape-mobile-left-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 p-3 shadow-lg border border-green-700 border-opacity-30">
+              <div className="flex flex-col gap-2">
+                <StockPile 
+                  cards={gameState.stockPile} 
+                  onClick={handleAnimatedStockFlip}
+                  cyclesRemaining={gameState.settings.deckCyclingLimit > 0 ? 
+                    Math.max(0, gameState.settings.deckCyclingLimit - gameState.stockCycles) : 
+                    undefined}
+                  canCycle={gameState.settings.deckCyclingLimit === 0 || 
+                    gameState.stockCycles < gameState.settings.deckCyclingLimit}
+                  wasteCardCount={gameState.wastePile.length}
+                  isShuffling={isShuffling}
+                />
+                <WastePile 
+                  cards={gameState.wastePile}
+                  onCardClick={(cardId) => {
+                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
+                    if (cardIndex !== -1) {
+                      handleCardClick(cardId, 'waste', 0, cardIndex);
+                    }
+                  }}
+                  onCardDragStart={(cardId, event) => {
+                    const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
+                    if (cardIndex !== -1) {
+                      const movableCards = getMovableCards({ pileType: 'waste', pileIndex: 0, cardIndex });
+                      if (movableCards.length > 0) {
+                        startDrag(movableCards, { pileType: 'waste', pileIndex: 0, cardIndex }, event);
+                      }
+                    }
+                  }}
+                  isCardBeingDragged={isCardBeingDragged}
+                />
+              </div>
+            </div>
 
             {/* Landscape Mobile: Center Tableau with Increased Size */}
             <div className="landscape-mobile-tableau flex-1 flex justify-center">
@@ -444,7 +447,7 @@ const GameBoard: React.FC = () => {
             </div>
 
             {/* Landscape Mobile: Right Side Foundation Piles */}
-            <div className="landscape-mobile-right-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 p-4 shadow-lg border border-green-700 border-opacity-30">
+            <div className="landscape-mobile-right-sidebar bg-gradient-to-b from-emerald-900 to-green-900 bg-opacity-40 p-3 shadow-lg border border-green-700 border-opacity-30">
                 {[0, 1, 2, 3].map(i => (
                   <div
                     key={i}
@@ -521,7 +524,7 @@ const GameBoard: React.FC = () => {
                   <p className="text-lg mb-6 text-slate-200">Final Score: {gameState.score}</p>
                   <button
                     onClick={handleAnimatedNewGame}
-                    className="px-6 py-2 rounded-lg bg-emerald-700 text-white font-semibold shadow-lg hover:bg-emerald-800 border border-emerald-600 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                    className="px-6 py-2 rounded-lg bg-gradient-to-b from-emerald-600 to-emerald-700 text-white font-semibold shadow-lg hover:from-emerald-700 hover:to-emerald-800 border border-emerald-500 hover:border-emerald-600 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-black"
                   >
                     🎮 Play Again
                   </button>
@@ -549,9 +552,19 @@ const GameBoard: React.FC = () => {
                   pointerEvents: 'none',
                   top: `${animatingCard.startPosition.y}px`,
                   left: `${animatingCard.startPosition.x}px`,
-                  // Use specific sizes for landscape mobile sidebar cards, responsive for others
-                  width: animatingCard.isLandscapeMobile ? '40px' : 'clamp(52px, 8vw, 132px)',
-                  height: animatingCard.isLandscapeMobile ? '56px' : 'clamp(72px, 11.2vw, 185px)',
+                  // Use consistent sizes for landscape mobile, responsive for others
+                  width: animatingCard.isLandscapeMobile ? '60px' : 
+                    window.innerWidth >= 1536 ? '110px' :
+                    window.innerWidth >= 1280 ? '100px' :
+                    window.innerWidth >= 1024 ? '100px' :
+                    window.innerWidth >= 768 ? '85px' : 
+                    window.innerWidth >= 640 ? '65px' : '52px',
+                  height: animatingCard.isLandscapeMobile ? '84px' : 
+                    window.innerWidth >= 1536 ? '154px' :
+                    window.innerWidth >= 1280 ? '140px' :
+                    window.innerWidth >= 1024 ? '140px' :
+                    window.innerWidth >= 768 ? '119px' : 
+                    window.innerWidth >= 640 ? '91px' : '72px',
                   transition: animatingCard.type === 'stockToWaste' 
                     ? 'all 0.4s cubic-bezier(0.4,0,0.2,1)' 
                     : 'all 0.6s cubic-bezier(0.4,0,0.2,1)',
@@ -564,6 +577,20 @@ const GameBoard: React.FC = () => {
                   faceUp={animatingCard.type === 'stockToWaste' ? true : animatingCard.card.faceUp}
                   cardId={animatingCard.card.id}
                   isBeingDragged={false}
+                  style={{
+                    width: animatingCard.isLandscapeMobile ? '60px' : 
+                      window.innerWidth >= 1536 ? '110px' :
+                      window.innerWidth >= 1280 ? '100px' :
+                      window.innerWidth >= 1024 ? '100px' :
+                      window.innerWidth >= 768 ? '85px' : 
+                      window.innerWidth >= 640 ? '65px' : '52px',
+                    height: animatingCard.isLandscapeMobile ? '84px' : 
+                      window.innerWidth >= 1536 ? '154px' :
+                      window.innerWidth >= 1280 ? '140px' :
+                      window.innerWidth >= 1024 ? '140px' :
+                      window.innerWidth >= 768 ? '119px' : 
+                      window.innerWidth >= 640 ? '91px' : '72px'
+                  }}
                 />
               </div>
             )}

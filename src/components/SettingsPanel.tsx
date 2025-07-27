@@ -42,7 +42,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
       {/* Settings Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="text-sm sm:text-lg font-mono font-bold text-white bg-slate-800 rounded-lg px-4 py-3 border border-slate-600 shadow-lg hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+        className="text-sm sm:text-lg font-mono font-bold text-white bg-gradient-to-b from-slate-700 to-slate-800 rounded-lg px-4 py-3 border border-slate-600 shadow-lg hover:from-slate-600 hover:to-slate-700 hover:border-slate-500 hover:scale-105 active:scale-95 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-800 hover:shadow-xl"
         title="Game Settings"
       >
         <div className="flex items-center justify-center">
@@ -139,7 +139,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="flex justify-center mt-8 pt-4 border-t border-slate-600">
               <button
                 onClick={() => setIsOpen(false)}
-                className="px-8 py-3 rounded-lg bg-emerald-700 text-white text-lg font-semibold hover:bg-emerald-800 hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="px-8 py-3 rounded-lg bg-gradient-to-b from-emerald-600 to-emerald-700 text-white text-lg font-semibold hover:from-emerald-700 hover:to-emerald-800 border border-emerald-500 hover:border-emerald-600 hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-800"
               >
                 Close
               </button>

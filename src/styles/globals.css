@@ -184,6 +184,7 @@ body {
   z-index: 3;
 }
 
+
 @keyframes subtle-shimmer {
   0%, 100% {
     background-position: 0% 50%;
@@ -230,16 +231,23 @@ body {
 .waste-pile,
 .foundation-pile {
   border-radius: 8px;
-  border: 1px solid #4b5563;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(circle at center, rgba(26, 46, 37, 0.8) 0%, rgba(13, 62, 34, 0.6) 100%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.1) 100%);
-  box-shadow:
-    inset 0 4px 8px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 2px 4px rgba(0, 0, 0, 0.2);
+  background: transparent;
+}
+
+.foundation-pile:hover,
+.stock-pile:hover,
+.waste-pile:hover {
+  overflow: visible;
+}
+
+/* Ensure cards can escape container bounds during hover animations */
+.foundation-pile .card:hover,
+.stock-pile .card:hover,
+.waste-pile .card:hover {
+  z-index: 1000;
 }
 
 .stock-pile.face-down {
@@ -285,11 +293,6 @@ body {
   z-index: 3;
 }
 
-.foundation-pile {
-  background:
-    radial-gradient(circle at center, rgba(26, 46, 37, 0.6) 0%, rgba(13, 62, 34, 0.4) 100%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.08) 100%);
-}
 
 /* Container classes for layout stability */
 .stock-pile-container,
@@ -306,17 +309,7 @@ body {
   flex-shrink: 0;
 }
 
-/* Foundation pile improvements - better visibility */
-.foundation-pile {
-  background:
-    radial-gradient(circle at center, rgba(26, 46, 37, 0.85) 0%, rgba(13, 62, 34, 0.75) 100%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.15) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow:
-    inset 0 4px 8px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    0 2px 6px rgba(0, 0, 0, 0.3);
-}
+/* Foundation pile improvements - clean modern styling */
 
 /* Foundation pile suit symbols and text - preserve colors with transparency */
 .foundation-pile .text-5xl {
@@ -358,6 +351,29 @@ body {
   line-height: 1;
 }
 
+/* Ensure all pile containers have consistent dimensions */
+.stock-pile-responsive,
+.waste-pile-responsive,
+.foundation-pile {
+  min-width: 52px;
+  min-height: 72px;
+  box-sizing: border-box;
+}
+
+/* Override for landscape mobile to prevent size conflicts */
+@media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
+  .landscape-mobile-left-sidebar .stock-pile-responsive,
+  .landscape-mobile-left-sidebar .waste-pile-responsive,
+  .landscape-mobile-right-sidebar .foundation-pile {
+    min-width: 60px !important;
+    min-height: 84px !important;
+    width: 60px !important;
+    height: 84px !important;
+    max-width: 60px !important;
+    max-height: 84px !important;
+  }
+}
+
 .tableau-pile {
   max-width: 52px;
   /*height: 350px;*/
@@ -378,6 +394,7 @@ body {
 
 .tableau-container {
   width: 52px;
+  min-height: 72px; /* Ensure empty piles can be drop targets */
 }
 
 .tableau-pile .card,
@@ -448,6 +465,15 @@ body {
 
   .tableau-container {
     width: 65px;
+    min-height: 91px; /* Ensure empty piles can be drop targets */
+  }
+
+  /* Ensure consistent pile sizing */
+  .stock-pile-responsive,
+  .waste-pile-responsive,
+  .foundation-pile {
+    min-width: 65px;
+    min-height: 91px;
   }
 
   .tableau-pile .card,
@@ -474,6 +500,7 @@ body {
     width: 3.4rem !important;
     height: 3.4rem !important;
   }
+
 
 }
 
@@ -504,12 +531,21 @@ body {
   .foundation-pile,
   .stock-pile-responsive,
   .waste-pile-responsive {
-    /*width: 85px;*/
-    /*height: 119px;*/
+    width: 85px;
+    height: 119px;
   }
 
   .tableau-container {
     width: 85px;
+    min-height: 119px; /* Ensure empty piles can be drop targets */
+  }
+
+  /* Ensure consistent pile sizing */
+  .stock-pile-responsive,
+  .waste-pile-responsive,
+  .foundation-pile {
+    min-width: 85px;
+    min-height: 119px;
   }
 
   .tableau-pile .card,
@@ -577,6 +613,15 @@ body {
 
   .tableau-container {
     width: 100px;
+    min-height: 140px; /* Ensure empty piles can be drop targets */
+  }
+
+  /* Ensure consistent pile sizing */
+  .stock-pile-responsive,
+  .waste-pile-responsive,
+  .foundation-pile {
+    min-width: 100px;
+    min-height: 140px;
   }
 
   .tableau-pile .card,
@@ -609,24 +654,24 @@ body {
 /* EXTRA LARGE (xl: 1280px+) - Viewport optimized */
 @media (min-width: 1280px) {
   .card-playing-area {
-    padding-top: 1rem;
+    padding-top: 0.5rem;
   }
 
   .card {
-    width: 132px;
-    height: 185px;
-    /* 5:7 ratio, optimized for viewport fit */
-    font-size: 1.35rem;
+    width: 100px;
+    height: 140px;
+    /* 5:7 ratio, more reasonable desktop size */
+    font-size: 1.1rem;
   }
 
   .tableau-pile {
-    max-width: 132px;
-    height: 520px;
+    max-width: 100px;
+    height: 420px;
     /* Controlled for viewport */
   }
 
   .tableau-card-position {
-    top: calc(var(--card-index) * 24px);
+    top: calc(var(--card-index) * 20px);
     /* Compact overlap for viewport fit */
   }
 
@@ -635,22 +680,31 @@ body {
   .foundation-pile,
   .stock-pile-responsive,
   .waste-pile-responsive {
-    width: 132px;
-    height: 185px;
+    width: 100px;
+    height: 140px;
   }
 
   .tableau-container {
-    width: 132px;
+    width: 100px;
+    min-height: 140px; /* Ensure empty piles can be drop targets */
+  }
+
+  /* Ensure consistent pile sizing */
+  .stock-pile-responsive,
+  .waste-pile-responsive,
+  .foundation-pile {
+    min-width: 100px;
+    min-height: 140px;
   }
 
   .tableau-pile .card,
   .tableau-pile .card.face-down {
-    width: 132px !important;
-    height: 185px !important;
-    min-width: 132px !important;
-    max-width: 132px !important;
-    min-height: 185px !important;
-    max-height: 185px !important;
+    width: 100px !important;
+    height: 140px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    min-height: 140px !important;
+    max-height: 140px !important;
   }
 
   .card span {
@@ -673,24 +727,24 @@ body {
 /* 2X LARGE (2xl: 1536px+) - Maximum viewport optimization */
 @media (min-width: 1536px) {
   .card-playing-area {
-    padding-top: 1.5rem;
+    padding-top: 0.75rem;
   }
 
   .card {
-    width: 132px;
-    height: 185px;
+    width: 110px;
+    height: 154px;
     /* 5:7 ratio, viewport constrained */
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
 
   .tableau-pile {
-    max-width: 132px;
-    height: 580px;
+    max-width: 110px;
+    height: 480px;
     /* Viewport fit priority */
   }
 
   .tableau-card-position {
-    top: calc(var(--card-index) * 28px);
+    top: calc(var(--card-index) * 22px);
     /* Efficient overlap */
   }
 
@@ -699,22 +753,31 @@ body {
   .foundation-pile,
   .stock-pile-responsive,
   .waste-pile-responsive {
-    width: 132px;
-    height: 185px;
+    width: 110px;
+    height: 154px;
   }
 
   .tableau-container {
-    width: 132px;
+    width: 110px;
+    min-height: 154px; /* Ensure empty piles can be drop targets */
+  }
+
+  /* Ensure consistent pile sizing */
+  .stock-pile-responsive,
+  .waste-pile-responsive,
+  .foundation-pile {
+    min-width: 110px;
+    min-height: 154px;
   }
 
   .tableau-pile .card,
   .tableau-pile .card.face-down {
-    width: 132px !important;
-    height: 185px !important;
-    min-width: 132px !important;
-    max-width: 132px !important;
-    min-height: 185px !important;
-    max-height: 185px !important;
+    width: 110px !important;
+    height: 154px !important;
+    min-width: 110px !important;
+    max-width: 110px !important;
+    min-height: 154px !important;
+    max-height: 154px !important;
   }
 
   .card span {
@@ -739,6 +802,15 @@ body {
    ================================================================= */
 @media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
 
+  /* Force full height for landscape mobile only */
+  .felt-bg {
+    height: 100vh !important;
+  }
+  
+  main {
+    height: 100% !important;
+  }
+
   /* Hide standard layout elements in landscape mobile */
   .standard-layout,
   .standard-tableau {
@@ -756,20 +828,33 @@ body {
   .card-playing-area {
     display: flex !important;
     flex-direction: row !important;
-    align-items: flex-start !important;
+    align-items: stretch !important; /* Make sidebars stretch to full height */
     gap: 1rem !important;
     margin-top: 0rem !important;
     padding-top: 0rem !important;
+    flex: 1 !important; /* Use all available height from parent */
+  }
+
+  /* Remove padding from main containers in landscape mobile to keep sidebars flush */
+  .w-full.flex.grow.max-w-6xl.mx-auto,
+  .standard-layout .w-full.max-w-6xl.mx-auto {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Header in landscape mobile should have consistent padding with sidebars (12px) */
+  header .w-full.max-w-6xl.mx-auto {
+    padding-left: 0.75rem !important; /* 12px to match sidebar p-3 */
+    padding-right: 0.75rem !important;
   }
 
   .landscape-mobile-left-sidebar {
-    height: calc(100vh - 80px) !important; /* Full height minus header */
     display: flex !important;
     flex-direction: column !important;
+    justify-content: flex-start !important;
   }
 
   .landscape-mobile-right-sidebar {
-    height: calc(100vh - 80px) !important; /* Full height minus header */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -796,6 +881,7 @@ body {
 
   .landscape-mobile-tableau .tableau-container {
     width: 60px !important;
+    min-height: 84px !important; /* Ensure empty piles can be drop targets */
   }
 
   .landscape-mobile-tableau .tableau-pile {
@@ -987,11 +1073,18 @@ body {
     font-size: 0.9rem !important;
   }
 
+
   .landscape-mobile-left-sidebar .stock-pile,
   .landscape-mobile-left-sidebar .waste-pile,
+  .landscape-mobile-left-sidebar .stock-pile-responsive,
+  .landscape-mobile-left-sidebar .waste-pile-responsive,
   .landscape-mobile-right-sidebar .foundation-pile {
     width: 60px !important;
     height: 84px !important;
+    min-width: 60px !important;
+    min-height: 84px !important;
+    max-width: 60px !important;
+    max-height: 84px !important;
   }
 
   .landscape-mobile-left-sidebar .card span,
@@ -1250,32 +1343,23 @@ div:focus {
    ================================================================= */
 
 .stock-pile.empty.recycle-available {
-  background: linear-gradient(135deg, #0f4b3c 0%, #10b981 20%, #059669 100%);
-  border-color: #10b981;
+  background: transparent;
+  border-color: rgba(16, 185, 129, 0.6);
   animation: recycleGlow 2s ease-in-out infinite;
   cursor: pointer !important;
 }
 
 .stock-pile.empty.recycle-available:hover {
-  background: linear-gradient(135deg, #064e3b 0%, #10b981 30%, #047857 100%);
-  /* Removed transform: scale(1.05) - no pile movement */
+  background: transparent;
+  border-color: rgba(16, 185, 129, 0.8);
 }
 
 @keyframes recycleGlow {
-
-  0%,
-  100% {
-    box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.35),
-      0 4px 8px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  0%, 100% {
+    border-color: rgba(16, 185, 129, 0.4);
   }
-
   50% {
-    box-shadow:
-      0 12px 32px rgba(16, 185, 129, 0.4),
-      0 6px 12px rgba(16, 185, 129, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    border-color: rgba(16, 185, 129, 0.8);
   }
 }
 

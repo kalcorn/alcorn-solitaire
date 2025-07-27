@@ -23,12 +23,7 @@ const UndoRedoButtons: React.FC<UndoRedoButtonsProps> = ({
   };
 
   return (
-    <div className="fixed z-40 
-                    /* All resolutions: left-aligned with page content - matches header/content margin */
-                    lg:bottom-8 lg:left-0 lg:ml-8 lg:transform-none lg:flex lg:flex-row
-                    md:bottom-6 md:left-0 md:ml-6 md:transform-none md:flex md:flex-row
-                    sm:bottom-4 sm:left-0 sm:ml-4 sm:transform-none sm:flex sm:flex-row
-                    max-sm:bottom-4 max-sm:left-0 max-sm:ml-4 max-sm:transform-none max-sm:flex max-sm:flex-col">
+    <div className="fixed z-40 bottom-4 left-4 xl:left-[max(1rem,calc(50vw-36rem))]">
       {/* Undo Button */}
       <button
         onClick={handleUndo}

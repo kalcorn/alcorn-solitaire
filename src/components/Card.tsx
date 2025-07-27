@@ -11,6 +11,7 @@ interface CardProps {
   onClick?: () => void;
   onMouseDown?: (event: React.MouseEvent) => void;
   onTouchStart?: (event: React.TouchEvent) => void;
+  style?: React.CSSProperties;
 }
 
 const suitIcons = {
@@ -24,7 +25,7 @@ const rankMap = {
   1: "A", 11: "J", 12: "Q", 13: "K"
 };
 
-const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged, onClick, onMouseDown, onTouchStart }) => {
+const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged, onClick, onMouseDown, onTouchStart, style }) => {
   const SuitIcon = suitIcons[suit];
   const displayRank = rankMap[rank as keyof typeof rankMap] || rank;
   const [isMouseDown, setIsMouseDown] = React.useState(false);
@@ -151,11 +152,12 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
         position: 'relative',
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none',
-        WebkitTapHighlightColor: 'transparent'
+        WebkitTapHighlightColor: 'transparent',
+        ...style // Merge passed styles to override dimensions
       }}
     >
       {faceUp ? (
-        <div className="relative w-full h-full bg-gradient-to-br from-white to-blue-50 border border-blue-200 rounded-lg shadow-lg">
+        <div className="relative w-full h-full bg-gradient-to-br from-white to-blue-50 border border-blue-200 rounded-lg shadow-lg overflow-hidden">
           {isFaceCard ? (
             /* Face Card SVG Display */
             <div className="relative w-full h-full overflow-hidden rounded-lg flex flex-col justify-end">
@@ -168,50 +170,55 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
                 onDragStart={(e) => e.preventDefault()}
               />
               {/* Small rank and suit in corners for face cards */}
-              <div className="absolute top-1 left-1">
+              <div className="absolute top-0.5 left-0.5">
                 <span className={`${suitColor} font-bold leading-none text-xs`}>{displayRank}</span>
               </div>
-              <div className="absolute top-1 right-1">
-                <SuitIcon className={`${suitColor} w-3 h-3`} />
+              <div className="absolute top-0.5 right-0.5">
+                <SuitIcon className={`${suitColor} w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 lg:w-4 lg:h-4`} />
               </div>
             </div>
           ) : (
             /* Regular Number/Ace Card Display */
             <>
               {/* Top-left number */}
-              <div className="absolute top-1 left-1">
+              <div className="absolute top-0.5 left-0.5">
                 <span className={`${suitColor} font-bold leading-none text-sm`}>{displayRank}</span>
               </div>
               
               {/* Top-right suit icon */}
-              <div className="absolute top-1 right-1">
-                <SuitIcon className={`${suitColor} w-4 h-4`} />
+              <div className="absolute top-0.5 right-0.5">
+                <SuitIcon className={`${suitColor} w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6`} />
               </div>
               
-              {/* Center large suit symbol with fancy duotone effect - positioned lower */}
+              {/* Center large suit symbol with vertical duo-tone effect - positioned lower */}
               <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'translateY(20%)' }}>
                 <div className="relative">
-                  {/* Main suit icon with duotone effect */}
-                  <div className="relative">
-                    <SuitIcon 
-                      className={`${suit === 'hearts' || suit === 'diamonds' ? 'text-red-500' : 'text-gray-700'} drop-shadow-lg`} 
-                      style={{
-                        fontSize: 'clamp(1.2rem, 4vw, 4rem)',
-                        filter: suit === 'hearts' || suit === 'diamonds' 
-                          ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.3)) drop-shadow(0 2px 4px rgba(220, 38, 38, 0.4))'
-                          : 'drop-shadow(0 0 8px rgba(55, 65, 81, 0.3)) drop-shadow(0 2px 4px rgba(31, 41, 55, 0.4))'
-                      }} 
-                    />
-                    {/* Duotone overlay */}
-                    <div className="absolute inset-0">
+                  {/* Main suit icon with duo-tone split effect */}
+                  <div className="relative" style={{ width: 'clamp(1.2rem, 4vw, 4rem)', height: 'clamp(1.2rem, 4vw, 4rem)' }}>
+                    {/* Left half of the icon */}
+                    <div className="absolute inset-0 overflow-hidden" style={{ clipPath: 'polygon(0 0, 50% 0, 50% 100%, 0 100%)' }}>
                       <SuitIcon 
-                        className={suit === 'hearts' || suit === 'diamonds' ? 'text-pink-300' : 'text-slate-500'}
+                        className={`${suit === 'hearts' || suit === 'diamonds' ? 'text-red-500' : 'text-gray-700'} drop-shadow-lg`}
                         style={{
-                          fontSize: 'clamp(1.2rem, 4vw, 4rem)',
-                          mixBlendMode: 'multiply',
-                          opacity: 0.6,
-                          transform: 'translate(1px, -1px)'
-                        }}
+                          width: 'clamp(1.2rem, 4vw, 4rem)',
+                          height: 'clamp(1.2rem, 4vw, 4rem)',
+                          filter: suit === 'hearts' || suit === 'diamonds' 
+                            ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.3)) drop-shadow(0 2px 4px rgba(220, 38, 38, 0.4))'
+                            : 'drop-shadow(0 0 8px rgba(55, 65, 81, 0.3)) drop-shadow(0 2px 4px rgba(31, 41, 55, 0.4))'
+                        }} 
+                      />
+                    </div>
+                    {/* Right half of the icon with slightly different color */}
+                    <div className="absolute inset-0 overflow-hidden" style={{ clipPath: 'polygon(50% 0, 100% 0, 100% 100%, 50% 100%)' }}>
+                      <SuitIcon 
+                        className={suit === 'hearts' || suit === 'diamonds' ? 'text-red-400' : 'text-gray-600'}
+                        style={{
+                          width: 'clamp(1.2rem, 4vw, 4rem)',
+                          height: 'clamp(1.2rem, 4vw, 4rem)',
+                          filter: suit === 'hearts' || suit === 'diamonds' 
+                            ? 'drop-shadow(0 0 6px rgba(248, 113, 113, 0.4)) drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))'
+                            : 'drop-shadow(0 0 6px rgba(75, 85, 99, 0.4)) drop-shadow(0 2px 4px rgba(55, 65, 81, 0.3))'
+                        }} 
                       />
                     </div>
                   </div>

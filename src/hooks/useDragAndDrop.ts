@@ -287,34 +287,46 @@ export function useDragAndDrop() {
     // Responsive card dimensions for different layouts
     const isMobile = window.innerWidth <= 768;
     const isLandscape = window.innerWidth > window.innerHeight;
-    const isLandscapeMobile = isMobile && isLandscape;
+    // Match CSS media query exactly: (max-height: 500px) and (min-width: 640px) and (max-width: 1024px)
+    const isLandscapeMobile = window.innerHeight <= 500 && window.innerWidth >= 640 && window.innerWidth <= 1024;
     
     let cardWidth: number;
     let cardHeight: number;
     
     if (isLandscapeMobile) {
-      // Landscape mobile: Check if card is from sidebar or tableau
-      const isLandscapeActive = document.querySelector('.landscape-mobile-left-sidebar')?.checkVisibility();
-      if (isLandscapeActive) {
-        // Use tableau card size for drag preview in landscape mobile
-        cardWidth = 60;  // Matches .landscape-mobile-tableau .card width
-        cardHeight = 84; // Matches .landscape-mobile-tableau .card height
-      } else {
-        cardWidth = 44;
-        cardHeight = 62;
-      }
+      // Landscape mobile: Use consistent card size for all areas
+      cardWidth = 60;  // Matches landscape mobile card size
+      cardHeight = 84; // Matches landscape mobile card size
     } else if (isMobile) {
       cardWidth = window.innerWidth <= 480 ? 76 : 44;
       cardHeight = window.innerWidth <= 480 ? 110 : 62;
     } else {
-      cardWidth = 128;
-      cardHeight = 184;
+      // Desktop: Match CSS breakpoints
+      if (window.innerWidth >= 1536) {
+        // 2XL breakpoint
+        cardWidth = 110;
+        cardHeight = 154;
+      } else if (window.innerWidth >= 1280) {
+        // XL breakpoint  
+        cardWidth = 100;
+        cardHeight = 140;
+      } else if (window.innerWidth >= 1024) {
+        // LG breakpoint
+        cardWidth = 85;
+        cardHeight = 119;
+      } else {
+        // MD breakpoint (768px+)
+        cardWidth = 65;
+        cardHeight = 91;
+      }
     }
 
     return {
       position: 'fixed' as const,
       left: dragState.dragPosition.x - dragState.dragOffset.x - (cardWidth / 2),
       top: dragState.dragPosition.y - dragState.dragOffset.y - (cardHeight / 2),
+      width: cardWidth,
+      height: cardHeight,
       zIndex: 1000,
       pointerEvents: 'none' as const,
       transform: `rotate(${rotation}) scale(${scale})`,

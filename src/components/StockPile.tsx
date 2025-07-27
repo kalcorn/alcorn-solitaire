@@ -65,11 +65,11 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
         onClick={canCycle ? onClick : undefined}
         title={canCycle ? "Click to recycle" : "No more cycles allowed"}
       >
-        <div className={`text-base text-center font-semibold ${isRecycleAvailable ? 'text-white' : 'text-gray-400'}`}>
+        <div className={`text-sm text-center font-medium ${isRecycleAvailable ? 'text-white' : 'text-white opacity-60'}`}>
           {isRecycleAvailable ? '♻️ Recycle' : canCycle ? 'Recycle' : 'Empty'}
         </div>
         {cyclesRemaining !== undefined && cyclesRemaining > 0 && (
-          <div className="text-gray-400 text-sm">
+          <div className="text-white text-xs opacity-50">
             {cyclesRemaining} left
           </div>
         )}
