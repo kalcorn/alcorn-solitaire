@@ -265,8 +265,16 @@ body {
   animation: stockToWasteFlip 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+.animated-card-flyover.stockToWaste.landscape-mobile {
+  animation: stockToWasteFlipVertical 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 .animated-card-flyover.wasteToStock {
   animation: wasteToStockFlip 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animated-card-flyover.wasteToStock.landscape-mobile {
+  animation: wasteToStockFlipVertical 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes stockToWasteFlip {
@@ -274,34 +282,82 @@ body {
     transform: translate(0, 0) rotateY(0deg);
   }
   25% {
-    transform: translate(15%, -10%) rotateY(-90deg);
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateY(90deg);
   }
   50% {
-    transform: translate(50%, -5%) rotateY(-180deg);
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(180deg);
   }
   75% {
-    transform: translate(85%, 0%) rotateY(-180deg);
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateY(180deg);
   }
   100% {
-    transform: translate(var(--end-x), var(--end-y)) rotateY(-180deg);
+    transform: translate(var(--end-x), var(--end-y)) rotateY(180deg);
   }
 }
 
 @keyframes wasteToStockFlip {
   0% {
-    transform: translate(0, 0) rotateY(-180deg);
+    transform: translate(0, 0) rotateY(180deg);
   }
   25% {
-    transform: translate(-15%, -10%) rotateY(-90deg);
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateY(90deg);
   }
   50% {
-    transform: translate(-50%, -5%) rotateY(0deg);
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(0deg);
   }
   75% {
-    transform: translate(-85%, 0%) rotateY(0deg);
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateY(0deg);
   }
   100% {
     transform: translate(var(--end-x), var(--end-y)) rotateY(0deg);
+  }
+}
+
+@keyframes stockToWasteFlipVertical {
+  0% {
+    transform: translate(0, 0) rotateX(0deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateX(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateX(180deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateX(180deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateX(180deg);
+  }
+}
+
+@keyframes wasteToStockFlipVertical {
+  0% {
+    transform: translate(0, 0) rotateX(180deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateX(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateX(0deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateX(0deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateX(0deg);
+  }
+}
+
+@keyframes bridgeCardMove {
+  0% {
+    transform: translate(0, 0) rotateY(0deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(90deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(180deg);
   }
 }
 
@@ -427,6 +483,10 @@ body {
   min-height: 72px;
   box-sizing: border-box;
 }
+
+
+
+
 
 /* Override for landscape mobile to prevent size conflicts */
 @media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {

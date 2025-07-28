@@ -20,6 +20,13 @@ interface AnimationState {
     flyX: number;
     flyRotation: number;
   }>;
+  bridgeCards: Array<{
+    id: string;
+    card: CardType;
+    startPosition: { x: number; y: number };
+    endPosition: { x: number; y: number };
+    delay: number;
+  }>;
 }
 
 export function useGameAnimations(gameState: GameState) {
@@ -28,6 +35,7 @@ export function useGameAnimations(gameState: GameState) {
   const [isWinAnimating, setIsWinAnimating] = useState(false);
   const [animatingCard, setAnimatingCard] = useState<AnimationState['animatingCard']>(null);
   const [flyingCards, setFlyingCards] = useState<AnimationState['flyingCards']>([]);
+  const [bridgeCards, setBridgeCards] = useState<AnimationState['bridgeCards']>([]);
 
   // Trigger particle effects when game is won
   useEffect(() => {
@@ -96,6 +104,43 @@ export function useGameAnimations(gameState: GameState) {
     }, 300);
   }, []);
 
+  const createCardBridgeAnimation = useCallback((
+    wastePosition: { x: number; y: number },
+    stockPosition: { x: number; y: number },
+    isLandscapeMobile = false
+  ) => {
+    // Get all cards from waste pile
+    const wasteCards = gameState.wastePile;
+    if (wasteCards.length === 0) return;
+
+    // Calculate timing for exactly 1 second total duration
+    const totalDuration = 1000; // 1 second
+    const animationDuration = 300; // Each card animation takes 300ms
+    const staggerDelay = wasteCards.length > 1 
+      ? (totalDuration - animationDuration) / (wasteCards.length - 1) 
+      : 0;
+
+    // Create bridge animation for each card
+    const newBridgeCards = wasteCards.map((card, index) => {
+      const delay = index * staggerDelay;
+      
+      return {
+        id: `${card.id}-bridge-${index}`,
+        card,
+        startPosition: wastePosition,
+        endPosition: stockPosition,
+        delay,
+      };
+    });
+    
+    setBridgeCards(newBridgeCards);
+    
+    // Clear bridge cards after exactly 1 second
+    setTimeout(() => {
+      setBridgeCards([]);
+    }, totalDuration);
+  }, [gameState.wastePile]);
+
   return {
     particleTrigger,
     setParticleTrigger,
@@ -107,8 +152,11 @@ export function useGameAnimations(gameState: GameState) {
     setAnimatingCard,
     flyingCards,
     setFlyingCards,
+    bridgeCards,
+    setBridgeCards,
     triggerShuffleAnimation,
     createShuffleCardsAnimation,
+    createCardBridgeAnimation,
     animateStockFlip,
   };
 } 

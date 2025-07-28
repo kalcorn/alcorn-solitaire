@@ -97,9 +97,6 @@ export function useDragAndDrop() {
     }
     
     setDropZones(zones);
-    
-    // Prevent default drag behavior
-    event.preventDefault();
   }, []);
 
   /**
@@ -112,7 +109,6 @@ export function useDragAndDrop() {
     
     if ('touches' in event) {
       // Prevent scrolling and other touch behaviors during drag
-      event.preventDefault();
       event.stopPropagation();
       
       // Use the first touch point, but ensure it exists

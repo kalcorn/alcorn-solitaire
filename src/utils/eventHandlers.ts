@@ -131,7 +131,9 @@ export function createEventHandlers(
 
   const getElementPosition = (selector: string) => {
     const element = document.querySelector(selector) as HTMLElement;
-    if (!element) return null;
+    if (!element) {
+      return null;
+    }
     
     const rect = element.getBoundingClientRect();
     return {

@@ -13,12 +13,14 @@ import FoundationPile from './FoundationPile';
 import WinOverlay from './WinOverlay';
 import AnimatedCard from './AnimatedCard';
 import FlyingCards from './FlyingCards';
+import BridgeCards from './BridgeCards';
 import { useGameState } from '@/hooks/useGameState';
 import { useDragAndDrop } from '@/hooks/useDragAndDrop';
 import { useGameAnimations } from '@/hooks/useGameAnimations';
 import { createEventHandlers } from '@/utils/eventHandlers';
 import { Card as CardType, CardPosition } from '@/types';
 import { useIsClient } from '@/utils/hydrationUtils';
+import { playSoundEffect } from '@/utils/soundUtils';
 
 const GameBoard: React.FC = () => {
   const isClient = useIsClient();
@@ -42,8 +44,10 @@ const GameBoard: React.FC = () => {
     isWinAnimating,
     animatingCard,
     flyingCards,
+    bridgeCards,
     triggerShuffleAnimation,
     createShuffleCardsAnimation,
+    createCardBridgeAnimation,
     animateStockFlip
   } = useGameAnimations(gameState);
 
@@ -96,8 +100,17 @@ const GameBoard: React.FC = () => {
       wastePosition = eventHandlers.getElementPosition('.landscape-mobile-left-sidebar .waste-pile-responsive');
     } else if (window.innerWidth < 1024) {
       // For mobile (both portrait and landscape), look in the mobile layout
-      stockPosition = eventHandlers.getElementPosition('.stock-pile-responsive');
-      wastePosition = eventHandlers.getElementPosition('.waste-pile-responsive');
+      // Try more specific selectors for mobile layout
+      stockPosition = eventHandlers.getElementPosition('.block.md\\:hidden.lg\\:hidden .stock-pile-responsive');
+      wastePosition = eventHandlers.getElementPosition('.block.md\\:hidden.lg\\:hidden .waste-pile-responsive');
+      
+      // Fallback to generic selectors if specific ones don't work
+      if (!stockPosition) {
+        stockPosition = eventHandlers.getElementPosition('.stock-pile-responsive');
+      }
+      if (!wastePosition) {
+        wastePosition = eventHandlers.getElementPosition('.waste-pile-responsive');
+      }
     } else {
       // For desktop, look in the standard layout
       stockPosition = eventHandlers.getElementPosition('.standard-layout .stock-pile-responsive');
@@ -113,22 +126,61 @@ const GameBoard: React.FC = () => {
     }
 
     if (isRecycling && gameState.wastePile.length > 0) {
-      // Animate recycling from waste to stock
-      const topWasteCard = gameState.wastePile[gameState.wastePile.length - 1];
-      animateStockFlip(topWasteCard, wastePosition, stockPosition, 'wasteToStock', isLandscapeMobile);
-      createShuffleCardsAnimation();
+      // Start sound first (async) to counteract any lag
+      if (gameState.settings.soundEnabled) {
+        if (gameState.wastePile.length === 1) {
+          playSoundEffect.cardFlip();
+        } else {
+          playSoundEffect.shuffle();
+        }
+      }
+      
+      // Create card bridge animation - cards move one by one from waste to stock
+      createCardBridgeAnimation(wastePosition, stockPosition, isLandscapeMobile);
+      
+      // Delay the actual stock flip until bridge animation completes (exactly 1 second)
+      setTimeout(() => {
+        handleStockFlip(true); // Skip sound since we already played it
+      }, 1000);
     } else if (gameState.stockPile.length > 0) {
+      // Start sound first (async) to counteract any lag
+      if (gameState.settings.soundEnabled) {
+        playSoundEffect.cardFlip();
+      }
+      
       // Animate card from stock to waste
       const topStockCard = gameState.stockPile[gameState.stockPile.length - 1];
-      animateStockFlip(topStockCard, stockPosition, wastePosition, 'stockToWaste', isLandscapeMobile);
+      
+      // Use the actual stock pile position (center) for the animation start
+      const stockStartPosition = {
+        x: stockPosition.x,
+        y: stockPosition.y
+      };
+      
+      // Use the center of waste pile for the animation end (so card lands on top)
+      const wasteEndPosition = {
+        x: wastePosition.x,
+        y: wastePosition.y
+      };
+      
+      animateStockFlip(topStockCard, stockStartPosition, wasteEndPosition, 'stockToWaste', isLandscapeMobile);
+      
+      // Delay the actual stock flip until animation completes
+      setTimeout(() => {
+        handleStockFlip(true); // Skip sound since we already played it
+      }, 300);
     }
-    
-    handleStockFlip();
   };
 
   // Animated new game handler
   const handleAnimatedNewGame = () => {
+    // Start sound first (async) to counteract any lag
+    if (gameState.settings.soundEnabled) {
+      playSoundEffect.shuffle();
+    }
+    
     createShuffleCardsAnimation();
+    
     setTimeout(() => {
       startNewGame();
     }, 500);
@@ -147,12 +199,10 @@ const GameBoard: React.FC = () => {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
       updateDrag(e as any);
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      e.preventDefault();
       endDrag();
     };
 
@@ -353,6 +403,9 @@ const GameBoard: React.FC = () => {
 
         {/* Flying Cards Shuffle Animation */}
         <FlyingCards flyingCards={flyingCards} />
+
+        {/* Bridge Cards Animation */}
+        <BridgeCards bridgeCards={bridgeCards} />
       </div>
 
       {/* Particle Effects */}

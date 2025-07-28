@@ -31,16 +31,20 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({ animatingCard }) => {
   };
 
   const { width, height } = getCardSize();
+  
+  // Parse width and height to get numeric values for centering
+  const cardWidth = parseInt(width);
+  const cardHeight = parseInt(height);
 
   return (
     <div
-      className={`animated-card-flyover ${animatingCard.type}`}
+      className={`animated-card-flyover ${animatingCard.type}${animatingCard.isLandscapeMobile ? ' landscape-mobile' : ''}`}
       style={{
         position: 'fixed',
         zIndex: 1000,
         pointerEvents: 'none',
-        top: `${animatingCard.startPosition.y}px`,
-        left: `${animatingCard.startPosition.x}px`,
+        top: `${animatingCard.startPosition.y - cardHeight / 2}px`,
+        left: `${animatingCard.startPosition.x - cardWidth / 2}px`,
         width,
         height,
         '--end-x': `${animatingCard.endPosition.x - animatingCard.startPosition.x}px`,

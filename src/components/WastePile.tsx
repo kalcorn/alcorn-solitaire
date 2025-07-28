@@ -1,32 +1,36 @@
 import React from 'react';
-import { Card } from '@/types';
-import CardComponent from './Card';
+import { Card as CardType } from '@/types';
+import Card from './Card';
 
 interface WastePileProps {
-  cards: Card[];
+  cards: CardType[];
   onCardClick?: (cardId: string) => void;
   onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   isCardBeingDragged?: (cardId: string) => boolean;
 }
 
 const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart, isCardBeingDragged }) => {
-  const topCard = cards.length > 0 ? cards[cards.length - 1] : null;
-  
-  // Check if the only card(s) are being dragged (making the pile effectively empty)
-  const visibleCards = cards.filter(card => !isCardBeingDragged?.(card.id));
-  const hasVisibleCards = visibleCards.length > 0;
+  // Don't filter cards - just check if there are any cards
+  const hasVisibleCards = cards.length > 0;
 
   return (
     <div
       className="flex-shrink-0 waste-pile-responsive"
-      style={{ position: 'relative', zIndex: 1 }}
+      style={{ 
+        position: 'relative', 
+        zIndex: 1,
+        width: '52px',
+        height: '72px',
+        minWidth: '52px',
+        minHeight: '72px'
+      }}
       aria-label="Waste pile"
       role="list"
     >
       {hasVisibleCards ? (
         <>
-          {/* Show multiple cards with slight offset for depth */}
-          {visibleCards.slice(-3).map((card, index, slicedCards) => (
+          {/* Use original positioning for animation compatibility, but keep working drag logic */}
+          {cards.slice(-3).map((card, index, slicedCards) => (
             <div
               key={card.id}
               style={{
@@ -36,13 +40,14 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
                 zIndex: index + 1
               }}
             >
-              <CardComponent
+              <Card
                 suit={card.suit}
                 rank={card.rank}
                 faceUp={card.faceUp}
                 cardId={card.id}
                 isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
-                onClick={index === slicedCards.length - 1 ? () => onCardClick && onCardClick(card.id) : undefined}
+                onClick={index === slicedCards.length - 1 ? 
+                  () => onCardClick && onCardClick(card.id) : undefined}
                 onMouseDown={index === slicedCards.length - 1 && card.draggable ? 
                   (e) => onCardDragStart && onCardDragStart(card.id, e) : undefined}
                 onTouchStart={index === slicedCards.length - 1 && card.draggable ? 
