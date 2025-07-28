@@ -280,47 +280,40 @@ export function useDragAndDrop() {
     const rotation = hoveredZone ? '2deg' : '3deg';
     const opacity = hoveredZone ? 0.95 : 0.85;
 
-    // Responsive card dimensions for different layouts
-    const isMobile = window.innerWidth <= 768;
-    const isLandscape = window.innerWidth > window.innerHeight;
-    // Match CSS media query exactly: (max-height: 500px) and (min-width: 640px) and (max-width: 1024px)
+    // Responsive card dimensions for different layouts - match CSS exactly
     const isLandscapeMobile = window.innerHeight <= 500 && window.innerWidth >= 640 && window.innerWidth <= 1024;
     
     let cardWidth: number;
     let cardHeight: number;
     
     if (isLandscapeMobile) {
-      // Landscape mobile: Use consistent card size for all areas
-      cardWidth = 60;  // Matches landscape mobile card size
-      cardHeight = 84; // Matches landscape mobile card size
-    } else if (isMobile) {
-      // Match CSS: base mobile is 52x72, sm+ (640px+) is 65x91
-      if (window.innerWidth >= 640) {
-        cardWidth = 65;
-        cardHeight = 91;
-      } else {
-        cardWidth = 52;
-        cardHeight = 72;
-      }
+      // Landscape mobile: 60x84
+      cardWidth = 60;
+      cardHeight = 84;
+    } else if (window.innerWidth >= 1536) {
+      // 2XL breakpoint: 110x154
+      cardWidth = 110;
+      cardHeight = 154;
+    } else if (window.innerWidth >= 1280) {
+      // XL breakpoint: 100x140
+      cardWidth = 100;
+      cardHeight = 140;
+    } else if (window.innerWidth >= 1024) {
+      // LG breakpoint: 100x140
+      cardWidth = 100;
+      cardHeight = 140;
+    } else if (window.innerWidth >= 768) {
+      // MD breakpoint: 85x119
+      cardWidth = 85;
+      cardHeight = 119;
+    } else if (window.innerWidth >= 640) {
+      // SM breakpoint: 65x91
+      cardWidth = 65;
+      cardHeight = 91;
     } else {
-      // Desktop: Match CSS breakpoints
-      if (window.innerWidth >= 1536) {
-        // 2XL breakpoint
-        cardWidth = 110;
-        cardHeight = 154;
-      } else if (window.innerWidth >= 1280) {
-        // XL breakpoint  
-        cardWidth = 100;
-        cardHeight = 140;
-      } else if (window.innerWidth >= 1024) {
-        // LG breakpoint
-        cardWidth = 85;
-        cardHeight = 119;
-      } else {
-        // MD breakpoint (768px+)
-        cardWidth = 65;
-        cardHeight = 91;
-      }
+      // Base mobile: 52x72
+      cardWidth = 52;
+      cardHeight = 72;
     }
 
     return {

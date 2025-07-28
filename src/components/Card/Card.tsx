@@ -2,6 +2,8 @@ import React from 'react';
 import Image from 'next/image';
 import { Suit } from '@/types';
 import { BsSuitHeartFill, BsSuitDiamondFill, BsSuitClubFill, BsSuitSpadeFill } from 'react-icons/bs';
+import { cn } from '@/utils/cssUtils';
+import cardStyles from './Card.module.css';
 
 interface CardProps {
   suit: Suit;
@@ -136,13 +138,11 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
       tabIndex={faceUp ? 0 : -1}
       aria-label={faceUp ? `${displayRank} of ${suit}` : 'Face-down card'}
       aria-describedby={faceUp ? undefined : 'card-back-description'}
-      className={`card rounded-lg shadow-xl
-        flex items-center justify-center select-none cursor-pointer
-        transition-all duration-200 hover:shadow-2xl hover:-translate-y-1 hover:scale-105 active:scale-95
-        focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-opacity-75
-        ${faceUp ? "face-up" : "face-down"}
-        ${isBeingDragged ? "opacity-0 pointer-events-none" : ""}`
-      }
+      className={cn(
+        cardStyles.card,
+        faceUp ? cardStyles.faceUp : cardStyles.faceDown,
+        isBeingDragged && "opacity-0 pointer-events-none"
+      )}
       onMouseDown={onMouseDown ? handleMouseDown : onClick}
       onMouseUp={onMouseDown ? handleMouseUp : undefined}
       onTouchStart={onTouchStart ? handleTouchStart : onClick}

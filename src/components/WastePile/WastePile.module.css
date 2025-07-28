@@ -1,0 +1,47 @@
+/* =================================================================
+   WASTE PILE COMPONENT STYLES - CSS MODULE
+   ================================================================= */
+
+/* Base waste pile styles */
+.wastePile {
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* Responsive waste pile container */
+.wastePileResponsive {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Empty state for waste pile */
+.empty {
+  /* Empty state styling is handled by the base wastePile class */
+}
+
+/* Hover effects for waste pile */
+.wastePile:hover {
+  overflow: visible;
+}
+
+/* Ensure cards can escape container bounds during hover animations */
+.wastePile :global(.card):hover {
+  z-index: 1000;
+}
+
+/* Unified responsive dimensions using CSS custom properties */
+.wastePile,
+.wastePileResponsive {
+  width: var(--card-width);
+  height: var(--card-height);
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  max-width: var(--card-width);
+  max-height: var(--card-height);
+  box-sizing: border-box;
+}
+
+/* All responsive sizing handled by card-dimensions.css */

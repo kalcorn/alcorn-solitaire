@@ -185,14 +185,7 @@ body {
 }
 
 
-@keyframes subtle-shimmer {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
+
 
 /* Card back pattern replaces the ::after content */
 
@@ -349,17 +342,7 @@ body {
   }
 }
 
-@keyframes bridgeCardMove {
-  0% {
-    transform: translate(0, 0) rotateY(0deg);
-  }
-  50% {
-    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(90deg);
-  }
-  100% {
-    transform: translate(var(--end-x), var(--end-y)) rotateY(180deg);
-  }
-}
+
 
 .foundation-pile:hover,
 .stock-pile:hover,
@@ -488,7 +471,12 @@ body {
 
 
 
-/* Override for landscape mobile to prevent size conflicts */
+/* Landscape mobile layout - Hidden by default, only shown in landscape mobile */
+.landscape-mobile-layout {
+  display: none !important;
+}
+
+/* Override for landscape mobile to show the layout */
 @media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
   .landscape-mobile-layout {
     display: block !important;
@@ -962,6 +950,16 @@ body {
   /* Hide standard layout elements in landscape mobile */
   .standard-layout,
   .standard-tableau {
+    display: none !important;
+  }
+
+  /* Hide mobile layout in landscape mobile */
+  .block.md\\:hidden {
+    display: none !important;
+  }
+
+  /* Hide desktop layout in landscape mobile */
+  .hidden.md\\:block {
     display: none !important;
   }
 
@@ -1450,49 +1448,7 @@ div:focus {
   animation: celebration-pulse 2s ease-in-out infinite;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
 
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes bounceIn {
-  0% {
-    transform: scale(0.3) rotate(-10deg);
-    opacity: 0;
-  }
-
-  50% {
-    transform: scale(1.05) rotate(2deg);
-  }
-
-  70% {
-    transform: scale(0.9) rotate(-1deg);
-  }
-
-  100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-  }
-}
-
-@keyframes celebration-pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-  }
-
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
-  }
-}
 
 /* Loading State */
 .hydration-loading {
@@ -1517,14 +1473,7 @@ div:focus {
   border-color: rgba(16, 185, 129, 0.8);
 }
 
-@keyframes recycleGlow {
-  0%, 100% {
-    border-color: rgba(16, 185, 129, 0.4);
-  }
-  50% {
-    border-color: rgba(16, 185, 129, 0.8);
-  }
-}
+
 
 /* Stock and Waste Slide Animations */
 .stock-slide-to-waste {
@@ -1594,22 +1543,7 @@ div:focus {
   animation: snapBack 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-@keyframes snapBack {
-  0% {
-    transform: scale(1) rotate(5deg);
-    opacity: 0.8;
-  }
 
-  50% {
-    transform: scale(1.1) rotate(-5deg);
-    opacity: 0.9;
-  }
-
-  100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-  }
-}
 
 /* =================================================================
    CARD FLIP ANIMATIONS
@@ -1766,16 +1700,7 @@ div:focus {
   animation: recycleGlowBorder 2s ease-in-out infinite;
 }
 
-@keyframes recycleGlow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.2);
-  }
 
-  50% {
-    box-shadow: 0 0 12px 3px rgba(34, 197, 94, 0.4);
-  }
-}
 
 @keyframes recycleGlowBorder {
   0%,
@@ -1917,24 +1842,7 @@ div:focus {
   animation: cardShuffleFly 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-@keyframes cardShuffleFly {
-  0% {
-    opacity: 1;
-    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
-  }
-  30% {
-    opacity: 0.8;
-    transform: translateY(-50px) translateX(var(--fly-x, 0px)) rotate(var(--fly-rotation, 15deg)) scale(0.9);
-  }
-  70% {
-    opacity: 0.6;
-    transform: translateY(-30px) translateX(calc(var(--fly-x, 0px) * 0.5)) rotate(calc(var(--fly-rotation, 15deg) * -0.5)) scale(1.1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(var(--end-y, 0px)) translateX(var(--end-x, 0px)) rotate(0deg) scale(0.8);
-  }
-}
+
 
 /* =================================================================
    ERROR AND FEEDBACK ANIMATIONS

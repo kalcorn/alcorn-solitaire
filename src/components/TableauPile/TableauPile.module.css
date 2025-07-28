@@ -1,0 +1,82 @@
+/* =================================================================
+   TABLEAU PILE COMPONENT STYLES - CSS MODULE
+   ================================================================= */
+
+/* Base tableau pile styles - Uses unified card width */
+.tableauPile {
+  width: 100%;
+  max-width: var(--card-width);
+  position: relative;
+}
+
+.tableauPile > * {
+  margin-top: 0 !important;
+}
+
+/* Empty tableau pile placeholder - Uses unified dimensions */
+.tableauEmptyPlaceholder {
+  width: var(--card-width);
+  height: var(--card-height);
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Card positioning within tableau pile */
+.tableauCardPosition {
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* Fallback for when dynamic spacing is not available */
+  top: calc(var(--card-index, 0) * var(--static-spacing, 18px));
+}
+
+/* Dynamic spacing override when set inline */
+.tableauCardPosition[style*="top"] {
+  /* Inline top style takes precedence over CSS calc */
+}
+
+/* Drop zone active state */
+.dropZoneActive {
+  /* Visual feedback for drop zones - subtle enhancement */
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* Force card dimensions within tableau piles - Uses unified sizing */
+.tableauPile :global(.card),
+.tableauPile :global(.card.face-down) {
+  width: var(--card-width) !important;
+  height: var(--card-height) !important;
+  min-width: var(--card-width) !important;
+  max-width: var(--card-width) !important;
+  min-height: var(--card-height) !important;
+  max-height: var(--card-height) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex: none !important;
+}
+
+/* All responsive sizing handled by card-dimensions.css */
+/* Optional height constraints for desktop layouts */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .tableauPile {
+    height: 600px;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1535px) {
+  .tableauPile {
+    height: 420px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .tableauPile {
+    height: 480px;
+  }
+}

@@ -1,0 +1,111 @@
+/* =================================================================
+   FOUNDATION PILE COMPONENT STYLES - CSS MODULE
+   ================================================================= */
+
+/* Base foundation pile styles */
+.foundationPile {
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  padding: 8px;
+}
+
+/* Drop zone styling */
+.dropZone {
+  position: relative;
+  /* Functionality remains, visual effects disabled in original design */
+}
+
+.dropZone::before {
+  /* Disabled visual drop zone indicator */
+  display: none;
+}
+
+/* Foundation pile hover effects */
+.foundationPile:hover {
+  overflow: visible;
+}
+
+/* Ensure cards can escape container bounds during hover animations */
+.foundationPile :global(.card):hover {
+  z-index: 1000;
+}
+
+/* Foundation pile suit symbol and text styling */
+.foundationPile :global(.text-2xl),
+.foundationPile :global(.text-4xl) {
+  opacity: 0.7 !important;
+}
+
+.foundationPile :global(.text-2xl.text-red-500),
+.foundationPile :global(.text-4xl.text-red-500) {
+  color: rgba(239, 68, 68, 0.8) !important;
+}
+
+.foundationPile :global(.text-2xl.text-gray-100),
+.foundationPile :global(.text-4xl.text-gray-100) {
+  color: rgb(3, 7, 18) !important;
+}
+
+.foundationPile :global(.text-xs) {
+  opacity: 0.8 !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600;
+}
+
+/* Unified responsive dimensions using CSS custom properties */
+.foundationPile {
+  width: var(--card-width);
+  height: var(--card-height);
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  max-width: var(--card-width);
+  max-height: var(--card-height);
+  box-sizing: border-box;
+}
+
+/* Hide foundation pile text on mobile, center symbols */
+.foundationPile :global(.text-xs) {
+  display: none;
+}
+
+.foundationPile > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Show foundation pile text on medium screens and up */
+@media (min-width: 768px) {
+  .foundationPile :global(.text-xs) {
+    display: block;
+  }
+}
+
+/* Hide text again in landscape mobile */
+@media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
+  .foundationPile :global(.text-xs) {
+    display: none !important;
+  }
+}
+
+/* All responsive sizing handled by card-dimensions.css */
+
+/* Drop zone pulse animation (disabled by default) */
+@keyframes dropZonePulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Accessibility - prevent focus outlines on drop zones */
+.foundationPile[data-drop-zone]:focus {
+  outline: none !important;
+}

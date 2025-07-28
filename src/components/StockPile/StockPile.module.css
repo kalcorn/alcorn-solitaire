@@ -1,0 +1,194 @@
+/* =================================================================
+   STOCK PILE COMPONENT STYLES - CSS MODULE
+   ================================================================= */
+
+/* Base stock pile styles */
+.stockPile {
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* Responsive stock pile container */
+.stockPileResponsive {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Face-down stock pile styling - Uses unified dimensions */
+.stockPile.faceDown {
+  width: var(--card-width);
+  height: var(--card-height);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
+  background-size: 200% 200%;
+  animation: subtleShimmer 8s ease-in-out infinite;
+  border-width: 2px;
+  border-color: #475569;
+  overflow: hidden;
+  position: relative;
+}
+
+.stockPile.faceDown::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 30%,
+    transparent 60%
+  );
+  border-radius: 50%;
+}
+
+.stockPile.faceDown::after {
+  content: 'A';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Dancing Script', cursive;
+  font-size: var(--card-face-down-font-size);
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.6);
+  text-shadow: 
+    0 0 10px rgba(148, 163, 184, 0.3),
+    0 0 20px rgba(148, 163, 184, 0.1);
+  z-index: 3;
+}
+
+/* Shimmer animation - PRESERVED EXACTLY */
+@keyframes subtleShimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Empty state for stock pile */
+.empty {
+  /* Empty state styling is handled by the base stockPile class */
+}
+
+/* Empty stock pile with recycle functionality */
+.stockPile.empty.recycleAvailable {
+  background: transparent;
+  border-color: rgba(16, 185, 129, 0.6);
+  animation: recycleGlow 2s ease-in-out infinite;
+  cursor: pointer !important;
+}
+
+.stockPile.empty.recycleAvailable:hover {
+  background: transparent;
+  border-color: rgba(16, 185, 129, 0.8);
+}
+
+/* Recycle glow animation */
+@keyframes recycleGlow {
+  0%, 100% {
+    border-color: rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    border-color: rgba(16, 185, 129, 0.8);
+  }
+}
+
+/* Advanced recycle glow for non-empty piles */
+.stockPile.recycleAvailable {
+  position: relative;
+  animation: recycleGlowBox 2s ease-in-out infinite;
+}
+
+.stockPile.recycleAvailable::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid rgba(34, 197, 94, 0.4);
+  border-radius: 12px;
+  pointer-events: none;
+  animation: recycleGlowBorder 2s ease-in-out infinite;
+}
+
+@keyframes recycleGlowBox {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 12px 3px rgba(34, 197, 94, 0.4);
+  }
+}
+
+@keyframes recycleGlowBorder {
+  0%,
+  100% {
+    border-color: rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.2);
+  }
+
+  50% {
+    border-color: rgba(34, 197, 94, 0.7);
+    box-shadow: 0 0 8px 2px rgba(34, 197, 94, 0.4);
+  }
+}
+
+/* Recycle icon glow animation */
+.recycleIconGlow {
+  animation: recycleIconGlow 2s ease-in-out infinite;
+}
+
+@keyframes recycleIconGlow {
+  0%,
+  100% {
+    color: rgb(74, 222, 128); /* text-green-400 */
+    filter: drop-shadow(0 0 2px rgba(34, 197, 94, 0.3));
+  }
+
+  50% {
+    color: rgb(34, 197, 94); /* text-green-500 */
+    filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6)) drop-shadow(0 0 12px rgba(34, 197, 94, 0.4));
+  }
+}
+
+/* Stock shuffle cascade animation */
+.stockShuffleCascade {
+  animation: stockShuffleCascade 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes stockShuffleCascade {
+  0% {
+    transform: translateY(-20px) translateX(10px) rotate(8deg) scale(0.9);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(5px) translateX(-3px) rotate(-2deg) scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Unified responsive dimensions using CSS custom properties */
+.stockPile,
+.stockPileResponsive {
+  width: var(--card-width);
+  height: var(--card-height);
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  max-width: var(--card-width);
+  max-height: var(--card-height);
+  box-sizing: border-box;
+}
+
+/* All responsive sizing handled by card-dimensions.css */

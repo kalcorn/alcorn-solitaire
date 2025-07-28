@@ -1,6 +1,9 @@
 import React from 'react';
-import Card from './Card';
+import Card from '../Card';
 import { Card as CardType } from '@/types';
+import { cn } from '@/utils/cssUtils';
+import { getCardDimensions } from '@/utils/cardDimensions';
+import styles from './TableauPile.module.css';
 
 interface TableauPileProps {
   cards: CardType[];
@@ -37,11 +40,8 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDra
     const viewportHeight = windowSize.height;
     const viewportWidth = windowSize.width;
     
-    // Calculate card dimensions based on viewport
-    const cardHeight = viewportWidth < 640 ? 72 : 
-                      viewportWidth < 768 ? 91 : 
-                      viewportWidth < 1024 ? 119 : 
-                      viewportWidth < 1280 ? 140 : 154;
+    // Get card dimensions from unified system
+    const { height: cardHeight } = getCardDimensions();
     
     // Calculate rank/suit display height + padding as optimal spacing
     // Rank/suit text is roughly 12-20% of card height, with some padding
@@ -103,14 +103,22 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDra
   const cardSpacing = calculateCardSpacing();
 
   return (
-    <div className={`tableau-pile relative ${isDropZone ? 'drop-zone-active' : ''}`} role="list" aria-label="Play pile">
+    <div 
+      className={cn(
+        styles.tableauPile,
+        "relative",
+        isDropZone && styles.dropZoneActive
+      )} 
+      role="list" 
+      aria-label="Play pile"
+    >
       {cards.length === 0 ? (
-        <div className="tableau-empty-placeholder" />
+        <div className={styles.tableauEmptyPlaceholder} />
       ) : (
         cards.map((card, index) => (
           <div
             key={card.id}
-            className="tableau-card-position"
+            className={styles.tableauCardPosition}
             style={{ 
               '--card-index': index,
               '--dynamic-spacing': `${cardSpacing}px`,

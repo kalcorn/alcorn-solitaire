@@ -1,6 +1,9 @@
 import React from 'react';
 import { Card as CardType } from '@/types';
+import Card from '../Card';
 import { BsArrowCounterclockwise } from 'react-icons/bs';
+import { cn } from '@/utils/cssUtils';
+import styles from './StockPile.module.css';
 
 interface StockPileProps {
   cards: CardType[];
@@ -15,28 +18,34 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
   const isRecycleAvailable = cards.length === 0 && wasteCardCount > 0 && canCycle;
   
   return (
-  <div className="flex-shrink-0 stock-pile-responsive" style={{ position: 'relative', zIndex: 1 }}>
+  <div className={cn("flex-shrink-0", styles.stockPileResponsive)} style={{ position: 'relative', zIndex: 1 }}>
     {/* Dynamic card stack effect based on card count */}
     {Array.from({ length: Math.min(5, cards.length - 1) }, (_, i) => (
       <div 
         key={i}
-        className={`card face-down pointer-events-none ${isShuffling ? 'stock-shuffle-cascade' : ''}`}
         style={{ 
           position: 'absolute', 
           left: `${(i + 1) * 1}px`, 
           top: `${(i + 1) * 1}px`,
           zIndex: i + 1,
           opacity: Math.max(0.1, 0.4 - (i * 0.08)),
-          animationDelay: isShuffling ? `${i * 0.08}s` : '0s'
-        }} 
-      />
+          animationDelay: isShuffling ? `${i * 0.08}s` : '0s',
+          pointerEvents: 'none'
+        }}
+        className={isShuffling ? styles.stockShuffleCascade : ''}
+      >
+        <Card
+          suit="hearts"
+          rank={1}
+          faceUp={false}
+          cardId={`stock-stack-${i}`}
+          isBeingDragged={false}
+        />
+      </div>
     ))}
     {/* Top card */}
     {cards.length > 0 ? (
       <div
-        className={`card face-down ${
-          canCycle ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-        } ${isShuffling ? 'stock-shuffle-cascade' : ''}`}
         role="button"
         tabIndex={canCycle ? 0 : -1}
         aria-label={`Stock pile with ${cards.length} cards. Click to deal cards to waste pile.`}
@@ -46,18 +55,31 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
           top: 0, 
           left: 0, 
           zIndex: 10,
-          animationDelay: isShuffling ? '0.4s' : '0s'
+          animationDelay: isShuffling ? '0.4s' : '0s',
+          cursor: canCycle ? 'pointer' : 'not-allowed',
+          opacity: canCycle ? 1 : 0.5
         }}
+        className={isShuffling ? styles.stockShuffleCascade : ''}
         onClick={canCycle ? onClick : undefined}
         title={canCycle ? "Stock pile" : "No more cycles allowed"}
-      />
+      >
+        <Card
+          suit="hearts"
+          rank={1}
+          faceUp={false}
+          cardId="stock-top"
+          isBeingDragged={false}
+        />
+      </div>
     ) : (
       <div 
-        className={`stock-pile empty flex flex-col items-center justify-center ${
-          isRecycleAvailable ? 'recycle-available' : ''
-        } ${
+        className={cn(
+          styles.stockPile,
+          styles.empty,
+          "flex flex-col items-center justify-center",
+          isRecycleAvailable && styles.recycleAvailable,
           canCycle ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'
-        }`}
+        )}
         role="button"
         tabIndex={canCycle ? 0 : -1}
         aria-label={isRecycleAvailable ? "Empty stock pile. Click to recycle waste cards." : "Empty stock pile"}
@@ -68,7 +90,7 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
       >
         <div className="flex items-center justify-center">
           {isRecycleAvailable ? (
-            <BsArrowCounterclockwise size={32} className="text-green-400 recycle-icon-glow" />
+            <BsArrowCounterclockwise size={32} className={cn("text-green-400", styles.recycleIconGlow)} />
           ) : null}
         </div>
         {cyclesRemaining !== undefined && cyclesRemaining > 0 && (

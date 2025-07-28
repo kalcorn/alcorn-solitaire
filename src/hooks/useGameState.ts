@@ -4,7 +4,7 @@ import { createInitialGameState } from '@/utils/gameUtils';
 import { validateAndExecuteMove, flipStock, autoMoveToFoundation } from '@/utils/moveValidation';
 import { soundManager, playSoundEffect } from '@/utils/soundUtils';
 import { saveSettings, loadSettings, saveGameState, loadGameState, clearGameState } from '@/utils/localStorage';
-import { useUndoRedo } from './useUndoRedo';
+import { useUndo } from './useUndo';
 import { useGameTimer } from './useGameTimer';
 import { useGameHydration } from './useGameHydration';
 
@@ -17,7 +17,7 @@ export function useGameState() {
   const [gameStarted, setGameStarted] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  const { saveState, undo } = useUndoRedo(setGameState);
+  const { saveState, undo } = useUndo(setGameState);
 
   // Timer effect
   useGameTimer(gameStarted, gameState.isGameWon, setTimeElapsed);

@@ -1,0 +1,299 @@
+/* =================================================================
+   CARD COMPONENT STYLES - CSS MODULE
+   ================================================================= */
+
+/* Base card styles - Uses unified card dimensions */
+.card {
+  /* Use CSS custom properties for consistent sizing */
+  width: var(--card-width);
+  height: var(--card-height);
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  max-width: var(--card-width);
+  max-height: var(--card-height);
+  font-size: var(--card-font-size);
+  
+  /* Styling */
+  border-radius: 8px;
+  border: 1px solid #374151;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  user-select: none;
+  display: flex;
+  backface-visibility: hidden;
+  flex-direction: column;
+  justify-content: space-between;
+  font-weight: 700;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease-out;
+  position: relative;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  /* Performance optimizations */
+  will-change: transform;
+  transform: translateZ(0);
+  perspective: 1000px;
+  /* Ensure consistent box-sizing */
+  box-sizing: border-box;
+}
+
+/* Hover effects for interactive cards */
+.card:hover:not(.stockPile .card):not(.wastePile .card) {
+  will-change: transform, box-shadow;
+  transform: translateY(-6px) scale(1.02);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    0 12px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Remove will-change after animation */
+.card:not(:hover) {
+  will-change: auto;
+}
+
+/* Stock and waste pile cards should not have hover effects */
+.stockPile .card:hover,
+.wastePile .card:hover {
+  transform: none;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 4px 8px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Playable card state */
+.card.playable {
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Selected card state */
+.card.selected {
+  transform: translateY(-4px);
+  box-shadow:
+    0 15px 30px rgba(0, 0, 0, 0.5),
+    0 8px 15px rgba(0, 0, 0, 0.3),
+    0 0 0 3px rgba(59, 130, 246, 0.8);
+}
+
+/* Face-up card styling */
+.card.faceUp {
+  background-color: #ffffff !important;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+  color: #f9fafb;
+  border-width: 1px;
+  border-color: #374151;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Face-down card styling - PRESERVED EXACTLY AS-IS */
+.card.faceDown {
+  width: inherit !important;
+  height: inherit !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #1e293b 75%, #0f172a 100%);
+  background-size: 200% 200%;
+  animation: subtleShimmer 8s ease-in-out infinite;
+  border-width: 2px;
+  border-color: #475569;
+  color: transparent;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 0 20px rgba(71, 85, 105, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Face-down card before pseudo-element */
+.card.faceDown::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 30%,
+    transparent 60%
+  );
+  border-radius: 50%;
+}
+
+/* Face-down card after pseudo-element - Uses unified font sizing */
+.card.faceDown::after {
+  content: 'A';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Dancing Script', cursive;
+  font-size: var(--card-face-down-font-size);
+  font-weight: 700;
+  color: rgba(148, 163, 184, 0.6);
+  text-shadow:
+    0 0 10px rgba(148, 163, 184, 0.3),
+    0 0 20px rgba(148, 163, 184, 0.1);
+  z-index: 3;
+}
+
+/* Shimmer animation - PRESERVED EXACTLY */
+@keyframes subtleShimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Card content sizing - Uses unified font sizes */
+.card {
+  line-height: 1;
+}
+
+/* Card rank text sizing */
+.card span {
+  font-size: var(--card-rank-font-size) !important;
+}
+
+/* Card suit symbol sizing */
+.card .opacity-25 {
+  font-size: var(--card-suit-symbol-size) !important;
+  width: var(--card-suit-symbol-size) !important;
+  height: var(--card-suit-symbol-size) !important;
+}
+
+/* Tableau pile specific card dimensions - Uses unified sizing */
+:global(.tableau-pile) .card,
+:global(.tableau-pile) .card.faceDown {
+  width: var(--card-width) !important;
+  height: var(--card-height) !important;
+  min-width: var(--card-width) !important;
+  max-width: var(--card-width) !important;
+  min-height: var(--card-height) !important;
+  max-height: var(--card-height) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex: none !important;
+}
+
+/* All responsive sizing now handled by CSS custom properties in card-dimensions.css */
+
+/* =================================================================
+   INTERACTIVE ANIMATIONS
+   ================================================================= */
+
+/* Playable card animation */
+.card.playable {
+  animation: subtleGlow 2s ease-in-out infinite;
+  position: relative;
+}
+
+.card.playable::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid rgba(59, 130, 246, 0.4);
+  border-radius: 10px;
+  pointer-events: none;
+  animation: playableGlow 2s ease-in-out infinite;
+}
+
+@keyframes subtleGlow {
+  0%, 100% {
+    box-shadow:
+      0 8px 20px rgba(0, 0, 0, 0.3),
+      0 3px 6px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 12px 30px rgba(0, 0, 0, 0.4),
+      0 6px 12px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+}
+
+@keyframes playableGlow {
+  0%, 100% {
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.2);
+  }
+  50% {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Card reveal animation for newly dealt cards */
+.cardReveal {
+  animation: cardReveal 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) rotateY(180deg) scale(0.8);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateY(10px) rotateY(90deg) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateY(0deg) scale(1);
+  }
+}
+
+/* Card placement animation */
+.cardPlace {
+  animation: cardPlace 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes cardPlace {
+  0% {
+    transform: translateY(-10px) scale(1.05) rotate(2deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(2px) scale(0.98) rotate(-1deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Card landing animation */
+.cardLanding {
+  animation: cardLand 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes cardLand {
+  0% {
+    transform: translateY(-20px) scale(1.1);
+  }
+  60% {
+    transform: translateY(5px) scale(0.95);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+} 

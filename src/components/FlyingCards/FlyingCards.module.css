@@ -1,0 +1,30 @@
+/* =================================================================
+   FLYING CARDS COMPONENT STYLES - CSS MODULE
+   ================================================================= */
+
+/* Card shuffle flying animation for recycling/new game */
+.cardShuffleFly {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  animation: cardShuffleFly 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes cardShuffleFly {
+  0% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+  }
+  30% {
+    opacity: 0.8;
+    transform: translateY(-50px) translateX(var(--fly-x, 0px)) rotate(var(--fly-rotation, 15deg)) scale(0.9);
+  }
+  70% {
+    opacity: 0.6;
+    transform: translateY(-30px) translateX(calc(var(--fly-x, 0px) * 0.5)) rotate(calc(var(--fly-rotation, 15deg) * -0.5)) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(var(--end-y, 0px)) translateX(var(--end-x, 0px)) rotate(0deg) scale(0.8);
+  }
+}

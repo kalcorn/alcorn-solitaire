@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card as CardType } from '@/types';
-import Card from './Card';
+import Card from '../Card';
+import { cn } from '@/utils/cssUtils';
+import styles from './AnimatedCard.module.css';
 
 interface AnimatedCardProps {
   animatingCard: {
@@ -18,16 +20,12 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({ animatingCard }) => {
   }
 
   const getCardSize = () => {
-    if (animatingCard.isLandscapeMobile) {
-      return { width: '60px', height: '84px' };
-    }
+    // Get dimensions from CSS custom properties for consistency
+    const computedStyle = getComputedStyle(document.documentElement);
+    const width = computedStyle.getPropertyValue('--card-width').trim();
+    const height = computedStyle.getPropertyValue('--card-height').trim();
     
-    if (window.innerWidth >= 1536) return { width: '110px', height: '154px' };
-    if (window.innerWidth >= 1280) return { width: '100px', height: '140px' };
-    if (window.innerWidth >= 1024) return { width: '100px', height: '140px' };
-    if (window.innerWidth >= 768) return { width: '85px', height: '119px' };
-    if (window.innerWidth >= 640) return { width: '65px', height: '91px' };
-    return { width: '52px', height: '72px' };
+    return { width, height };
   };
 
   const { width, height } = getCardSize();
@@ -36,9 +34,21 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({ animatingCard }) => {
   const cardWidth = parseInt(width);
   const cardHeight = parseInt(height);
 
+  // Get animation class based on type and landscape mobile state
+  const getAnimationClass = () => {
+    if (animatingCard.type === 'stockToWaste') {
+      return animatingCard.isLandscapeMobile ? styles.stockToWasteLandscape : styles.stockToWaste;
+    } else {
+      return animatingCard.isLandscapeMobile ? styles.wasteToStockLandscape : styles.wasteToStock;
+    }
+  };
+
   return (
     <div
-      className={`animated-card-flyover ${animatingCard.type}${animatingCard.isLandscapeMobile ? ' landscape-mobile' : ''}`}
+      className={cn(
+        styles.animatedCardFlyover,
+        getAnimationClass()
+      )}
       style={{
         position: 'fixed',
         zIndex: 1000,

@@ -9,3 +9,18 @@
 
  ✓ Starting...
  ✓ Ready in 2.2s
+ ⚠ Found a change in next.config.js. Restarting the server to apply the changes...
+   ▲ Next.js 15.4.4
+   - Local:        http://localhost:3002
+   - Network:      http://10.0.0.70:3002
+
+ ✓ Starting...
+ ⚠ `devIndicators.appIsrStatus` is deprecated and no longer configurable. Please remove it from next.config.js.
+ ✓ Ready in 3.1s
+ ⚠ Found a change in next.config.js. Restarting the server to apply the changes...
+   ▲ Next.js 15.4.4
+   - Local:        http://localhost:3002
+   - Network:      http://10.0.0.70:3002
+
+ ✓ Starting...
+ ✓ Ready in 2.6s

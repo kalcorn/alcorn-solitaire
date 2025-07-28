@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { GameState, GameHistoryEntry } from '@/types';
 
-export const useUndoRedo = (
+export const useUndo = (
   setGameState: (state: GameState) => void
 ) => {
   

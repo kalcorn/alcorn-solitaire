@@ -78,16 +78,16 @@ const LandscapeMobileLayout: React.FC<LandscapeMobileLayoutProps> = ({
       </div>
 
       {/* Landscape Mobile: Center Tableau with Increased Size */}
-      <div className="landscape-mobile-tableau flex-1 flex justify-center">
+      <div className="flex-1 flex justify-center">
         <div 
-          className="landscape-tableau-center justify-between w-full max-w-4xl"
+          className="flex flex-row justify-between w-full max-w-4xl gap-1"
           role="region"
           aria-label="Tableau piles"
         >
           {gameState.tableauPiles.map((pile, i) => (
             <div 
               key={i} 
-              className={`flex-shrink-0 tableau-pile tableau-container ${isZoneHovered('tableau', i) ? 'drop-zone' : ''}`}
+              className={`flex-shrink-0 ${isZoneHovered('tableau', i) ? 'drop-zone' : ''}`}
               data-drop-zone
               data-pile-type="tableau"
               data-pile-index={i}

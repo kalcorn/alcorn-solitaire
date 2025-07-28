@@ -22,11 +22,11 @@ const TableauSection: React.FC<TableauSectionProps> = ({
   getMovableCards,
 }) => {
   return (
-    <div className="standard-tableau desktop-tableau justify-between w-full">
+    <div className="flex flex-row justify-between w-full gap-1">
       {tableauPiles.map((pile, i) => (
         <div 
           key={i} 
-          className={`flex-shrink-0 tableau-pile tableau-container ${isZoneHovered('tableau', i) ? 'drop-zone' : ''}`}
+          className={`flex-shrink-0 ${isZoneHovered('tableau', i) ? 'drop-zone' : ''}`}
           data-drop-zone
           data-pile-type="tableau"
           data-pile-index={i}

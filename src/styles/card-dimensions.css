@@ -1,0 +1,139 @@
+/* =================================================================
+   UNIFIED CARD DIMENSIONS - SINGLE SOURCE OF TRUTH
+   ================================================================= */
+
+/* 
+  This file defines the ONLY place where card dimensions are specified.
+  All components MUST use these CSS custom properties.
+  Never hardcode card dimensions anywhere else in the codebase.
+*/
+
+:root {
+  /* Mobile (default - up to 639px) */
+  --card-width: 52px;
+  --card-height: 72px;
+  --card-aspect-ratio: 0.722; /* 52/72 = 0.722 (5:7 ratio) */
+  
+  /* Font sizes for card content */
+  --card-font-size: 0.9rem;
+  --card-rank-font-size: 1.4rem;
+  --card-suit-symbol-size: 2.8rem;
+  --card-face-down-font-size: 1.5rem;
+}
+
+/* Small screens (640px+) */
+@media (min-width: 640px) {
+  :root {
+    --card-width: 65px;
+    --card-height: 91px;
+    --card-font-size: 1rem;
+    --card-rank-font-size: 1.8rem;
+    --card-suit-symbol-size: 3.4rem;
+    --card-face-down-font-size: 1.8rem;
+  }
+}
+
+/* Medium screens (768px+) */
+@media (min-width: 768px) {
+  :root {
+    --card-width: 85px;
+    --card-height: 119px;
+    --card-font-size: 1.1rem;
+    --card-rank-font-size: 2rem;
+    --card-suit-symbol-size: 4.8rem;
+    --card-face-down-font-size: 2.4rem;
+  }
+}
+
+/* Large screens (1024px+) */
+@media (min-width: 1024px) {
+  :root {
+    --card-width: 100px;
+    --card-height: 140px;
+    --card-font-size: 1.25rem;
+    --card-rank-font-size: 2.2rem;
+    --card-suit-symbol-size: 5.4rem;
+    --card-face-down-font-size: 2.8rem;
+  }
+}
+
+/* Extra large screens (1280px+) */
+@media (min-width: 1280px) {
+  :root {
+    --card-width: 100px;
+    --card-height: 140px;
+    --card-font-size: 1.1rem;
+    --card-rank-font-size: 2.4rem;
+    --card-suit-symbol-size: 5.8rem;
+    --card-face-down-font-size: 3.2rem;
+  }
+}
+
+/* 2XL screens (1536px+) */
+@media (min-width: 1536px) {
+  :root {
+    --card-width: 110px;
+    --card-height: 154px;
+    --card-font-size: 1.2rem;
+    --card-rank-font-size: 2.6rem;
+    --card-suit-symbol-size: 6.2rem;
+    --card-face-down-font-size: 3.6rem;
+  }
+}
+
+/* Landscape mobile override (640px - 1024px, height <= 500px) */
+@media screen and (max-height: 500px) and (min-width: 640px) and (max-width: 1024px) {
+  :root {
+    --card-width: 60px;
+    --card-height: 84px;
+    --card-font-size: 0.9rem;
+    --card-rank-font-size: 1.6rem;
+    --card-suit-symbol-size: 2.8rem;
+    --card-face-down-font-size: 1.8rem;
+  }
+}
+
+/* =================================================================
+   UTILITY CLASSES FOR CONSISTENT CARD SIZING
+   ================================================================= */
+
+.card-dimensions {
+  width: var(--card-width);
+  height: var(--card-height);
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  max-width: var(--card-width);
+  max-height: var(--card-height);
+  font-size: var(--card-font-size);
+}
+
+.card-dimensions-flexible {
+  width: var(--card-width);
+  height: var(--card-height);
+  font-size: var(--card-font-size);
+}
+
+/* Container sizing for piles */
+.pile-dimensions {
+  width: var(--card-width);
+  height: var(--card-height);
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+}
+
+/* Global card classes removed - all components should use the Card component */
+
+/* =================================================================
+   JAVASCRIPT ACCESS TO CSS CUSTOM PROPERTIES
+   ================================================================= */
+
+/*
+  To access these values in JavaScript:
+  
+  const cardWidth = getComputedStyle(document.documentElement)
+    .getPropertyValue('--card-width').trim();
+  const cardHeight = getComputedStyle(document.documentElement)
+    .getPropertyValue('--card-height').trim();
+    
+  This ensures JavaScript animations use the same dimensions as CSS.
+*/

@@ -1,0 +1,114 @@
+/* =================================================================
+   ANIMATED CARD COMPONENT STYLES - CSS MODULE
+   ================================================================= */
+
+/* Base animated card flyover */
+.animatedCardFlyover {
+  will-change: transform;
+}
+
+/* Stock to waste flip animation */
+.stockToWaste {
+  animation: stockToWasteFlip 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Stock to waste flip animation for landscape mobile */
+.stockToWasteLandscape {
+  animation: stockToWasteFlipVertical 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Waste to stock flip animation */
+.wasteToStock {
+  animation: wasteToStockFlip 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Waste to stock flip animation for landscape mobile */
+.wasteToStockLandscape {
+  animation: wasteToStockFlipVertical 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Keyframe animations */
+@keyframes stockToWasteFlip {
+  0% {
+    transform: translate(0, 0) rotateY(0deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateY(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(180deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateY(180deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(180deg);
+  }
+}
+
+@keyframes wasteToStockFlip {
+  0% {
+    transform: translate(0, 0) rotateY(180deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateY(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(0deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateY(0deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(0deg);
+  }
+}
+
+@keyframes stockToWasteFlipVertical {
+  0% {
+    transform: translate(0, 0) rotateX(0deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateX(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateX(180deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateX(180deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateX(180deg);
+  }
+}
+
+@keyframes wasteToStockFlipVertical {
+  0% {
+    transform: translate(0, 0) rotateX(180deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateX(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateX(0deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateX(0deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateX(0deg);
+  }
+}
+
+/* Bridge card animation for waste to stock recycling */
+@keyframes bridgeCardMove {
+  0% {
+    transform: translate(0, 0) rotateY(0deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(90deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(180deg);
+  }
+}

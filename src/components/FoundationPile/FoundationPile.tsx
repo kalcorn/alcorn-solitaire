@@ -1,7 +1,9 @@
 import React from 'react';
 import { Card as CardType } from '@/types';
-import Card from './Card';
+import Card from '../Card';
 import { BsSuitHeartFill, BsSuitDiamondFill, BsSuitClubFill, BsSuitSpadeFill } from 'react-icons/bs';
+import { cn } from '@/utils/cssUtils';
+import styles from './FoundationPile.module.css';
 
 interface FoundationPileProps {
   cards: CardType[];
@@ -20,7 +22,10 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
   
   return (
     <div
-      className={`foundation-pile ${isDropZone ? 'drop-zone' : ''}`}
+      className={cn(
+        styles.foundationPile,
+        isDropZone && styles.dropZone
+      )}
       role="list"
       aria-label={`${suits[index]} suit pile`}
     >

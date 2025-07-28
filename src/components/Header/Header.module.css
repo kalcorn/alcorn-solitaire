@@ -1,0 +1,311 @@
+/* =================================================================
+   HEADER COMPONENT STYLES - CSS MODULE
+   ================================================================= */
+
+/* Base header styles */
+.header {
+  width: 100%;
+  background: linear-gradient(to bottom, #374151, #1f2937);
+  color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #475569;
+}
+
+.headerContainer {
+  width: 100%;
+  max-width: 1152px; /* max-w-6xl */
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Logo and title section */
+.logoTitleSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo {
+  height: 2rem;
+  width: auto;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  filter: drop-shadow(0 0 0.2rem rgba(0, 0, 0, 0.5));
+}
+
+/* Stats container */
+.statsContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.statBox {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(to right, #1f2937, #111827);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #374151;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  opacity: 0.7;
+  margin-bottom: 0.125rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.timeValue {
+  color: #93c5fd; /* text-blue-300 */
+}
+
+.movesValue {
+  color: #fdba74; /* text-orange-300 */
+}
+
+.scoreValue {
+  color: #86efac; /* text-green-300 */
+}
+
+/* Buttons */
+.newGameButton {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(to bottom, #059669, #047857);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #10b981;
+  transition: all 0.2s;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.newGameButton:hover {
+  background: linear-gradient(to bottom, #047857, #065f46);
+  border-color: #059669;
+  transform: scale(1.05);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.newGameButton:active {
+  transform: scale(0.95);
+}
+
+.newGameButton:focus {
+  outline: none;
+  ring: 2px solid #34d399;
+  ring-offset: 2px;
+  ring-offset-color: #1f2937;
+}
+
+.plusButton {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(to bottom, #059669, #047857);
+  border-radius: 0.5rem;
+  border: 1px solid #10b981;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.plusButton:hover {
+  background: linear-gradient(to bottom, #047857, #065f46);
+  border-color: #059669;
+  transform: scale(1.05);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.plusButton:active {
+  transform: scale(0.95);
+}
+
+.plusButton:focus {
+  outline: none;
+  ring: 2px solid #34d399;
+  ring-offset: 2px;
+  ring-offset-color: #1f2937;
+}
+
+/* Mobile-first responsive layout */
+/* Base mobile styles (default: up to 639px) */
+.header {
+  padding: 0.25rem 0;
+}
+
+.headerContent {
+  gap: 0.5rem;
+}
+
+.logo {
+  height: 2rem;
+}
+
+.title {
+  font-size: 1.25rem;
+}
+
+.statBox {
+  font-size: 0.875rem;
+  padding: 0.5rem;
+}
+
+.statValue {
+  font-size: 0.875rem;
+}
+
+/* Mobile portrait specific layout */
+.mobilePortraitRow {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.mobileControlsRow {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mobileStatsCompact {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.compactStatBox {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.875rem;
+  color: white;
+  background: linear-gradient(to right, #1f2937, #111827);
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #374151;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.compactStatBox .statSeparator {
+  color: #9ca3af;
+  margin: 0 0.375rem;
+}
+
+/* Small screens and up (640px+) */
+@media (min-width: 640px) {
+  .header {
+    padding: 0.5rem 0;
+  }
+  
+  .logo {
+    height: 2.5rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .statBox {
+    font-size: 1rem;
+  }
+  
+  .statValue {
+    font-size: 1.125rem;
+  }
+}
+
+/* Medium screens and up (768px+) */
+@media (min-width: 768px) {
+  .headerContent {
+    flex-direction: row;
+    gap: 0;
+  }
+  
+  .logo {
+    height: 2.5rem;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .statsContainer {
+    gap: 0.75rem;
+  }
+}
+
+/* Large screens and up (1024px+) */
+@media (min-width: 1024px) {
+  .logo {
+    height: 3rem;
+  }
+  
+  .title {
+    font-size: 1.875rem;
+  }
+  
+  .statsContainer {
+    gap: 1rem;
+  }
+}
+
+/* Extra large screens and up (1280px+) */
+@media (min-width: 1280px) {
+  .headerContainer {
+    padding: 0;
+  }
+}
+
+/* Utility classes for different layouts */
+.hidden {
+  display: none;
+}
+
+.showOnMobile {
+  display: flex;
+}
+
+.showOnDesktop {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .showOnMobile {
+    display: none;
+  }
+  
+  .showOnDesktop {
+    display: flex;
+  }
+}

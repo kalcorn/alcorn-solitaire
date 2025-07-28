@@ -1,6 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
-import SettingsPanel, { GameSettings } from './SettingsPanel';
+import SettingsPanel, { GameSettings } from '../SettingsPanel';
+import { cn } from '@/utils/cssUtils';
+import styles from './Header.module.css';
 
 interface HeaderProps {
   timeElapsed: number;
@@ -41,21 +43,27 @@ const Header: React.FC<HeaderProps> = ({
   onUndo, 
   canUndo = false 
 }) => (
-  <header className="w-full bg-gradient-to-b from-slate-700 to-slate-800 text-white py-1 sm:py-2 shadow-lg border-b border-slate-600 landscape-mobile-header">
-    <div className="w-full max-w-6xl mx-auto px-4 xl:px-0">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-2 sm:gap-0 landscape-mobile-single-line">
+  <header className={cn(styles.header, "landscape-mobile-header")}>
+    <div className={styles.headerContainer}>
+      <div className={cn(styles.headerContent, "landscape-mobile-single-line")}>
         {/* Portrait Mobile: First row centered logo and title */}
-        <div className="flex md:hidden w-full justify-center items-center gap-2 mb-1">
-          <Image src="/alcorn-logo.svg" alt="Alcorn Solitaire Logo" width={48} height={48} className="h-8 sm:h-10 lg:h-12 w-auto landscape-mobile-logo" />
-          <h1 className="header-title text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
+        <div className={cn(styles.mobilePortraitRow, styles.showOnMobile)}>
+          <Image 
+            src="/alcorn-logo.svg" 
+            alt="Alcorn Solitaire Logo" 
+            width={48} 
+            height={48} 
+            className={cn(styles.logo, "landscape-mobile-logo")} 
+          />
+          <h1 className={cn(styles.title, "header-title")}>Alcorn Solitaire</h1>
         </div>
         
         {/* Portrait Mobile: Second row with + button, stats, and settings cog */}
-        <div className="flex md:hidden w-full items-center justify-between gap-3">
+        <div className={cn(styles.mobileControlsRow, styles.showOnMobile)}>
           {/* Portrait Mobile + Button */}
           <button
             onClick={onNewGame}
-            className="px-4 py-2 text-xl font-bold text-white bg-gradient-to-b from-emerald-600 to-emerald-700 rounded-lg border border-emerald-500 hover:from-emerald-700 hover:to-emerald-800 hover:border-emerald-600 hover:scale-105 active:scale-95 transition-all duration-200 flex items-center justify-center flex-shrink-0 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-800"
+            className={styles.plusButton}
             style={{ minHeight: '36px' }}
             title="New game"
             aria-label="Start a new game"
@@ -64,17 +72,17 @@ const Header: React.FC<HeaderProps> = ({
           </button>
           
           {/* Game Stats for portrait mobile */}
-          <div className="flex-1 flex justify-center">
-            <div className="text-sm font-mono text-white bg-gradient-to-r from-slate-800 to-slate-900 rounded-lg px-4 py-2 border border-slate-700 shadow-lg">
+          <div className={styles.mobileStatsCompact}>
+            <div className={styles.compactStatBox}>
               <span className="opacity-95">
-                <span className="text-blue-300 font-semibold">{formatTime(timeElapsed)}</span>
-                <span className="text-slate-400 mx-1.5">•</span>
+                <span className={styles.timeValue}>{formatTime(timeElapsed)}</span>
+                <span className={styles.statSeparator}>•</span>
                 
-                <span className="text-orange-300 font-semibold mx-1.5">{moves}</span>
+                <span className={cn(styles.movesValue, "mx-1.5")}>{moves}</span>
                 <span className="text-slate-400 text-xs">moves</span>
 
-                <span className="text-slate-400 mx-1.5">•</span>
-                <span className="text-green-300 font-semibold">{score}</span>
+                <span className={styles.statSeparator}>•</span>
+                <span className={styles.scoreValue}>{score}</span>
               </span>
             </div>
           </div>
@@ -89,17 +97,23 @@ const Header: React.FC<HeaderProps> = ({
         </div>
         
         {/* Desktop and Landscape Mobile Layout */}
-        <div className="hidden md:flex items-center gap-2 landscape-mobile-title">
-          <Image src="/alcorn-logo.svg" alt="Alcorn Solitaire Logo" width={48} height={48} className="h-8 sm:h-10 lg:h-12 w-auto landscape-mobile-logo" />
-          <h1 className="header-title text-xl sm:text-2xl lg:text-3xl font-bold text-white drop-shadow-lg">Alcorn Solitaire</h1>
+        <div className={cn(styles.logoTitleSection, styles.showOnDesktop, "landscape-mobile-title")}>
+          <Image 
+            src="/alcorn-logo.svg" 
+            alt="Alcorn Solitaire Logo" 
+            width={48} 
+            height={48} 
+            className={cn(styles.logo, "landscape-mobile-logo")} 
+          />
+          <h1 className={cn(styles.title, "header-title")}>Alcorn Solitaire</h1>
         </div>
         
-        <div className="hidden md:flex items-center gap-2 sm:gap-4 landscape-mobile-right">
+        <div className={cn(styles.showOnDesktop, "items-center gap-2 sm:gap-4 landscape-mobile-right")}>
           {/* Desktop New Game Button */}
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={onNewGame}
-              className="landscape-mobile-new-game text-base sm:text-lg font-semibold text-white bg-gradient-to-b from-emerald-600 to-emerald-700 rounded-lg px-4 py-2 border border-emerald-500 hover:from-emerald-700 hover:to-emerald-800 hover:border-emerald-600 hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-800"
+              className={cn(styles.newGameButton, "landscape-mobile-new-game")}
               title="Start new game"
               aria-label="Start a new game"
             >

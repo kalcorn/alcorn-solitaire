@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card as CardType } from '@/types';
-import Card from './Card';
+import Card from '../Card';
+import { cn } from '@/utils/cssUtils';
+import styles from './WastePile.module.css';
 
 interface WastePileProps {
   cards: CardType[];
@@ -15,14 +17,10 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
 
   return (
     <div
-      className="flex-shrink-0 waste-pile-responsive"
+      className={cn("flex-shrink-0", styles.wastePileResponsive)}
       style={{ 
         position: 'relative', 
-        zIndex: 1,
-        width: '52px',
-        height: '72px',
-        minWidth: '52px',
-        minHeight: '72px'
+        zIndex: 1
       }}
       aria-label="Waste pile"
       role="list"
@@ -58,7 +56,11 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
         </>
       ) : (
         <div 
-          className="waste-pile empty flex items-center justify-center"
+          className={cn(
+            styles.wastePile,
+            styles.empty,
+            "flex items-center justify-center"
+          )}
           style={{ 
             position: 'absolute', 
             top: 0, 
