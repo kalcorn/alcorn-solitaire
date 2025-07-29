@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, GameState } from '../types';
 import { useAnimation } from './useAnimation';
 import { usePileElements } from './usePileRegistration';
-import { playSoundEffect } from '../utils/soundUtils';
+import { playSoundEffect, initializeSoundSystem } from '../utils/soundUtils';
+import { animateElement } from '../utils/animationEngine';
 
 export interface AnimationState {
   particleTrigger: number;
@@ -30,7 +31,6 @@ export interface GameAnimationHook {
   
   // Animation functions
   animateStockFlip: (card: any, stockPosition?: { x: number; y: number } | null, wastePosition?: { x: number; y: number } | null, onComplete?: () => void, onError?: (error: string) => void) => Promise<void>;
-  animateWasteToStock: (cards: any[], onComplete?: () => void, onError?: (error: string) => void) => Promise<void>;
   
   // New animation system functions
   animateStockToWaste: (card: Card, stockElement: HTMLElement, wasteElement: HTMLElement) => Promise<void>;
@@ -41,8 +41,15 @@ export interface GameAnimationHook {
 }
 
 export function useGameAnimations(gameState?: GameState): GameAnimationHook {
-  const { animateStockFlip: newAnimateStockFlip, animatePileToPile, animateShuffle } = useAnimation();
+  const { animateStockFlip: newAnimateStockFlip, animatePileToPile, animateShuffle, animateElementSequence } = useAnimation();
   const { getPileElement } = usePileElements();
+  
+  // Initialize sound system with game settings
+  useEffect(() => {
+    if (gameState?.settings) {
+      initializeSoundSystem(gameState.settings);
+    }
+  }, [gameState?.settings]);
   
   // Animation state
   const [particleTrigger, setParticleTrigger] = useState(0);
@@ -78,31 +85,35 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     onError?: (error: string) => void
   ): Promise<void> => {
     try {
-      console.log('[useGameAnimations] animateStockFlip called with:', {
-        card: {
-          id: card.id,
-          suit: card.suit,
-          rank: card.rank,
-          faceUp: card.faceUp
-        },
-        stockPosition,
-        wastePosition,
-        hasPositions: !!(stockPosition && wastePosition)
-      });
-      
-      if (gameState?.settings.soundEnabled) {
-        playSoundEffect.cardFlip();
-      }
+      playSoundEffect.cardFlip();
 
-      // Use the new animation system with actual DOM elements
+      // Use the new animation system with position overrides if provided
       const stockElement = getPileElement('stock');
       const wasteElement = getPileElement('waste');
 
       if (stockElement && wasteElement) {
-        console.log('[useGameAnimations] Using new animation system for stock flip');
-        await newAnimateStockFlip(card, stockElement, wasteElement);
+        console.log('[DEBUG] Stock element found:', stockElement);
+        console.log('[DEBUG] Waste element found:', wasteElement);
+        console.log('[DEBUG] Using positions:', { stockPosition, wastePosition });
+        
+        if (stockPosition && wastePosition) {
+          // Use position-aware animation for precise positioning
+          await animateElement(stockElement, wasteElement, {
+            type: 'flip',
+            duration: 600,
+            card,
+            fromPosition: stockPosition,
+            toPosition: wastePosition,
+            onComplete,
+            onError
+          });
+        } else {
+          // Fallback to element-based animation
+          await newAnimateStockFlip(card, stockElement, wasteElement);
+          onComplete?.();
+        }
       } else {
-        console.warn('[useGameAnimations] Pile elements not found, falling back to immediate completion');
+        console.warn('[DEBUG] Elements not found - stock:', !!stockElement, 'waste:', !!wasteElement);
       }
 
       onComplete?.();
@@ -112,40 +123,9 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     }
   }, [gameState?.settings.soundEnabled, newAnimateStockFlip, getPileElement]);
 
-  // Legacy animateWasteToStock function for backward compatibility
-  const animateWasteToStock = useCallback(async (
-    cards: any[],
-    onComplete?: () => void,
-    onError?: (error: string) => void
-  ): Promise<void> => {
-    try {
-      if (gameState?.settings.soundEnabled) {
-        if (cards.length === 1) {
-          playSoundEffect.cardFlip();
-        } else {
-          playSoundEffect.shuffle();
-        }
-      }
 
-      // Use the new animation system with actual DOM elements
-      const stockElement = getPileElement('stock');
-      const wasteElement = getPileElement('waste');
 
-      if (stockElement && wasteElement) {
-        console.log('[useGameAnimations] Using new animation system for waste to stock shuffle');
-        // Create waste elements array (simplified - in real implementation we'd get actual card elements)
-        const wasteElements = Array(cards.length).fill(wasteElement);
-        await animateShuffle(cards, wasteElements, stockElement);
-      } else {
-        console.warn('[useGameAnimations] Pile elements not found, falling back to immediate completion');
-      }
 
-      onComplete?.();
-    } catch (error) {
-      console.error('Waste to stock animation failed:', error);
-      onError?.(error as string);
-    }
-  }, [gameState?.settings.soundEnabled, animateShuffle, getPileElement]);
 
   // New animation system functions
   const animateStockToWaste = useCallback(async (
@@ -153,18 +133,9 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     stockElement: HTMLElement,
     wasteElement: HTMLElement
   ): Promise<void> => {
-    console.log('[useGameAnimations] animateStockToWaste:', {
-      cardId: card.id,
-      cardSuit: card.suit,
-      cardRank: card.rank,
-      faceUp: card.faceUp
-    });
-
     try {
       await newAnimateStockFlip(card, stockElement, wasteElement);
-      console.log('[useGameAnimations] Stock to waste animation completed');
     } catch (error) {
-      console.error('[useGameAnimations] Stock to waste animation failed:', error);
       throw error;
     }
   }, [newAnimateStockFlip]);
@@ -174,19 +145,9 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     fromElement: HTMLElement,
     toElement: HTMLElement
   ): Promise<void> => {
-    console.log('[useGameAnimations] animateCardToFoundation:', {
-      cardId: card.id,
-      cardSuit: card.suit,
-      cardRank: card.rank,
-      fromElement: fromElement.id || fromElement.className,
-      toElement: toElement.id || toElement.className
-    });
-
     try {
       await animatePileToPile(card, fromElement, toElement);
-      console.log('[useGameAnimations] Card to foundation animation completed');
     } catch (error) {
-      console.error('[useGameAnimations] Card to foundation animation failed:', error);
       throw error;
     }
   }, [animatePileToPile]);
@@ -196,19 +157,9 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     fromElement: HTMLElement,
     toElement: HTMLElement
   ): Promise<void> => {
-    console.log('[useGameAnimations] animateCardToTableau:', {
-      cardId: card.id,
-      cardSuit: card.suit,
-      cardRank: card.rank,
-      fromElement: fromElement.id || fromElement.className,
-      toElement: toElement.id || toElement.className
-    });
-
     try {
       await animatePileToPile(card, fromElement, toElement);
-      console.log('[useGameAnimations] Card to tableau animation completed');
     } catch (error) {
-      console.error('[useGameAnimations] Card to tableau animation failed:', error);
       throw error;
     }
   }, [animatePileToPile]);
@@ -218,16 +169,9 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     wasteElements: HTMLElement[],
     stockElement: HTMLElement
   ): Promise<void> => {
-    console.log('[useGameAnimations] animateShuffleWasteToStock:', {
-      cardCount: cards.length,
-      stockElement: stockElement.id || stockElement.className
-    });
-
     try {
       await animateShuffle(cards, wasteElements, stockElement);
-      console.log('[useGameAnimations] Shuffle waste to stock animation completed');
     } catch (error) {
-      console.error('[useGameAnimations] Shuffle waste to stock animation failed:', error);
       throw error;
     }
   }, [animateShuffle]);
@@ -236,20 +180,11 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     card: Card,
     element: HTMLElement
   ): Promise<void> => {
-    console.log('[useGameAnimations] animateCardFlip:', {
-      cardId: card.id,
-      cardSuit: card.suit,
-      cardRank: card.rank,
-      element: element.id || element.className
-    });
-
     try {
       // For a card flip in place, we animate from the element to itself
       // This will trigger the flip animation without movement
       await animatePileToPile(card, element, element);
-      console.log('[useGameAnimations] Card flip animation completed');
     } catch (error) {
-      console.error('[useGameAnimations] Card flip animation failed:', error);
       throw error;
     }
   }, [animatePileToPile]);
@@ -265,7 +200,6 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     
     // Legacy animation functions
     animateStockFlip,
-    animateWasteToStock,
     
     // New animation system functions
     animateStockToWaste,

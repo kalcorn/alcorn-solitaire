@@ -69,7 +69,10 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
           opacity: canCycle ? 1 : 0.5
         }}
         className={isShuffling ? styles.stockShuffleCascade : ''}
-        onClick={canCycle ? (event) => onClick?.(event) : undefined}
+        onClick={canCycle ? (event) => {
+          console.log('[TIMING] StockPile click handler triggered at:', performance.now());
+          onClick?.(event);
+        } : undefined}
         title={canCycle ? "Stock pile" : "No more cycles allowed"}
       >
         <Card
@@ -94,7 +97,10 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
         aria-label={isRecycleAvailable ? "Empty stock pile. Click to recycle waste cards." : "Empty stock pile"}
         aria-disabled={!canCycle}
         style={{ position: 'absolute', top: 0, left: 0, zIndex: 10 }}
-        onClick={canCycle ? (event) => onClick?.(event) : undefined}
+        onClick={canCycle ? (event) => {
+          console.log('[TIMING] StockPile recycle click handler triggered at:', performance.now());
+          onClick?.(event);
+        } : undefined}
         title={canCycle ? "Click to recycle" : "No more cycles allowed"}
       >
         <div className="flex items-center justify-center">

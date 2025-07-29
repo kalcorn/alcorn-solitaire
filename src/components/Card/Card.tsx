@@ -9,6 +9,7 @@ interface CardProps {
   suit: Suit;
   rank: number;
   faceUp: boolean;
+  visible?: boolean;
   cardId?: string;
   isBeingDragged?: boolean;
   onClick?: () => void;
@@ -28,7 +29,7 @@ const rankMap = {
   1: "A", 11: "J", 12: "Q", 13: "K"
 };
 
-const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged, onClick, onMouseDown, onTouchStart, style }) => {
+const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId, isBeingDragged, onClick, onMouseDown, onTouchStart, style }) => {
   const SuitIcon = suitIcons[suit];
   const displayRank = rankMap[rank as keyof typeof rankMap] || rank;
   const [isMouseDown, setIsMouseDown] = React.useState(false);
@@ -155,6 +156,7 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
         WebkitUserSelect: 'none',
         WebkitTouchCallout: 'none',
         WebkitTapHighlightColor: 'transparent',
+        display: visible ? 'block' : 'none',
         ...style // Merge passed styles to override dimensions
       }}
     >

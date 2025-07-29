@@ -14,6 +14,7 @@ interface DesktopLayoutProps {
   onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   startDrag: (cards: CardType[], position: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => CardType[];
+  cardVisibility?: { [cardId: string]: boolean };
 }
 
 const DesktopLayout: React.FC<DesktopLayoutProps> = ({
@@ -26,7 +27,8 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   onCardClick,
   onCardDragStart,
   startDrag,
-  getMovableCards
+  getMovableCards,
+  cardVisibility
 }) => {
   return (
     <div className="hidden md:block w-full flex grow flex-col">
@@ -42,6 +44,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         onCardDragStart={onCardDragStart}
         startDrag={startDrag}
         getMovableCards={getMovableCards}
+        cardVisibility={cardVisibility}
       />
       {/* Desktop Tableau Section - Constrained Width */}
       <div className="w-full max-w-6xl mx-auto px-4 xl:px-0">

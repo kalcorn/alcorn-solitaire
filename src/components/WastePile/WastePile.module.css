@@ -45,3 +45,26 @@
 }
 
 /* All responsive sizing handled by card-dimensions.css */
+
+/* Full DOM approach: hide shadows and filters for non-top cards */
+.wastePileResponsive .hidden-card .card {
+  box-shadow: none !important;
+  filter: none !important;
+  /* Ensure hidden cards don't interfere with layout */
+  pointer-events: none !important;
+  /* Make sure hidden cards don't create visual artifacts */
+  opacity: 0.01 !important; /* Nearly invisible but still in DOM for animations */
+  /* Completely eliminate any shadow effects */
+  text-shadow: none !important;
+  /* Force GPU rendering to prevent shadow bleeding */
+  transform: translateZ(0) !important;
+  /* Ensure no background shadows */
+  background-shadow: none !important;
+}
+
+/* Ensure top card maintains proper styling */
+.wastePileResponsive .visible-card .card {
+  /* Maintain default card styling */
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}

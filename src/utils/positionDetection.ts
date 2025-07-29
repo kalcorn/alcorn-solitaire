@@ -19,125 +19,16 @@ export interface PositionValidation {
   confidence: 'high' | 'medium' | 'low';
 }
 
-/**
- * Check if CSS custom properties are loaded
- */
-function areCssPropertiesLoaded(): boolean {
-  try {
-    const computedStyle = getComputedStyle(document.documentElement);
-    const cardWidth = computedStyle.getPropertyValue('--card-width').trim();
-    const cardHeight = computedStyle.getPropertyValue('--card-height').trim();
-    return cardWidth !== '' && cardHeight !== '' && 
-           parseFloat(cardWidth) > 0 && parseFloat(cardHeight) > 0;
-  } catch (error) {
-    console.warn('[PositionDetection] Failed to check CSS properties:', error);
-    return false; // Changed from true to false - if we can't check, assume not loaded
-  }
-}
 
-/**
- * Wait for an element to be properly positioned in the DOM
- */
-async function waitForElementInDOM(element: HTMLElement, maxAttempts = 5): Promise<void> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    if (document.contains(element)) {
-      return;
-    }
-    
-    if (attempt === 1 || attempt === maxAttempts) {
-      console.log(`[PositionDetection] Waiting for element in DOM: attempt ${attempt}/${maxAttempts}`);
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, 20)); // Reduced delay
-  }
-  
-  throw new Error(`Element not in DOM after ${maxAttempts} attempts`);
-}
 
-/**
- * Wait for CSS custom properties to be loaded
- */
-async function waitForCSSProperties(maxAttempts = 5): Promise<void> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    if (areCssPropertiesLoaded()) {
-    return;
-  }
-  
-    if (attempt === 1 || attempt === maxAttempts) {
-      console.log(`[PositionDetection] Waiting for CSS properties: attempt ${attempt}/${maxAttempts}`);
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, 20)); // Reduced delay
-  }
-  
-  console.warn('[PositionDetection] CSS properties not loaded, continuing anyway');
-}
 
-/**
- * Force layout recalculation for an element
- */
-function forceLayoutRecalculation(element: HTMLElement): void {
-  // Force the browser to recalculate layout
-  element.offsetHeight; // This triggers a reflow
-}
 
-/**
- * Force layout recalculation multiple times with delays
- */
-async function forceLayoutRecalculationAggressive(element: HTMLElement, attempts = 5): Promise<void> {
-  for (let i = 0; i < attempts; i++) {
-    // Multiple properties that force reflow
-    element.offsetHeight;
-    element.offsetWidth;
-    element.getBoundingClientRect();
-    
-    // Small delay to allow layout to settle
-    await new Promise(resolve => setTimeout(resolve, 10));
-  }
-}
 
-/**
- * Wait for element layout to be stable
- */
-async function waitForLayoutStable(element: HTMLElement, maxAttempts = 10): Promise<void> {
-  let lastRect: DOMRect | null = null;
-  let stableCount = 0;
-  
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    // Force layout recalculation
-    forceLayoutRecalculation(element);
-    
-    const rect = element.getBoundingClientRect();
-    
-    if (lastRect && 
-        Math.abs(rect.left - lastRect.left) < 1 &&
-        Math.abs(rect.top - lastRect.top) < 1 &&
-        Math.abs(rect.width - lastRect.width) < 1 &&
-        Math.abs(rect.height - lastRect.height) < 1) {
-      stableCount++;
-      if (stableCount >= 2) {
-        return; // Layout is stable
-      }
-    } else {
-      stableCount = 0;
-    }
-    
-    lastRect = rect;
-    
-    if (attempt === 1 || attempt === maxAttempts) {
-      console.log(`[PositionDetection] Waiting for layout stability: attempt ${attempt}/${maxAttempts}, stable: ${stableCount}`);
-    }
-    
-    await new Promise(resolve => setTimeout(resolve, 50)); // Increased delay to 50ms
-  }
-  
-  console.warn('[PositionDetection] Layout not stable, continuing anyway');
-}
 
 /**
  * Measure element position with multiple validation approaches
  */
-async function measureElementPosition(element: HTMLElement): Promise<ElementPosition> {
+function measureElementPosition(element: HTMLElement): ElementPosition {
   const rect = element.getBoundingClientRect();
   
   // Try to get CSS dimensions
@@ -151,7 +42,7 @@ async function measureElementPosition(element: HTMLElement): Promise<ElementPosi
     cssHeight = parseFloat(computedStyle.height);
     hasCssDimensions = cssWidth > 0 && cssHeight > 0;
   } catch (error) {
-    console.warn('[PositionDetection] getComputedStyle failed:', error);
+    // Ignore computed style errors
   }
   
   // Check if element has position from getBoundingClientRect
@@ -163,8 +54,8 @@ async function measureElementPosition(element: HTMLElement): Promise<ElementPosi
   // Check if element is in the layout flow
   const hasOffsetParent = element.offsetParent !== null;
   
-  // Check if CSS custom properties are loaded
-  const cssLoaded = areCssPropertiesLoaded();
+  // CSS is assumed to be loaded
+  const cssLoaded = true;
     
     // Calculate center position
   // If getBoundingClientRect returns zero dimensions but we have CSS dimensions,
@@ -180,62 +71,11 @@ async function measureElementPosition(element: HTMLElement): Promise<ElementPosi
     y = rect.top + rect.height / 2;
   }
   
-  // Element is visible if it has either CSS dimensions or valid rect dimensions
-  // AND CSS custom properties are loaded (for consistent sizing)
-  // AND either has valid position or offsetParent or CSS dimensions
+  // Element is visible if it has valid dimensions and position
   const isVisible = (hasCssDimensions || hasValidDimensions) && 
-                   cssLoaded &&
-                   (hasValidPosition || hasOffsetParent || hasCssDimensions);
+                   (hasValidPosition || hasOffsetParent);
   
-  // Debug logging for visibility calculation
-  console.log('[PositionDetection] Visibility calculation:', {
-    hasCssDimensions,
-    hasValidDimensions,
-    hasValidPosition,
-    hasOffsetParent,
-    cssLoaded,
-    isVisible,
-    rect: { width: rect.width, height: rect.height, left: rect.left, top: rect.top },
-    css: { width: cssWidth, height: cssHeight }
-  });
   
-  // Debug logging for visibility issues
-  if (!isVisible) {
-    console.warn('[PositionDetection] Element not visible:', {
-      hasOffsetParent,
-      hasValidDimensions,
-      hasValidPosition,
-      hasCssDimensions,
-      cssLoaded,
-      rect: { width: rect.width, height: rect.height, left: rect.left, top: rect.top },
-      css: { width: cssWidth, height: cssHeight },
-      offsetParent: element.offsetParent ? 'present' : 'null'
-    });
-    
-    // Run comprehensive debug if element has zero dimensions
-    if (rect.width === 0 && rect.height === 0) {
-      console.warn('[PositionDetection] Element has zero dimensions - running comprehensive debug...');
-      debugElementPosition(element);
-      
-      // Check for CSS vs layout mismatch (exactly what we're seeing in browser)
-      if (hasCssDimensions && cssWidth > 0 && cssHeight > 0) {
-        console.warn('[PositionDetection] CSS vs Layout mismatch detected! CSS dimensions exist but layout dimensions are zero.');
-        console.warn('[PositionDetection] This indicates a layout timing issue - forcing immediate layout recalculation...');
-        
-        // Force immediate layout recalculation
-        await forceLayoutRecalculationAggressive(element, 3);
-        
-        // Re-measure immediately
-        const immediateRect = element.getBoundingClientRect();
-        console.log('[PositionDetection] After immediate layout recalculation:', {
-          width: immediateRect.width,
-          height: immediateRect.height,
-          left: immediateRect.left,
-          top: immediateRect.top
-        });
-      }
-    }
-  }
   
   return {
     x: Math.round(x),
@@ -482,147 +322,31 @@ export async function debugParentTree(element: HTMLElement): Promise<void> {
 /**
  * Get reliable element position with improved retry logic
  */
-export async function getElementPosition(element: HTMLElement): Promise<ElementPosition> {
-  const maxAttempts = 10; // Reduced from 15
-  
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      // Step 1: Wait for element to be in DOM
-      await waitForElementInDOM(element, 3); // Reduced from 5
-      
-      // Step 2: Wait for CSS properties
-      await waitForCSSProperties(3); // Reduced from 5
-      
-      // Step 3: Wait for layout to be stable
-      await waitForLayoutStable(element, 10); // Increased from 3 to 10
-      
-      // Step 4: Measure position
-      const position = await measureElementPosition(element);
-      
-      // Step 5: If we have CSS dimensions but not valid rect dimensions,
-      // force additional layout recalculations
-      if (position.visible && position.width === 0 && position.height === 0) {
-        console.log(`[PositionDetection] Element has CSS dimensions but zero rect dimensions, forcing aggressive layout recalculation on attempt ${attempt}`);
-        
-        // Check if this is Chrome mobile view issue
-        const computedStyle = getComputedStyle(element);
-        const hasCssDimensions = computedStyle.width !== 'auto' && computedStyle.height !== 'auto';
-        const cssWidth = parseFloat(computedStyle.width);
-        const cssHeight = parseFloat(computedStyle.height);
-        
-        if (hasCssDimensions && cssWidth > 0 && cssHeight > 0) {
-          console.warn(`[PositionDetection] Chrome mobile view detected! CSS dimensions: ${cssWidth}x${cssHeight}, but layout dimensions: 0x0`);
-          console.warn(`[PositionDetection] Applying Chrome mobile view workaround...`);
-          
-          // Chrome mobile view workaround: force multiple layout recalculations
-          for (let i = 0; i < 10; i++) {
-            // Force layout recalculation
-            element.offsetHeight;
-            element.offsetWidth;
-            element.getBoundingClientRect();
-            
-            // Small delay to allow layout to settle
-            await new Promise(resolve => setTimeout(resolve, 5));
-          }
-          
-          // Re-measure after Chrome mobile view workaround
-          const chromeWorkaroundRect = element.getBoundingClientRect();
-          console.log(`[PositionDetection] After Chrome mobile view workaround:`, {
-            width: chromeWorkaroundRect.width,
-            height: chromeWorkaroundRect.height,
-            left: chromeWorkaroundRect.left,
-            top: chromeWorkaroundRect.top
-          });
-          
-          // If still zero, use CSS dimensions as fallback
-          if (chromeWorkaroundRect.width === 0 && chromeWorkaroundRect.height === 0) {
-            console.warn(`[PositionDetection] Chrome mobile view workaround failed, using CSS dimensions as fallback`);
-            position.x = 0; // We can't get real position, use 0
-            position.y = 0; // We can't get real position, use 0
-            position.width = cssWidth;
-            position.height = cssHeight;
-            position.visible = true;
-            position.confidence = 'low'; // Low confidence due to Chrome mobile view issue
-            return position;
-          } else {
-            console.log(`[PositionDetection] Chrome mobile view workaround successful!`);
-            position.x = chromeWorkaroundRect.left;
-            position.y = chromeWorkaroundRect.top;
-            position.width = chromeWorkaroundRect.width;
-            position.height = chromeWorkaroundRect.height;
-            position.visible = true;
-            position.confidence = 'high';
-            return position;
-          }
-        }
-        
-        // Force aggressive layout recalculation
-        await forceLayoutRecalculationAggressive(element, 5);
-        
-        // Re-measure after forced recalculation
-        const recalculatedPosition = await measureElementPosition(element);
-        if (recalculatedPosition.width > 0 || recalculatedPosition.height > 0) {
-          console.log(`[PositionDetection] Aggressive layout recalculation successful, got dimensions: ${recalculatedPosition.width}x${recalculatedPosition.height}`);
-          position.x = recalculatedPosition.x;
-          position.y = recalculatedPosition.y;
-          position.width = recalculatedPosition.width;
-          position.height = recalculatedPosition.height;
-          position.visible = recalculatedPosition.visible;
-          position.confidence = recalculatedPosition.confidence;
-        } else {
-          console.warn(`[PositionDetection] Aggressive layout recalculation failed, dimensions still zero`);
-          
-          // Final fallback: use CSS dimensions if available
-          const computedStyle = getComputedStyle(element);
-          const cssWidth = parseFloat(computedStyle.width);
-          const cssHeight = parseFloat(computedStyle.height);
-          
-          if (cssWidth > 0 && cssHeight > 0) {
-            console.warn(`[PositionDetection] Using CSS dimensions as final fallback: ${cssWidth}x${cssHeight}`);
-            position.x = 0;
-            position.y = 0;
-            position.width = cssWidth;
-            position.height = cssHeight;
-            position.visible = true;
-            position.confidence = 'low';
-            return position;
-          }
-        }
-      }
-      
-      // Step 6: Validate position
-      const validation = validatePosition(position);
-      
-      if (validation.isValid || validation.confidence === 'medium') {
-        console.log(`[PositionDetection] Got position on attempt ${attempt}:`, {
-          x: position.x,
-          y: position.y,
-          width: position.width,
-          height: position.height,
-          confidence: position.confidence,
-          visible: position.visible
-        });
-        return position;
-      }
-      
-      // Log validation issues
-      if (attempt === 1 || attempt === maxAttempts) {
-        console.warn(`[PositionDetection] Position validation failed on attempt ${attempt}:`, validation.issues);
-      }
-      
-    } catch (error) {
-      if (attempt === 1 || attempt === maxAttempts) {
-        console.warn(`[PositionDetection] Error on attempt ${attempt}:`, error);
-      }
-    }
-    
-    // Shorter delay
-    const delay = Math.min(20 * attempt, 100); // Reduced delays
-    await new Promise(resolve => setTimeout(resolve, delay));
+export function getElementPosition(element: HTMLElement): ElementPosition {
+  // Check if element is in DOM
+  if (!document.contains(element)) {
+    return {
+      x: 100,
+      y: 100,
+      width: 52,
+      height: 72,
+      visible: false,
+      confidence: 'low',
+      source: 'fallback'
+    };
   }
   
-  // Final fallback: return a reasonable position
-  console.error('[PositionDetection] Failed to get reliable position, using fallback');
+  // Measure position
+  const position = measureElementPosition(element);
+  
+  // Basic validation
+  const validation = validatePosition(position);
+  
+  if (validation.isValid || validation.confidence === 'medium') {
+    return position;
+  }
+  
+  // Simple fallback
   return {
     x: 100,
     y: 100,
@@ -637,27 +361,12 @@ export async function getElementPosition(element: HTMLElement): Promise<ElementP
 /**
  * Get positions for both elements with validation
  */
-export async function getElementPositions(
+export function getElementPositions(
   fromElement: HTMLElement,
   toElement: HTMLElement
-): Promise<{ from: ElementPosition; to: ElementPosition }> {
-  console.log('[PositionDetection] Getting positions for animation');
-  
-  const [fromPosition, toPosition] = await Promise.all([
-    getElementPosition(fromElement),
-    getElementPosition(toElement)
-  ]);
-  
-  // Validate both positions
-  const fromValidation = validatePosition(fromPosition);
-  const toValidation = validatePosition(toPosition);
-  
-  if (!fromValidation.isValid || !toValidation.isValid) {
-    console.warn('[PositionDetection] Position validation issues:', {
-      from: fromValidation.issues,
-      to: toValidation.issues
-    });
-  }
+): { from: ElementPosition; to: ElementPosition } {
+  const fromPosition = getElementPosition(fromElement);
+  const toPosition = getElementPosition(toElement);
   
   return { from: fromPosition, to: toPosition };
 } 
@@ -667,66 +376,16 @@ export async function getElementPositions(
  * This gives us the true absolute position relative to document body (0,0)
  */
 export function calculateAbsolutePosition(element: HTMLElement): { x: number, y: number } {
-  console.group('[PositionDetection] Absolute Position Calculation');
-  
-  console.log(`Starting with element: ${element.tagName}${element.id ? `#${element.id}` : ''}${element.className ? `.${element.className.split(' ').join('.')}` : ''}`);
-  
-  // Use the same approach as getElementPosition - force layout recalculation first
-  console.log('Forcing layout recalculation...');
-  element.offsetHeight; // Force reflow
-  element.offsetWidth; // Force reflow
-  element.getBoundingClientRect(); // Force reflow
-  
-  // Method 1: Use getBoundingClientRect + scroll (most reliable)
+  // Use getBoundingClientRect + scroll (most reliable)
   const rect = element.getBoundingClientRect();
   const boundingRectPosition = {
     x: rect.left + window.scrollX,
     y: rect.top + window.scrollY
   };
   
-  console.log(`getBoundingClientRect + scroll: (${boundingRectPosition.x}, ${boundingRectPosition.y})`);
-  
-  // Method 2: Use the same CSS dimensions fallback as getElementPosition
-  const computedStyle = getComputedStyle(element);
-  const cssWidth = parseFloat(computedStyle.width);
-  const cssHeight = parseFloat(computedStyle.height);
-  const hasCssDimensions = cssWidth > 0 && cssHeight > 0;
-  
-  console.log(`CSS dimensions: ${cssWidth}x${cssHeight}, hasCssDimensions: ${hasCssDimensions}`);
-  
-  // If getBoundingClientRect returns zeros but we have CSS dimensions, use Chrome mobile view workaround
-  if (boundingRectPosition.x === 0 && boundingRectPosition.y === 0 && hasCssDimensions) {
-    console.warn('⚠️ Chrome mobile view detected! getBoundingClientRect returns zeros but CSS dimensions exist.');
-    console.warn('Applying Chrome mobile view workaround...');
-    
-    // Use the same workaround as getElementPosition
-    // Force multiple layout recalculations
-    for (let i = 0; i < 10; i++) {
-      element.offsetHeight;
-      element.offsetWidth;
-      element.getBoundingClientRect();
-    }
-    
-    // Re-measure after workaround
-    const workaroundRect = element.getBoundingClientRect();
-    const workaroundPosition = {
-      x: workaroundRect.left + window.scrollX,
-      y: workaroundRect.top + window.scrollY
-    };
-    
-    console.log(`After Chrome mobile view workaround: (${workaroundPosition.x}, ${workaroundPosition.y})`);
-    
-    if (workaroundPosition.x === 0 && workaroundPosition.y === 0) {
-      console.warn('⚠️ Chrome mobile view workaround failed, using CSS dimensions as fallback');
-      console.log(`Final absolute position (CSS fallback): (0, 0) - using CSS dimensions: ${cssWidth}x${cssHeight}`);
-      console.groupEnd();
-      return { x: 0, y: 0 }; // We can't get real position, but we know the element exists
-    } else {
-      console.log(`✅ Chrome mobile view workaround successful!`);
-      console.log(`Final absolute position (workaround): (${workaroundPosition.x}, ${workaroundPosition.y})`);
-      console.groupEnd();
-      return workaroundPosition;
-    }
+  // If position is zero, return zero
+  if (boundingRectPosition.x === 0 && boundingRectPosition.y === 0) {
+    return { x: 0, y: 0 };
   }
   
   // Method 3: Use offsetParent chain (for comparison)
@@ -734,9 +393,7 @@ export function calculateAbsolutePosition(element: HTMLElement): { x: number, y:
   let offsetX = 0;
   let offsetY = 0;
   let level = 0;
-  const maxLevels = 20; // Prevent infinite loops
-  
-  console.log('OffsetParent chain calculation:');
+  const maxLevels = 20;
   
   while (currentElement && level < maxLevels) {
     const offsetLeft = currentElement.offsetLeft;
@@ -744,38 +401,18 @@ export function calculateAbsolutePosition(element: HTMLElement): { x: number, y:
     const scrollLeft = currentElement.scrollLeft || 0;
     const scrollTop = currentElement.scrollTop || 0;
     
-    // Add this element's offset to our running total
     offsetX += offsetLeft - scrollLeft;
     offsetY += offsetTop - scrollTop;
     
-    console.log(`Level ${level}:`, {
-      element: currentElement.tagName + 
-        (currentElement.id ? `#${currentElement.id}` : '') + 
-        (currentElement.className ? `.${currentElement.className.split(' ').join('.')}` : ''),
-      offsetLeft,
-      offsetTop,
-      scrollLeft,
-      scrollTop,
-      runningTotal: { x: offsetX, y: offsetY },
-      offsetParent: currentElement.offsetParent ? 
-        (currentElement.offsetParent as HTMLElement).tagName + 
-        ((currentElement.offsetParent as HTMLElement).id ? `#${(currentElement.offsetParent as HTMLElement).id}` : '') : 
-        'null'
-    });
-    
-    // Move to parent
     currentElement = currentElement.offsetParent as HTMLElement;
     level++;
     
-    // Stop if we reach body or html
     if (currentElement && (currentElement.tagName === 'BODY' || currentElement.tagName === 'HTML')) {
-      console.log(`🏁 Reached ${currentElement.tagName} at level ${level}`);
       break;
     }
   }
   
   const offsetPosition = { x: offsetX, y: offsetY };
-  console.log(`OffsetParent calculation: (${offsetPosition.x}, ${offsetPosition.y})`);
   
   // Compare methods
   const discrepancy = {
@@ -783,17 +420,9 @@ export function calculateAbsolutePosition(element: HTMLElement): { x: number, y:
     y: Math.abs(boundingRectPosition.y - offsetPosition.y)
   };
   
-  console.log(`Discrepancy between methods: x=${discrepancy.x}, y=${discrepancy.y}`);
-  
   if (discrepancy.x > 5 || discrepancy.y > 5) {
-    console.warn('⚠️ Large discrepancy detected! Using getBoundingClientRect method.');
-    console.log(`Final absolute position (getBoundingClientRect): (${boundingRectPosition.x}, ${boundingRectPosition.y})`);
-    console.groupEnd();
     return boundingRectPosition;
   } else {
-    console.log('✅ Methods agree within 5px tolerance');
-    console.log(`Final absolute position (offsetParent): (${offsetPosition.x}, ${offsetPosition.y})`);
-    console.groupEnd();
     return offsetPosition;
   }
 }
@@ -802,44 +431,22 @@ export function calculateAbsolutePosition(element: HTMLElement): { x: number, y:
  * Compare getBoundingClientRect vs absolute position calculation
  */
 export function comparePositionMethods(element: HTMLElement): void {
-  console.group('[PositionDetection] Position Method Comparison');
-  
-  // Method 1: getBoundingClientRect
+  // Simple comparison without verbose logging
   const rect = element.getBoundingClientRect();
   const boundingRectPosition = {
     x: rect.left + window.scrollX,
     y: rect.top + window.scrollY
   };
   
-  // Method 2: Absolute position calculation
   const absolutePosition = calculateAbsolutePosition(element);
   
-  // Method 3: getBoundingClientRect without scroll adjustment
-  const boundingRectRaw = {
-    x: rect.left,
-    y: rect.top
-  };
-  
-  console.log('Position Comparison Results:');
-  console.log(`Element: ${element.tagName}${element.id ? `#${element.id}` : ''}${element.className ? `.${element.className.split(' ').join('.')}` : ''}`);
-  console.log(`getBoundingClientRect + scroll: (${boundingRectPosition.x}, ${boundingRectPosition.y})`);
-  console.log(`getBoundingClientRect raw: (${boundingRectRaw.x}, ${boundingRectRaw.y})`);
-  console.log(`Absolute calculation: (${absolutePosition.x}, ${absolutePosition.y})`);
-  console.log(`Window scroll: (${window.scrollX}, ${window.scrollY})`);
-  
-  // Check for discrepancies
   const boundingVsAbsolute = {
     xDiff: Math.abs(boundingRectPosition.x - absolutePosition.x),
     yDiff: Math.abs(boundingRectPosition.y - absolutePosition.y)
   };
   
-  console.log(`Discrepancy (bounding vs absolute): x=${boundingVsAbsolute.xDiff}, y=${boundingVsAbsolute.yDiff}`);
-  
-  if (boundingVsAbsolute.xDiff > 1 || boundingVsAbsolute.yDiff > 1) {
-    console.warn('⚠️ Significant discrepancy detected between position methods!');
-  } else {
-    console.log('✅ Position methods agree within 1px tolerance');
+  // Only log if there's a significant discrepancy
+  if (boundingVsAbsolute.xDiff > 5 || boundingVsAbsolute.yDiff > 5) {
+    console.warn('Position methods disagree:', { boundingRectPosition, absolutePosition, discrepancy: boundingVsAbsolute });
   }
-  
-  console.groupEnd();
 } 

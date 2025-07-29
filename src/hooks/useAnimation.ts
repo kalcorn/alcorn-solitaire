@@ -47,6 +47,15 @@ export interface AnimationHook {
     onComplete?: () => void,
     onError?: (error: string) => void
   ) => Promise<void>;
+
+  animateElementSequence: (
+    animations: Array<{
+      fromElement: HTMLElement;
+      toElement: HTMLElement;
+      options: AnimationOptions;
+    }>,
+    sequenceOptions: SequenceOptions
+  ) => Promise<void>;
 }
 
 export function useAnimation(): AnimationHook {
@@ -76,13 +85,6 @@ export function useAnimation(): AnimationHook {
     onComplete?: () => void,
     onError?: (error: string) => void
   ): Promise<void> => {
-    console.log('[useAnimation] animateStockFlip called:', {
-      cardId: card.id,
-      cardSuit: card.suit,
-      cardRank: card.rank,
-      faceUp: card.faceUp
-    });
-
     return animateElement(stockElement, wasteElement, {
       type: 'flip',
       duration: 600,
@@ -99,12 +101,6 @@ export function useAnimation(): AnimationHook {
     onComplete?: () => void,
     onError?: (error: string) => void
   ): Promise<void> => {
-    console.log('[useAnimation] animatePileToPile called:', {
-      cardId: card.id,
-      fromElement: fromElement.id || fromElement.className,
-      toElement: toElement.id || toElement.className
-    });
-
     return animateElement(fromElement, toElement, {
       type: 'move',
       duration: 300,
@@ -120,31 +116,42 @@ export function useAnimation(): AnimationHook {
     onComplete?: () => void,
     onError?: (error: string) => void
   ): Promise<void> => {
-    console.log('[useAnimation] animateShuffle called:', {
-      cardCount: cards.length,
-      toElement: toElement.id || toElement.className
-    });
-
     if (cards.length !== fromElements.length) {
       throw new Error('Card count must match element count for shuffle animation');
     }
+
+    // Calculate timing for exactly 1 second total duration
+    const totalDuration = 1000;
+    const staggerDelay = Math.min(50, totalDuration / cards.length); // Ensure reasonable stagger
+    const animationDuration = Math.max(200, totalDuration - (cards.length * staggerDelay)); // Ensure reasonable animation duration
 
     const animations = cards.map((card, index) => ({
       fromElement: fromElements[index],
       toElement,
       options: {
         type: 'shuffle' as const,
-        duration: 200,
+        duration: animationDuration,
         card
       }
     }));
 
     return animateElementSequence(animations, {
-      staggerDelay: 50,
-      totalDuration: 1000,
+      staggerDelay,
+      totalDuration,
       onComplete,
       onError
     });
+  }, []);
+
+  const animateElementSequenceWrapper = useCallback(async (
+    animations: Array<{
+      fromElement: HTMLElement;
+      toElement: HTMLElement;
+      options: AnimationOptions;
+    }>,
+    sequenceOptions: SequenceOptions
+  ): Promise<void> => {
+    return animateElementSequence(animations, sequenceOptions);
   }, []);
 
   return {
@@ -152,6 +159,7 @@ export function useAnimation(): AnimationHook {
     animateSequence,
     animateStockFlip,
     animatePileToPile,
-    animateShuffle
+    animateShuffle,
+    animateElementSequence: animateElementSequenceWrapper
   };
 } 

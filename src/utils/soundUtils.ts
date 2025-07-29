@@ -2,10 +2,16 @@
  * Sound utilities for game audio feedback
  */
 
+interface GameSettings {
+  soundEnabled: boolean;
+}
+
 class SoundManager {
   private audioContext: AudioContext | null = null;
   private sounds: Map<string, AudioBuffer> = new Map();
   private enabled: boolean = true;
+  private gameSettings: GameSettings | null = null;
+  private preloadPromise: Promise<void> | null = null;
 
   constructor() {
     // Initialize AudioContext only on user interaction to avoid Chrome warnings
@@ -223,16 +229,38 @@ class SoundManager {
   }
 
   /**
-   * Initialize sound effects
+   * Preload sound files asynchronously in the background
    */
-  public async initializeSounds() {
+  public async preloadSounds(soundFiles: string[] = ['/sounds/card_flip.mp3', '/sounds/card_shuffle.mp3']): Promise<void> {
+    if (this.preloadPromise) {
+      return this.preloadPromise;
+    }
+
+    this.preloadPromise = this.initializeSounds(soundFiles);
+    return this.preloadPromise;
+  }
+
+  /**
+   * Initialize sound effects with optional preloading
+   */
+  private async initializeSounds(soundFiles?: string[]) {
     if (!this.audioContext) {
       return;
     }
 
+    const filesToLoad = soundFiles || ['/sounds/card_flip.mp3', '/sounds/card_shuffle.mp3'];
+    
     // Load MP3 files for card movements and shuffling
-    const cardFlipBuffer = await this.loadMP3Sound('/sounds/card_flip.mp3');
-    const shuffleBuffer = await this.loadMP3Sound('/sounds/card_shuffle.mp3');
+    const loadPromises = filesToLoad.map(async (file) => {
+      try {
+        return await this.loadMP3Sound(file);
+      } catch (error) {
+        console.warn(`Failed to preload sound: ${file}`, error);
+        return null;
+      }
+    });
+
+    const [cardFlipBuffer, shuffleBuffer] = await Promise.all(loadPromises);
     
     // Generate remaining sounds using Web Audio API
     const winSound = this.generateTone(1000, 0.3, 'sine');
@@ -265,10 +293,20 @@ class SoundManager {
   }
 
   /**
-   * Play a sound effect
+   * Set game settings for centralized sound control
    */
-  public async playSound(soundName: string): Promise<void> {
-    if (!this.enabled || !this.audioContext || !this.sounds.has(soundName)) {
+  public setGameSettings(settings: GameSettings): void {
+    this.gameSettings = settings;
+  }
+
+  /**
+   * Centralized function to play sounds with automatic settings check
+   */
+  public async playSoundIfEnabled(soundName: string): Promise<void> {
+    // Check game settings first, then fallback to internal enabled state
+    const shouldPlay = this.gameSettings ? this.gameSettings.soundEnabled : this.enabled;
+    
+    if (!shouldPlay || !this.audioContext || !this.sounds.has(soundName)) {
       return;
     }
 
@@ -296,6 +334,14 @@ class SoundManager {
   }
 
   /**
+   * Legacy method - kept for backward compatibility
+   * @deprecated Use playSoundIfEnabled instead
+   */
+  public async playSound(soundName: string): Promise<void> {
+    return this.playSoundIfEnabled(soundName);
+  }
+
+  /**
    * Enable or disable sound effects
    */
   public setEnabled(enabled: boolean): void {
@@ -317,7 +363,7 @@ export const soundManager = new SoundManager();
 let soundsInitialized = false;
 const initializeSoundsOnInteraction = async () => {
   if (!soundsInitialized) {
-    await soundManager.initializeSounds();
+    await soundManager.preloadSounds();
     soundsInitialized = true;
     // Remove listeners after first initialization
     if (typeof document !== 'undefined') {
@@ -333,17 +379,32 @@ if (typeof document !== 'undefined') {
   document.addEventListener('touchstart', initializeSoundsOnInteraction);
 }
 
+// Also preload sounds immediately in the background (non-blocking)
+if (typeof window !== 'undefined') {
+  // Start preloading sounds as soon as the module loads
+  soundManager.preloadSounds().catch(() => {
+    // Silent failure - sounds will initialize on first interaction
+  });
+}
+
 /**
- * Utility functions for playing specific game sounds
+ * Utility functions for playing specific game sounds with automatic settings check
  */
 export const playSoundEffect = {
-  cardFlip: () => soundManager.playSound('cardFlip'),
-  cardMove: () => soundManager.playSound('cardMove'),
-  cardDrop: () => soundManager.playSound('cardDrop'),
-  stockFlip: () => soundManager.playSound('cardFlip'), // Use cardFlip sound for stock flips
-  shuffle: () => soundManager.playSound('shuffle'),
-  win: () => soundManager.playSound('win'),
-  error: () => soundManager.playSound('error')
+  cardFlip: () => soundManager.playSoundIfEnabled('cardFlip'),
+  cardMove: () => soundManager.playSoundIfEnabled('cardMove'),
+  cardDrop: () => soundManager.playSoundIfEnabled('cardDrop'),
+  stockFlip: () => soundManager.playSoundIfEnabled('cardFlip'), // Use cardFlip sound for stock flips
+  shuffle: () => soundManager.playSoundIfEnabled('shuffle'),
+  win: () => soundManager.playSoundIfEnabled('win'),
+  error: () => soundManager.playSoundIfEnabled('error')
+};
+
+/**
+ * Initialize sound system with game settings
+ */
+export const initializeSoundSystem = (gameSettings: GameSettings) => {
+  soundManager.setGameSettings(gameSettings);
 };
 
 export default soundManager;

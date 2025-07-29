@@ -11,13 +11,9 @@ class PileRegistry {
       
       if (isInVisibleLayout) {
         this.piles.set(id, element);
-        console.log(`[PileRegistry] Registered pile: ${id} (visible layout)`);
-      } else {
-        console.log(`[PileRegistry] Skipped pile: ${id} (hidden layout)`);
       }
     } else {
       this.piles.delete(id);
-      console.log(`[PileRegistry] Unregistered pile: ${id}`);
     }
   }
 
@@ -46,9 +42,6 @@ class PileRegistry {
 
   getPile(id: string): HTMLElement | null {
     const element = this.piles.get(id);
-    if (!element) {
-      console.warn(`[PileRegistry] Pile not found: ${id}`);
-    }
     return element || null;
   }
 

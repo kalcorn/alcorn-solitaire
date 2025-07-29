@@ -16,6 +16,7 @@ interface MobileLayoutProps {
   onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   startDrag: (cards: CardType[], position: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => CardType[];
+  cardVisibility?: { [cardId: string]: boolean };
 }
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
@@ -28,7 +29,8 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
   onCardClick,
   onCardDragStart,
   startDrag,
-  getMovableCards
+  getMovableCards,
+  cardVisibility
 }) => {
   return (
     <div className="block md:hidden w-full">
@@ -51,6 +53,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
               />
               <WastePile 
                 cards={gameState.wastePile}
+                cardVisibility={cardVisibility}
                 onCardClick={(cardId) => {
                   const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
                   if (cardIndex !== -1) {

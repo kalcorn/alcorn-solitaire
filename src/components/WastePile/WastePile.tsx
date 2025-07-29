@@ -10,9 +10,10 @@ interface WastePileProps {
   onCardClick?: (cardId: string) => void;
   onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   isCardBeingDragged?: (cardId: string) => boolean;
+  cardVisibility?: { [cardId: string]: boolean };
 }
 
-const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart, isCardBeingDragged }) => {
+const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart, isCardBeingDragged, cardVisibility }) => {
   // Don't filter cards - just check if there are any cards
   const hasVisibleCards = cards.length > 0;
 
@@ -34,32 +35,45 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
     >
       {hasVisibleCards ? (
         <>
-          {/* Use original positioning for animation compatibility, but keep working drag logic */}
-          {cards.slice(-3).map((card, index, slicedCards) => (
-            <div
-              key={card.id}
-              style={{
-                position: 'absolute',
-                left: index * 2,
-                top: index * 1,
-                zIndex: index + 1
-              }}
-            >
-              <Card
-                suit={card.suit}
-                rank={card.rank}
-                faceUp={card.faceUp}
-                cardId={card.id}
-                isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
-                onClick={index === slicedCards.length - 1 ? 
-                  () => onCardClick && onCardClick(card.id) : undefined}
-                onMouseDown={index === slicedCards.length - 1 && card.draggable ? 
-                  (e) => onCardDragStart && onCardDragStart(card.id, e) : undefined}
-                onTouchStart={index === slicedCards.length - 1 && card.draggable ? 
-                  (e) => onCardDragStart && onCardDragStart(card.id, e) : undefined}
-              />
-            </div>
-          ))}
+          {/* Full DOM approach: render all cards, apply visual offsets only to top 3 */}
+          {cards.map((card, index) => {
+            const isTopCard = index === cards.length - 1;
+            // Only apply visual offsets to the top 3 cards (last 3 in the array)
+            // Cards beyond the top 3 should be positioned at the same location
+            const isInTopThree = index >= cards.length - 3;
+            const visualIndex = isInTopThree ? (cards.length - 1 - index) : 0; // 0, 1, 2 for top 3, 0 for rest
+            
+            return (
+              <div
+                key={card.id}
+                className={isTopCard ? 'visible-card' : 'hidden-card'}
+                style={{
+                  position: 'absolute',
+                  left: visualIndex * 1, // 1px offset for visual stacking (only top 3)
+                  top: visualIndex * 1,  // 1px offset for visual stacking (only top 3)
+                  zIndex: index + 1,
+                  transform: 'translateZ(0)', // GPU acceleration
+                  willChange: 'transform'
+                }}
+                data-card-element="true"
+              >
+                <Card
+                  suit={card.suit}
+                  rank={card.rank}
+                  faceUp={card.faceUp}
+                  visible={cardVisibility ? cardVisibility[card.id] : true}
+                  cardId={card.id}
+                  isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
+                  onClick={isTopCard ? 
+                    () => onCardClick && onCardClick(card.id) : undefined}
+                  onMouseDown={isTopCard && card.draggable ? 
+                    (e) => onCardDragStart && onCardDragStart(card.id, e) : undefined}
+                  onTouchStart={isTopCard && card.draggable ? 
+                    (e) => onCardDragStart && onCardDragStart(card.id, e) : undefined}
+                />
+              </div>
+            );
+          })}
         </>
       ) : (
         <div 

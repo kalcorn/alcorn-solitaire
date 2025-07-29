@@ -25,6 +25,7 @@ interface LandscapeMobileLayoutProps {
   onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   startDrag: (cards: Card[], source: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => Card[];
+  cardVisibility?: { [cardId: string]: boolean };
 }
 
 const LandscapeMobileLayout: React.FC<LandscapeMobileLayoutProps> = ({
@@ -38,6 +39,7 @@ const LandscapeMobileLayout: React.FC<LandscapeMobileLayoutProps> = ({
   onCardDragStart,
   startDrag,
   getMovableCards,
+  cardVisibility,
 }) => {
   return (
     <div className="flex flex-row w-full h-full">
@@ -57,6 +59,7 @@ const LandscapeMobileLayout: React.FC<LandscapeMobileLayoutProps> = ({
           />
           <WastePile 
             cards={gameState.wastePile}
+            cardVisibility={cardVisibility}
             onCardClick={(cardId) => {
               const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
               if (cardIndex !== -1) {

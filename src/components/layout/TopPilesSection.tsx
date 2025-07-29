@@ -23,6 +23,7 @@ interface TopPilesSectionProps {
   onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   startDrag: (cards: Card[], source: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => Card[];
+  cardVisibility?: { [cardId: string]: boolean };
 }
 
 const TopPilesSection: React.FC<TopPilesSectionProps> = ({
@@ -36,6 +37,7 @@ const TopPilesSection: React.FC<TopPilesSectionProps> = ({
   onCardDragStart,
   startDrag,
   getMovableCards,
+  cardVisibility,
 }) => {
   return (
     <div className="standard-layout w-full bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-opacity-90 from-slate-800 via-green-900 to-slate-800 bg-opacity-90 py-4 mb-0 md:mb-4 lg:mb-6 shadow-lg border-y border-slate-600/30">
@@ -59,6 +61,7 @@ const TopPilesSection: React.FC<TopPilesSectionProps> = ({
             />
             <WastePile 
               cards={gameState.wastePile}
+              cardVisibility={cardVisibility}
               onCardClick={(cardId) => {
                 const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
                 if (cardIndex !== -1) {

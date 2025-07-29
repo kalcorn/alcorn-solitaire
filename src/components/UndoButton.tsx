@@ -1,33 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { BsArrowLeftCircle, BsCheckCircle } from 'react-icons/bs';
+import React from 'react';
+import { BsArrowLeftCircle } from 'react-icons/bs';
 import { playSoundEffect } from '@/utils/soundUtils';
 
 interface UndoButtonProps {
   onUndo: () => void;
   canUndo: boolean;
-  soundEnabled?: boolean;
 }
 
 const UndoButton: React.FC<UndoButtonProps> = ({ 
   onUndo, 
-  canUndo,
-  soundEnabled = true
+  canUndo
 }) => {
-  const [showFeedback, setShowFeedback] = useState(false);
-
   const handleUndo = () => {
     if (!canUndo) return;
     
     // Play card flip sound first
-    if (soundEnabled) {
-      playSoundEffect.cardFlip();
-    }
+    playSoundEffect.cardFlip();
     
     onUndo();
-    setShowFeedback(true);
-    
-    // Clear feedback after animation
-    setTimeout(() => setShowFeedback(false), 1000);
   };
 
   return (
@@ -43,17 +33,8 @@ const UndoButton: React.FC<UndoButtonProps> = ({
         }`}
         title={canUndo ? "Undo last move" : "No moves to undo"}
       >
-        {showFeedback ? (
-          <>
-            <BsCheckCircle className="w-5 h-5 sm:w-7 sm:h-7 landscape-mobile-undo-icon text-green-400" />
-            <span className="text-base sm:text-xl font-bold landscape-mobile-undo-text text-green-400">Undone!</span>
-          </>
-        ) : (
-          <>
-            <BsArrowLeftCircle className="w-5 h-5 sm:w-7 sm:h-7 landscape-mobile-undo-icon" />
-            <span className="text-base sm:text-xl font-bold landscape-mobile-undo-text">Undo</span>
-          </>
-        )}
+        <BsArrowLeftCircle className="w-5 h-5 sm:w-7 sm:h-7 landscape-mobile-undo-icon" />
+        <span className="text-base sm:text-xl font-bold landscape-mobile-undo-text">Undo</span>
       </button>
     </div>
   );

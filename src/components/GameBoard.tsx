@@ -29,6 +29,7 @@ import { createEventHandlers } from '@/utils/eventHandlers';
 import { Card as CardType, CardPosition } from '@/types';
 import { useIsClient } from '@/utils/hydrationUtils';
 import { playSoundEffect } from '@/utils/soundUtils';
+import { animateElement } from '@/utils/animationEngine';
 
 const GameBoard: React.FC = () => {
   const isClient = useIsClient();
@@ -46,13 +47,15 @@ const GameBoard: React.FC = () => {
     canUndo
   } = useGameState();
 
+  // State for managing card visibility during shuffle
+  const [cardVisibility, setCardVisibility] = useState<{ [cardId: string]: boolean }>({});
+
   const {
     particleTrigger,
     isShuffling,
     isWinAnimating,
     triggerShuffleAnimation,
-    animateStockFlip,
-    animateWasteToStock
+    animateStockFlip
   } = useGameAnimations(gameState);
 
   const {
@@ -88,172 +91,264 @@ const GameBoard: React.FC = () => {
     return result;
   }, [moveCards, triggerShuffleAnimation]);
 
+  // New shuffle function using Card visibility
+  const handleShuffleWithVisibility = useCallback(async (cards: CardType[]) => {
+    const stockElement = document.querySelector('[data-pile-type="stock"]') as HTMLElement;
+    const wasteElement = document.querySelector('[data-pile-type="waste"]') as HTMLElement;
+    
+    if (!stockElement || !wasteElement) {
+      console.error('Stock or waste element not found');
+      return;
+    }
+
+    // Play shuffle sound
+    playSoundEffect.shuffle();
+
+    // Animate each card sequentially
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      
+      try {
+        // Make card visible
+        setCardVisibility(prev => ({ ...prev, [card.id]: true }));
+        
+        // Wait for React to update DOM
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        
+        // Find the card element
+        const cardElement = wasteElement.querySelector(`[data-card-element="true"]`) as HTMLElement;
+        if (!cardElement) {
+          console.error('Card element not found');
+          continue;
+        }
+        
+        // Execute flip animation with error handling
+        await animateElement(
+          cardElement,
+          stockElement,
+          {
+            type: 'flip',
+            duration: 300,
+            card: { ...card, faceUp: false },
+            onComplete: () => {
+              // Hide card after animation completes
+              setCardVisibility(prev => ({ ...prev, [card.id]: false }));
+            },
+            onError: (error) => {
+              console.error('Animation failed:', error);
+              // Hide card on error
+              setCardVisibility(prev => ({ ...prev, [card.id]: false }));
+            }
+          }
+        );
+        
+        // Small delay between cards
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+      } catch (error) {
+        console.error('Card animation failed:', error);
+        // Ensure card is hidden on error
+        setCardVisibility(prev => ({ ...prev, [card.id]: false }));
+      }
+    }
+  }, []);
+
+  // Calculate visual center offset for proper alignment between stock and waste piles
+  const calculateVisualCenterOffset = (element: HTMLElement, pileType: 'stock' | 'waste'): number => {
+    const computedStyle = getComputedStyle(element);
+    
+    if (pileType === 'waste') {
+      return 0; // Waste pile positioning is our baseline - no offset needed
+    }
+    
+    // For stock pile, calculate offset relative to waste pile positioning
+    let hoverOffset = 0;
+    let borderOffset = 0;
+    let positioningOffset = 0;
+    
+    // 1. Check for hover transform
+    const transform = computedStyle.transform;
+    if (transform && transform.includes('translateY')) {
+      const translateYMatch = transform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+      if (translateYMatch) {
+        const translateY = parseFloat(translateYMatch[1]);
+        hoverOffset = -translateY;
+      }
+    }
+    
+    // 2. Border difference between face-down (stock) and face-up (waste) cards
+    // Face-down cards have 2px border, face-up cards have 1px border
+    borderOffset = pileType === 'stock' ? 2 : 0;
+    
+    // 3. Stock pile stacking offset - only applies to stock pile
+    if (pileType === 'stock') {
+      // Stock pile cards are stacked with incremental top positions (0px, 1px, 2px, etc.)
+      // The top card appears higher than the visual center of the stacked deck
+      // We need to offset down to match the visual center that users perceive
+      const currentStockCount = gameState.stockPile.length;
+      const stackedCardsBelow = Math.min(5, currentStockCount - 1); // Max 5 visible stacked cards
+      
+      if (stackedCardsBelow > 0) {
+        // Visual stack effect is constant - doesn't matter if 1 or 5 cards beneath
+        // The visual center of any stacked deck is the same position
+        positioningOffset = 6; // Fixed offset for any stacked cards
+      } else {
+        positioningOffset = 0; // Last card - no stack beneath, perfect as-is
+      }
+    } else {
+      positioningOffset = 0; // Waste pile positioning is the baseline
+    }
+    
+    return hoverOffset + borderOffset + positioningOffset;
+  };
+
   // Animated stock flip handler with immediate position capture
   const handleAnimatedStockFlip = async (event?: React.MouseEvent) => {
+    const clickTime = performance.now();
+    console.log('[TIMING] Stock/Recycle button clicked at:', clickTime);
+    
     const isRecycling = gameState.stockPile.length === 0;
+    console.log('[TIMING] Is recycling:', isRecycling);
 
-    if (isRecycling && gameState.wastePile.length > 0) {
-      // Animate waste to stock (recycling)
-      await animateWasteToStock(
-        gameState.wastePile,
-        () => {
-          // Animation complete - perform the actual stock flip
-          handleStockFlip(true); // Skip sound since we already played it
-        },
-        (error) => {
-          console.error('Recycling animation failed:', error);
-          // Fallback to immediate stock flip
-          handleStockFlip(true);
-        }
-      );
-    } else if (gameState.stockPile.length > 0) {
-      // Animate stock to waste with immediate position capture
-      const topStockCard = gameState.stockPile[gameState.stockPile.length - 1];
-      
-      // Capture positions immediately from the click event if available
-      let stockPosition: { x: number; y: number } | null = null;
-      let wastePosition: { x: number; y: number } | null = null;
-      let topCardElement: HTMLElement | null = null;
-      
-      if (event) {
-        console.log('[GameBoard] Capturing positions immediately to capture hover state');
+    try {
+      if (isRecycling && gameState.wastePile.length > 0) {
+        const preAnimationTime = performance.now();
+        console.log('[TIMING] Starting recycle animation preparation at:', preAnimationTime, 'Delay since click:', preAnimationTime - clickTime, 'ms');
+        // Capture current waste pile data AND DOM elements before updating state
+        const wasteCardsForAnimation = [...gameState.wastePile];
         
-        // Get stock position from the actual top card element (accounting for hover/focus effects)
-        const stockElement = document.querySelector('[data-pile-type="stock"]') as HTMLElement;
-        if (stockElement) {
-          // Try to find the actual top card element first
-          topCardElement = stockElement.querySelector('[data-card-element="true"]') as HTMLElement;
-          let stockRect: DOMRect;
-          
-          if (topCardElement) {
-            // IMPORTANT: Capture position immediately while hover state is active
-            // The hover effect: transform: translateY(-6px) scale(1.02)
-            stockRect = topCardElement.getBoundingClientRect();
-            console.log('[GameBoard] Using HOVER-STATE top card element for position');
-          } else {
-            // Fallback to pile container
-            stockRect = stockElement.getBoundingClientRect();
-            console.log('[GameBoard] Using pile container for position (no card element found)');
-          }
-          
-          const cardDimensions = getCardDimensions();
-          const computedStyle = getComputedStyle(document.documentElement);
-          const cssCardWidth = computedStyle.getPropertyValue('--card-width').trim();
-          const cssCardHeight = computedStyle.getPropertyValue('--card-height').trim();
-          
-          // Convert top-left coordinates to center coordinates for animation system
-          stockPosition = {
-            x: stockRect.left + stockRect.width / 2,
-            y: stockRect.top + stockRect.height / 2
-          };
-          
-          // Add animating class to prevent hover effects during animation
-          if (topCardElement) {
-            topCardElement.classList.add('animating');
-          }
-          
-          console.log('[GameBoard] Stock position captured (HOVER STATE):', {
-            position: stockPosition,
-            cardRect: { left: stockRect.left, top: stockRect.top, width: stockRect.width, height: stockRect.height },
-            cardDimensions: { width: cardDimensions.width, height: cardDimensions.height },
-            cssProperties: { width: cssCardWidth, height: cssCardHeight },
-            calculation: `CENTER = ${stockRect.left} + ${stockRect.width/2} = ${stockRect.left + stockRect.width/2}, ${stockRect.top} + ${stockRect.height/2} = ${stockRect.top + stockRect.height/2}`,
-            hoverState: topCardElement ? 'ACTIVE (hover transform applied)' : 'NOT_DETECTED',
-            expectedHoverTransform: 'translateY(-6px) scale(1.02)',
-            debug: {
-              cardElementFound: !!topCardElement,
-              rectSource: topCardElement ? 'HOVER_CARD_ELEMENT' : 'PILE_CONTAINER',
-              hoverOffset: topCardElement ? 'Y: -6px, Scale: 1.02' : 'NO_HOVER',
-              centerCalculation: `(${stockRect.left}, ${stockRect.top}) + (${stockRect.width/2}, ${stockRect.height/2}) = (${stockPosition.x}, ${stockPosition.y})`
-            },
-            pileElement: {
-              className: stockElement.className,
-              tagName: stockElement.tagName,
-              children: stockElement.children.length,
-              hasCardElement: !!topCardElement
-            }
-          });
-        }
-
-        // Get waste position from the waste pile container
-        const wasteElement = document.querySelector('[data-pile-type="waste"]') as HTMLElement;
-        if (wasteElement) {
-          const wasteRect = wasteElement.getBoundingClientRect();
-          // Since pile containers are the same size as cards, position at pile container
-          const cardDimensions = getCardDimensions();
-          
-          // Convert top-left coordinates to center coordinates for animation system  
-          // Add slight downward offset for more natural diagonal movement
-          wastePosition = {
-            x: wasteRect.left + wasteRect.width / 2,
-            y: wasteRect.top + wasteRect.height / 2 + 8 // Add 8px downward for subtle diagonal
-          };
-          console.log('[GameBoard] Waste position from pile container:', {
-            position: wastePosition,
-            pileRect: { left: wasteRect.left, top: wasteRect.top, width: wasteRect.width, height: wasteRect.height },
-            cardDimensions: { width: cardDimensions.width, height: cardDimensions.height },
-            calculation: `${wasteRect.left} (pile left), ${wasteRect.top} (pile top)`,
-            alignment: 'Animated card left edge aligned with waste pile left edge',
-            debug: {
-              pileWidth: wasteRect.width,
-              pileHeight: wasteRect.height,
-              cardWidth: cardDimensions.width,
-              cardHeight: cardDimensions.height,
-              widthDifference: wasteRect.width - cardDimensions.width,
-              heightDifference: wasteRect.height - cardDimensions.height,
-              reason: 'Pile and card dimensions are identical - using container positioning',
-              finalPosition: {
-                cardLeftEdge: wasteRect.left,
-                cardRightEdge: wasteRect.left + cardDimensions.width,
-                pileLeftEdge: wasteRect.left,
-                pileRightEdge: wasteRect.left + wasteRect.width,
-                alignment: 'Card left edge = Pile left edge'
+        // Animate the visual transition first (while DOM elements still exist)
+        const animationStartTime = performance.now();
+        console.log('[TIMING] Calling animateWasteToStock at:', animationStartTime, 'Delay since click:', animationStartTime - clickTime, 'ms');
+        
+        await handleShuffleWithVisibility(wasteCardsForAnimation);
+        
+        const animationEndTime = performance.now();
+        console.log('[TIMING] animateWasteToStock completed at:', animationEndTime, 'Total duration:', animationEndTime - animationStartTime, 'ms');
+        
+        // Update game state AFTER animation completes
+        handleStockFlip(true); // Skip sound since animation already played it
+      } else if (gameState.stockPile.length > 0) {
+        // Capture current top stock card for animation BEFORE updating game state
+        const topStockCard = gameState.stockPile[gameState.stockPile.length - 1];
+        
+        // Capture positions immediately from the click event if available
+        let stockPosition: { x: number; y: number } | null = null;
+        let wastePosition: { x: number; y: number } | null = null;
+        let topCardElement: HTMLElement | null = null;
+        
+        if (event) {
+          // Get stock position from the actual top card element (accounting for hover/focus effects)
+          const stockElement = document.querySelector('[data-pile-type="stock"]') as HTMLElement;
+          if (stockElement) {
+            // Try to find the actual top card element first
+            topCardElement = stockElement.querySelector('[data-card-element="true"]') as HTMLElement;
+            let stockRect: DOMRect;
+            
+            if (topCardElement) {
+              // Capture position immediately while hover state is active
+              stockRect = topCardElement.getBoundingClientRect();
+              // Validate the rect has valid dimensions
+              if (stockRect.width > 0 && stockRect.height > 0) {
+                // THOROUGH INVESTIGATION: Let's see exactly what's happening
+                const computedStyle = getComputedStyle(topCardElement);
+                const currentTransform = computedStyle.transform;
+                
+                // Parse the transform to see the actual values
+                let actualTranslateY = 0;
+                if (currentTransform && currentTransform !== 'none') {
+                  const translateYMatch = currentTransform.match(/translateY\((-?\d+(?:\.\d+)?)px\)/);
+                  if (translateYMatch) {
+                    actualTranslateY = parseFloat(translateYMatch[1]);
+                  }
+                }
+                
+                // Calculate visual center offset
+                const stockVisualCenterOffset = calculateVisualCenterOffset(topCardElement, 'stock');
+                
+                
+                stockPosition = {
+                  x: stockRect.left + stockRect.width / 2,
+                  y: stockRect.top + stockRect.height / 2 - stockVisualCenterOffset
+                };
+                // Add animating class to prevent hover effects during animation
+                topCardElement.classList.add('animating');
               }
-            },
-            pileElement: {
-              className: wasteElement.className,
-              tagName: wasteElement.tagName,
-              children: wasteElement.children.length
             }
-          });
+            
+            // Fallback to pile container if card element not found or invalid
+            if (!stockPosition) {
+              stockRect = stockElement.getBoundingClientRect();
+              if (stockRect.width > 0 && stockRect.height > 0) {
+                const stockVisualCenterOffsetFallback = 5;
+                
+                stockPosition = {
+                  x: stockRect.left + stockRect.width / 2,
+                  y: stockRect.top + stockRect.height / 2 - stockVisualCenterOffsetFallback
+                };
+              }
+            }
+          }
+
+          // Get waste position from the waste pile container, accounting for raised stack effect
+          const wasteElement = document.querySelector('[data-pile-type="waste"]') as HTMLElement;
+          if (wasteElement) {
+            // Look for existing cards in waste pile to determine stack positioning
+            const existingWasteCards = wasteElement.querySelectorAll('[data-card-element="true"]');
+            const wasteRect = wasteElement.getBoundingClientRect();
+            
+            // Validate waste element has valid dimensions
+            if (wasteRect.width > 0 && wasteRect.height > 0) {
+              // Calculate end position based on current waste pile state
+              let wasteX = wasteRect.left + wasteRect.width / 2;
+              let wasteY = wasteRect.top + wasteRect.height / 2;
+              
+              // If there are existing cards, use the actual top card position for both X and Y
+              if (existingWasteCards.length > 0) {
+                // Get the actual top card position to account for stacking and horizontal offset
+                const topWasteCard = existingWasteCards[existingWasteCards.length - 1] as HTMLElement;
+                const topCardRect = topWasteCard.getBoundingClientRect();
+                
+                // Validate the top card has valid dimensions
+                if (topCardRect.width > 0 && topCardRect.height > 0) {
+                  wasteX = topCardRect.left + topCardRect.width / 2;
+                  wasteY = topCardRect.top + topCardRect.height / 2;
+                }
+              }
+              
+              wastePosition = {
+                x: wasteX,
+                y: wasteY
+              };
+            }
+          }
         }
-      }
-      
-      // Debug movement calculation
-      if (stockPosition && wastePosition) {
-        const deltaX = wastePosition.x - stockPosition.x;
-        const deltaY = wastePosition.y - stockPosition.y;
-        console.log('[GameBoard] Movement delta analysis:', {
+        
+        // Animate the visual transition FIRST (before updating game state)
+        await animateStockFlip(
+          topStockCard,
           stockPosition,
           wastePosition,
-          delta: { x: deltaX, y: deltaY },
-          movement: {
-            horizontal: Math.abs(deltaX) > Math.abs(deltaY) ? 'PRIMARY' : 'secondary',
-            vertical: Math.abs(deltaY) > Math.abs(deltaX) ? 'PRIMARY' : 'secondary',
-            direction: `${deltaX > 0 ? 'RIGHT' : 'LEFT'} ${deltaY > 0 ? 'DOWN' : 'UP'}`,
-            distance: Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+          () => {
+            // Animation complete - remove animating class
+            if (topCardElement) {
+              topCardElement.classList.remove('animating');
+            }
           },
-          expectedMovement: deltaX > 0 && Math.abs(deltaY) > 5 ? 'DIAGONAL' : deltaX > 0 ? 'HORIZONTAL_ONLY' : 'UNEXPECTED'
-        });
-      }
-      
-      await animateStockFlip(
-        topStockCard,
-        stockPosition,
-        wastePosition,
-        () => {
-          // Animation complete - remove animating class and perform the actual stock flip
-          if (topCardElement) {
-            topCardElement.classList.remove('animating');
+          (error) => {
+            console.error('Stock flip animation failed:', error);
+            // Remove animating class on error too
+            if (topCardElement) {
+              topCardElement.classList.remove('animating');
+            }
           }
-          handleStockFlip(true); // Skip sound since we already played it
-        },
-        (error) => {
-          console.error('Stock flip animation failed:', error);
-          // Fallback to immediate stock flip
-          handleStockFlip(true);
-        }
-      );
+        );
+        
+        // Update game state AFTER animation completes
+        handleStockFlip(true); // Skip sound since animation already played it
+      }
+    } catch (error) {
+      console.error('Animation error:', error);
     }
   };
 
@@ -340,6 +435,7 @@ const GameBoard: React.FC = () => {
           onCardDragStart={eventHandlers.handleCardDragStart}
           startDrag={startDrag}
           getMovableCards={getMovableCards}
+          cardVisibility={cardVisibility}
         />
 
         {/* Landscape Mobile Layout */}
@@ -355,6 +451,7 @@ const GameBoard: React.FC = () => {
             onCardDragStart={eventHandlers.handleCardDragStart}
             startDrag={startDrag}
             getMovableCards={getMovableCards}
+            cardVisibility={cardVisibility}
           />
         </div>
 
@@ -371,6 +468,7 @@ const GameBoard: React.FC = () => {
             onCardDragStart={eventHandlers.handleCardDragStart}
             startDrag={startDrag}
             getMovableCards={getMovableCards}
+            cardVisibility={cardVisibility}
           />
         </div>
 
