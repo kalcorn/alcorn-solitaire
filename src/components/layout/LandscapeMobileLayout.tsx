@@ -93,6 +93,7 @@ const LandscapeMobileLayout: React.FC<LandscapeMobileLayoutProps> = ({
               data-pile-index={i}
             >
               <TableauPile 
+                index={i}
                 cards={pile}
                 isDropZone={isZoneHovered('tableau', i)}
                 onCardClick={(cardId) => {

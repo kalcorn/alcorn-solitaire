@@ -1,0 +1,303 @@
+/* =================================================================
+   PILE REGISTRATION HOOK
+   ================================================================= */
+
+import { useEffect, useRef, useCallback } from 'react';
+import { pileRegistry, createPileReference, LayoutType } from '@/utils/animationSystem';
+
+/**
+ * Hook for registering pile components with the animation system
+ */
+export function usePileRegistration(
+  type: 'stock' | 'waste' | 'foundation' | 'tableau',
+  index?: number,
+  getCardDimensions?: () => { width: number; height: number },
+  getCardOffset?: () => { x: number; y: number }
+) {
+  const elementRef = useRef<HTMLElement | null>(null);
+  const pileRef = useRef<ReturnType<typeof createPileReference> | null>(null);
+
+  // Create pile reference
+  const createPileRef = useCallback(() => {
+    if (!elementRef.current) return null;
+
+    return createPileReference(
+      type,
+      () => elementRef.current,
+      index
+    );
+  }, [type, index]);
+
+  // Register pile with animation system
+  const registerPile = useCallback(() => {
+    // Safety check for SSR
+    if (typeof window === 'undefined') return;
+
+    const pile = createPileRef();
+    if (pile) {
+      pileRef.current = pile;
+      pileRegistry.register(pile);
+    }
+  }, [createPileRef]);
+
+  // Unregister pile from animation system
+  const unregisterPile = useCallback(() => {
+    // Safety check for SSR
+    if (typeof window === 'undefined') return;
+
+    if (pileRef.current) {
+      pileRegistry.unregister(pileRef.current);
+      pileRef.current = null;
+    }
+  }, []);
+
+  // Check if CSS custom properties are loaded
+  const areCssPropertiesLoaded = useCallback(() => {
+    if (typeof window === 'undefined') return false;
+    
+    // In test environments, assume CSS is loaded
+    if (process.env.NODE_ENV !== 'production') {
+      return true;
+    }
+    
+    try {
+      const computedStyle = getComputedStyle(document.documentElement);
+      const cardWidth = computedStyle.getPropertyValue('--card-width').trim();
+      const cardHeight = computedStyle.getPropertyValue('--card-height').trim();
+      
+      // Check if CSS custom properties have valid values
+      return cardWidth !== '' && cardHeight !== '' && 
+             parseFloat(cardWidth) > 0 && parseFloat(cardHeight) > 0;
+    } catch (error) {
+      console.warn('[PileRegistration] Failed to check CSS properties:', error);
+      return true; // Assume loaded in case of error
+    }
+  }, []);
+
+  // Set element reference and register pile with improved positioning check
+  const setElementRef = useCallback((element: HTMLElement | null) => {
+    console.log(`[PileRegistration] setElementRef called for ${type}${index !== undefined ? `-${index}` : ''}:`, {
+      element: element ? 'present' : 'null',
+      elementType: element ? element.constructor.name : 'N/A',
+      elementTag: element ? element.tagName : 'N/A',
+      elementId: element ? element.id : 'N/A',
+      elementClasses: element ? element.className : 'N/A'
+    });
+    
+    elementRef.current = element;
+    
+    // Unregister previous pile if it exists
+    unregisterPile();
+    
+    // Register new pile if element exists with IMPROVED POSITIONING CHECK
+    if (element) {
+      console.log(`[PileRegistration] Element provided for ${type}${index !== undefined ? `-${index}` : ''}, checking positioning...`);
+      
+      // Improved positioning check with CSS loading awareness
+      const checkPositioning = (attempt: number = 1) => {
+        const rect = element.getBoundingClientRect();
+        
+        // Check if element has position from getBoundingClientRect
+        const hasValidDimensions = rect.width > 0 && rect.height > 0;
+        const hasValidPosition = rect.left !== 0 || rect.top !== 0;
+        
+        // Check if element is in the layout flow
+        const hasOffsetParent = element.offsetParent !== null;
+        
+        // Check if CSS custom properties are loaded
+        const cssLoaded = areCssPropertiesLoaded();
+        
+        // Try to get CSS dimensions if we're in a browser environment
+        let hasCssDimensions = false;
+        let cssWidth = 0;
+        let cssHeight = 0;
+        
+        if (typeof window !== 'undefined' && window.getComputedStyle) {
+          try {
+            const computedStyle = window.getComputedStyle(element);
+            cssWidth = parseFloat(computedStyle.width);
+            cssHeight = parseFloat(computedStyle.height);
+            hasCssDimensions = cssWidth > 0 && cssHeight > 0;
+          } catch (error) {
+            // Fallback if getComputedStyle fails (e.g., in test environment)
+            console.warn('[PileRegistration] getComputedStyle failed, using fallback:', error);
+          }
+        }
+        
+        // Log only first, every 5th, and final attempts (following logging protocols)
+        const shouldLog = attempt === 1 || attempt % 5 === 0 || attempt >= 25; // Max 25 attempts
+        
+        if (shouldLog) {
+          console.log(`[PileRegistration] Position check attempt ${attempt} for ${type}${index !== undefined ? `-${index}` : ''}:`, {
+            hasOffsetParent,
+            hasValidDimensions,
+            hasValidPosition,
+            hasCssDimensions,
+            cssLoaded,
+            rect: { 
+              width: rect.width, 
+              height: rect.height, 
+              left: rect.left, 
+              top: rect.top 
+            },
+            css: { width: cssWidth, height: cssHeight },
+            offsetParent: element.offsetParent ? 'present' : 'null'
+          });
+          
+          // Additional human-readable summary
+          console.log(`[PileRegistration] Status for ${type}${index !== undefined ? `-${index}` : ''}:`, {
+            ready: (hasCssDimensions || hasValidDimensions) && (hasValidPosition || hasOffsetParent) && cssLoaded,
+            issues: {
+              noOffsetParent: !hasOffsetParent,
+              zeroDimensions: !hasValidDimensions && !hasCssDimensions,
+              zeroPosition: !hasValidPosition,
+              cssNotLoaded: !cssLoaded
+            },
+            dimensions: `${rect.width}px × ${rect.height}px (CSS: ${cssWidth}px × ${cssHeight}px)`,
+            position: `(${rect.left}, ${rect.top})`
+          });
+        }
+        
+        // More robust positioning check that waits for CSS to be loaded
+        const isReady = (hasCssDimensions || hasValidDimensions) && 
+                       (hasValidPosition || hasOffsetParent) && 
+                       cssLoaded;
+        
+        if (isReady) {
+          console.log(`[PileRegistration] Element properly positioned, registering pile for ${type}${index !== undefined ? `-${index}` : ''}`);
+          registerPile();
+        } else if (attempt < 25) { // Max 25 attempts (2.5 seconds total)
+          if (shouldLog) {
+            console.log(`[PileRegistration] Element not yet positioned, retrying in 100ms for ${type}${index !== undefined ? `-${index}` : ''}`);
+          }
+          // Retry after a short delay with exponential backoff
+          const delay = Math.min(100 * Math.pow(1.1, attempt - 1), 300); // Max 300ms delay
+          setTimeout(() => checkPositioning(attempt + 1), delay);
+        } else {
+          console.warn(`[PileRegistration] Failed to position element after 25 attempts for ${type}${index !== undefined ? `-${index}` : ''}, registering anyway`);
+          // Register anyway as fallback - better to have a pile with fallback position than no pile
+          registerPile();
+        }
+      };
+      
+      // Start checking positioning
+      checkPositioning();
+    } else {
+      console.log(`[PileRegistration] No element provided for ${type}${index !== undefined ? `-${index}` : ''}, skipping registration`);
+    }
+  }, [registerPile, unregisterPile, type, index, areCssPropertiesLoaded]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      unregisterPile();
+    };
+  }, [unregisterPile]);
+
+  return {
+    setElementRef,
+    pileRef: pileRef.current
+  };
+}
+
+/**
+ * Hook for getting card dimensions based on current layout
+ */
+export function useCardDimensions() {
+  const getCardDimensions = useCallback((): { width: number; height: number } => {
+    // Get dimensions from CSS custom properties for consistency
+    if (typeof window === 'undefined') {
+      return { width: 52, height: 72 }; // Default mobile dimensions
+    }
+
+    const computedStyle = getComputedStyle(document.documentElement);
+    const width = computedStyle.getPropertyValue('--card-width').trim();
+    const height = computedStyle.getPropertyValue('--card-height').trim();
+    
+    // Parse dimensions, fallback to defaults if invalid
+    const widthNum = parseInt(width) || 52;
+    const heightNum = parseInt(height) || 72;
+    
+    return { width: widthNum, height: heightNum };
+  }, []);
+
+  return { getCardDimensions };
+}
+
+/**
+ * Hook for getting card offset in multi-card piles (like tableau)
+ */
+export function useCardOffset(cardIndex: number = 0) {
+  const { getCardDimensions } = useCardDimensions();
+  
+  const getCardOffset = useCallback((): { x: number; y: number } => {
+    // Calculate offset based on card index and current layout
+    const { width, height } = getCardDimensions();
+    
+    // For tableau piles, cards are stacked vertically with small overlap
+    const verticalOffset = cardIndex * 18; // 18px overlap between cards
+    
+    return {
+      x: 0,
+      y: verticalOffset
+    };
+  }, [cardIndex, getCardDimensions]);
+
+  return { getCardOffset };
+}
+
+/**
+ * Hook for foundation pile registration with suit-specific positioning
+ */
+export function useFoundationPileRegistration(suit: string, index: number) {
+  const { getCardDimensions } = useCardDimensions();
+  
+  const getCardOffset = useCallback((): { x: number; y: number } => {
+    // Foundation piles don't have card offsets since they only show the top card
+    return { x: 0, y: 0 };
+  }, []);
+
+  return usePileRegistration('foundation', index, getCardDimensions, getCardOffset);
+}
+
+/**
+ * Hook for tableau pile registration with card stacking
+ */
+export function useTableauPileRegistration(index: number) {
+  const { getCardDimensions } = useCardDimensions();
+  
+  const getCardOffset = useCallback((): { x: number; y: number } => {
+    // Tableau piles show the top card position
+    return { x: 0, y: 0 };
+  }, []);
+
+  return usePileRegistration('tableau', index, getCardDimensions, getCardOffset);
+}
+
+/**
+ * Hook for stock pile registration
+ */
+export function useStockPileRegistration() {
+  const { getCardDimensions } = useCardDimensions();
+  
+  const getCardOffset = useCallback((): { x: number; y: number } => {
+    // Stock pile shows the top card position
+    return { x: 0, y: 0 };
+  }, []);
+
+  return usePileRegistration('stock', undefined, getCardDimensions, getCardOffset);
+}
+
+/**
+ * Hook for waste pile registration
+ */
+export function useWastePileRegistration() {
+  const { getCardDimensions } = useCardDimensions();
+  
+  const getCardOffset = useCallback((): { x: number; y: number } => {
+    // Waste pile shows the top card position
+    return { x: 0, y: 0 };
+  }, []);
+
+  return usePileRegistration('waste', undefined, getCardDimensions, getCardOffset);
+} 

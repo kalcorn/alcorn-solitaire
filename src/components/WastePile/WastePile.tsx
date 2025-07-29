@@ -3,6 +3,7 @@ import { Card as CardType } from '@/types';
 import Card from '../Card';
 import { cn } from '@/utils/cssUtils';
 import styles from './WastePile.module.css';
+import { usePileRegistration } from '@/hooks/usePileRegistration';
 
 interface WastePileProps {
   cards: CardType[];
@@ -15,8 +16,13 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
   // Don't filter cards - just check if there are any cards
   const hasVisibleCards = cards.length > 0;
 
+  // Register this pile with the animation system
+  // Register this pile with the new animation system
+  const { setElementRef } = usePileRegistration('waste');
+
   return (
     <div
+      ref={setElementRef}
       className={cn("flex-shrink-0", styles.wastePileResponsive)}
       style={{ 
         position: 'relative', 
@@ -24,6 +30,7 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
       }}
       aria-label="Waste pile"
       role="list"
+      data-pile-type="waste"
     >
       {hasVisibleCards ? (
         <>

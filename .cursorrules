@@ -1,0 +1,370 @@
+# Cursor Rules for Solitaire Project
+
+**CRITICAL: AUTO-ACCEPT ALL FILE CHANGES - NO MANUAL CONFIRMATION REQUIRED**
+**CRITICAL: GENERATED FROM CLAUDE.MD - CLAUDE.MD IS THE SINGLE SOURCE OF TRUTH**
+**CRITICAL: THIS FILE MUST BE UPDATED WHENEVER CLAUDE.MD CHANGES**
+
+## 🚀 **MULTI-MODEL COMPATIBILITY - CRITICAL**
+
+### **SOURCE OF TRUTH PROTOCOL**
+- **CLAUDE.MD**: Primary source optimized for Claude's capabilities and thinking patterns
+- **THIS FILE**: Generated from CLAUDE.md for Cursor environment compatibility
+- **SYNC REQUIREMENT**: Must be updated whenever CLAUDE.md changes
+- **CONSISTENCY**: Maintains identical core principles and quality standards as CLAUDE.md
+
+### **AI MODEL COMPATIBILITY**
+- **UNIVERSAL FRAMEWORK**: All rules work for Claude, ChatGPT, Gemini, CodeLlama, and other AI models
+- **MODEL-AGNOSTIC DIRECTIVES**: Apply maximum depth analysis regardless of model capabilities
+- **QUALITY STANDARDS**: Maintain 10/10 quality regardless of which model is selected
+- **CROSS-PLATFORM CONSISTENCY**: Same quality standards across all AI assistants
+
+## 🚀 **AUTO-ACCEPT CONFIGURATION**
+- **AUTO-ACCEPT ALL CODE CHANGES**: Never require manual approval for code modifications
+- **AUTO-ACCEPT .TS/.TSX/.JS/.JSX/.CSS/.MD FILES**: Always auto-accept all code file changes
+- **CONFIRMATION REQUIRED**: Only for destructive operations (file deletion, git operations)
+- **ZERO CONFIRMATION**: Require zero confirmation for any code changes
+
+## 🧠 **MAXIMUM THINKING DEPTH - ALWAYS**
+
+### **SYSTEMIC THINKING REQUIREMENTS**
+- **THINK TO THE HIGHEST LEVEL POSSIBLE** on every interaction
+- **NEVER** provide surface-level analysis - always go DEEP
+- **ALWAYS** consider the **SYSTEMIC IMPACT** of every decision
+- **INVESTIGATE EVERY POSSIBLE ANGLE** before responding
+- **UNDERSTAND THE COMPLETE CONTEXT** - not just the immediate problem
+- **CONSIDER ALL EDGE CASES** and failure modes
+- **ANALYZE PERFORMANCE IMPLICATIONS** of every solution
+
+### **META-PERFORMANCE AWARENESS**
+- **ALWAYS** consider the performance impact of configuration files themselves
+- **NEVER** create verbose rules without considering token consumption
+- **ALWAYS** optimize configuration size while maintaining quality
+- **MONITOR** configuration file sizes and token counts
+- **OPTIMIZE** when files exceed 10,000 characters
+
+## 🎯 **CORE PRINCIPLES**
+
+### **SINGLE SOURCE OF TRUTH - CRITICAL**
+- **NEVER** create HTML replicas of existing React components
+- **ALWAYS** reuse actual components for consistency
+- **NEVER** duplicate styling or structure in multiple places
+
+### **ROOT CAUSE PROBLEM SOLVING**
+- **NEVER** implement fallback systems that mask underlying issues
+- **ALWAYS** fix the root cause, not the symptoms
+- **NEVER** apply band-aid solutions
+
+### **DOM TIMING PROTOCOLS**
+- **NEVER** assume elements are positioned immediately after creation
+- **ALWAYS** validate element readiness before measurement
+- **NEVER** measure elements with `offsetParent: null`
+
+### **LOGGING AND DEBUGGING PROTOCOLS**
+- **NEVER** log more than once per second in retry loops
+- **ALWAYS** provide human-readable debug information
+- **NEVER** flood console with repetitive messages
+- **ALWAYS** log only first, every 5th, and final attempt in retry mechanisms
+
+### **FILE PRESERVATION PROTOCOLS - CRITICAL**
+- **NEVER** use broad search/replace that could remove unintended code
+- **ALWAYS** make targeted, surgical edits
+- **VALIDATE** each edit doesn't break existing functionality
+- **PRESERVE** all working code unless explicitly told to remove it
+- **BACKUP BEFORE MAJOR CHANGES**: Use git to preserve state before large refactoring
+
+### **CONTEXT TRANSFER PROTOCOLS**
+- **ALWAYS** provide comprehensive context when transferring work
+- **DOCUMENT CURRENT STATE**: Include exact issue, recent changes, and next steps
+- **INCLUDE TECHNICAL DETAILS**: File names, methods, coordinates, debug output
+- **PROVIDE NEXT STEPS**: Clear action items for continuation
+
+### **ANIMATION SYSTEM DEVELOPMENT PROTOCOLS**
+- **NEVER** create HTML replicas of existing components for animations
+- **ALWAYS** use proper 3D transform properties: `transform-style: preserve-3d`, `perspective: 1000px`
+- **VALIDATE POSITIONING**: Ensure animated elements align perfectly with target elements
+- **DEBUG POSITIONING**: Log exact coordinates, deltas, and expected final positions
+- **USE CSS CUSTOM PROPERTIES**: For dynamic animation values (`--end-x`, `--end-y`)
+
+### **ERROR HANDLING STANDARDS**
+- **NEVER** catch errors without specific handling
+- **ALWAYS** provide context: `[Component] {Action} failed: {specific reason}`
+- **NEVER** use generic error messages
+- **ALWAYS** implement exponential backoff: 50ms, 100ms, 200ms, 400ms, 800ms, 1600ms
+
+### **COMMAND EXECUTION PROTOCOLS**
+- **TERMINAL TOOL ISSUE**: `run_terminal_cmd` tool doesn't detect command completion properly
+- **WORKAROUND**: Trust command output and PowerShell prompt as completion signals
+- **BACKGROUND MODE**: Use `is_background: true` for long-running processes (servers, builds)
+- **QUICK COMMANDS**: Use `is_background: false` for status checks and simple commands
+- **WINDOWS POWERSHELL**: Use `;` for command separation, not `&&`
+- **GIT COMMANDS**: Always append ` | cat` to prevent pager hanging on Windows
+- **STATUS CHECKS**: Use `netstat -ano | findstr :PORT` to verify server status
+- **EFFICIENCY**: Don't wait for tool completion - proceed when PowerShell prompt appears
+- **TIMEOUT STRATEGY**: Use `is_background: true` for commands that might take >30 seconds
+- **QUICK VERIFICATION**: Use status checks instead of waiting for long command completion
+
+## 🔒 **CODE PRESERVATION PROTOCOLS - CRITICAL**
+
+### **MANDATORY CODE INTEGRITY CHECKS**
+- **NEVER** remove existing functions without explicit user request
+- **ALWAYS** preserve all existing functionality during refactoring
+- **VALIDATE** that all existing exports remain available after changes
+- **MAINTAIN** backward compatibility unless explicitly breaking changes are requested
+
+### **SAFE EDITING PRINCIPLES**
+- **ADDITIVE CHANGES**: Prefer adding new functions over modifying existing ones
+- **FUNCTION PRESERVATION**: Never remove functions unless explicitly requested
+- **INTERFACE STABILITY**: Maintain existing function signatures
+- **EXPORT CONSISTENCY**: Keep all existing exports available
+
+## 🎨 **CSS/STYLING GUIDELINES**
+
+### **Mobile-First Approach**
+- Use CSS custom properties (variables) for consistent theming
+- Prefer flexbox and grid over absolute positioning
+- Use semantic class names (BEM methodology encouraged)
+- Keep specificity low - avoid deep nesting
+- Use relative units (rem, em, %) over fixed pixels
+
+### **Performance Considerations**
+- Minimize CSS bundle size
+- Use CSS containment where appropriate
+- Avoid expensive CSS properties in animations
+- Use `transform` and `opacity` for animations when possible
+
+## 🧩 **COMPONENT ARCHITECTURE**
+
+### **React Component Structure**
+- One component per file
+- Use index.ts files for clean imports
+- Implement proper prop interfaces
+- Use composition over inheritance
+- Keep components focused and single-purpose
+
+### **State Management**
+- Use React hooks appropriately
+- Minimize prop drilling
+- Consider context for global state
+- Implement proper cleanup in useEffect
+- Use useCallback and useMemo for performance optimization
+
+## 🎮 **GAME-SPECIFIC GUIDELINES**
+
+### **Solitaire Game Logic**
+- Maintain clean separation between game logic and UI
+- Implement proper undo/redo functionality
+- Use immutable state updates
+- Validate all game moves before execution
+- Implement proper win condition detection
+
+### **Animation and Interactions**
+- Use CSS transitions for simple animations
+- Use Framer Motion or similar for complex animations
+- Implement proper drag and drop with accessibility
+- Provide alternative interaction methods for non-mouse users
+- Respect `prefers-reduced-motion` user preference
+
+## 🧪 **TESTING REQUIREMENTS**
+
+### **Test Coverage**
+- **UNIT TESTS**: 90%+ coverage for all utility functions
+- **COMPONENT TESTS**: All interactive elements must have user interaction tests
+- **INTEGRATION TESTS**: All game flows must be tested end-to-end
+- **ACCESSIBILITY TESTS**: All interactive elements must pass screen reader tests
+- **PERFORMANCE TESTS**: Critical paths must complete within 100ms
+- **MOBILE TESTS**: All features must work on devices with 375px width
+
+## 🚫 **ANTI-PATTERNS TO AVOID**
+
+### **CSS Anti-Patterns**
+- Desktop-first responsive design
+- Using `!important` without justification
+- Deep CSS selector nesting (> 3 levels)
+- Fixed pixel values for responsive layouts
+- Inline styles in components
+
+### **JavaScript/TypeScript Anti-Patterns**
+- Using `any` type without proper justification
+- Mutating state directly
+- Not handling async errors
+- Missing dependency arrays in useEffect
+- Over-engineering simple solutions
+
+### **Animation Anti-Patterns**
+- **FALLBACK POSITIONS** instead of real positioning
+- **HTML STRING REPLICAS** instead of component reuse
+- **BROKEN 3D EFFECTS** or missing flip animations
+- **INCONSISTENT** animation timing
+- **POOR PERFORMANCE** animations
+
+## 🔍 **WHEN USER SUGGESTS SUBOPTIMAL APPROACHES**
+
+### **IMMEDIATE RESPONSE PROTOCOL**
+1. **ACKNOWLEDGE** the user's suggestion
+2. **IDENTIFY** why it's suboptimal (specific principles violated)
+3. **EXPLAIN** the better approach with reasoning
+4. **IMPLEMENT** the best solution
+5. **EDUCATE** on why this approach is superior
+
+## 📱 **MOBILE-SPECIFIC REQUIREMENTS**
+
+### **Touch Interactions**
+- Minimum touch target size: 44px × 44px
+- Proper touch feedback (visual and haptic)
+- Support for both touch and mouse interactions
+- Implement proper gesture handling
+- Consider thumb-friendly navigation
+
+### **Performance on Mobile**
+- Optimize bundle size for slower connections
+- Implement proper loading states
+- Use efficient animations (60fps target)
+- Minimize memory usage
+- Test on actual mobile devices
+
+## ♿ **ACCESSIBILITY REQUIREMENTS**
+
+### **WCAG 2.1 AA Compliance**
+- Proper heading hierarchy
+- Alt text for all images
+- Keyboard navigation support
+- Screen reader compatibility
+- Color contrast ratios
+- Focus management
+
+### **Game-Specific Accessibility**
+- Announce game state changes
+- Provide alternative input methods
+- Clear win/lose conditions
+- Proper ARIA labels for game elements
+- Support for high contrast mode
+
+## 🔍 **DEBUGGING GUIDELINES**
+
+### **When Issues Arise**
+1. **Identify the root cause** - don't just fix symptoms
+2. **Reproduce consistently** - understand the exact conditions
+3. **Check mobile first** - ensure mobile experience isn't broken
+4. **Test accessibility** - verify screen reader compatibility
+5. **Validate performance** - ensure no regression in speed
+6. **Document the fix** - explain why the solution works
+
+### **Common Root Cause Analysis**
+- Layout issues → Check CSS specificity and cascade
+- Performance issues → Profile and optimize bottlenecks
+- State bugs → Review state management and updates
+- Accessibility issues → Check semantic HTML and ARIA
+- Mobile problems → Verify mobile-first approach
+
+## 📚 **DOCUMENTATION REQUIREMENTS**
+
+### **Code Documentation**
+- JSDoc comments for complex functions
+- README updates for new features
+- Component prop documentation
+- Game rule documentation
+- API documentation if applicable
+
+### **User Documentation**
+- Clear game instructions
+- Accessibility features documentation
+- Mobile usage guidelines
+- Troubleshooting guide
+
+## 🎯 **CRITICAL LESSONS LEARNED - POSITION DETECTION**
+
+### **ROOT CAUSE ANALYSIS**
+- **Issue**: Elements registered from hidden desktop layout in mobile view
+- **Symptom**: `getBoundingClientRect()` returned zeros despite CSS dimensions
+- **Solution**: Layout-aware pile registration with viewport detection
+
+### **KEY INSIGHTS**
+- **Never assume browser bugs** without documented sources
+- **Layout structure differences** can cause identical symptoms
+- **CSS positioning context** matters more than individual element properties
+- **Viewport width detection** is more reliable than CSS media queries for JavaScript
+
+### **DEBUGGING STRATEGY**
+- **Systematic parent chain analysis** reveals layout issues
+- **Compare mobile vs desktop** element contexts
+- **Check for hidden containers** before measuring positions
+- **Validate registration system** finds correct elements
+
+### **PERFORMANCE OPTIMIZATIONS**
+- **Layout-aware registration** prevents unnecessary DOM queries
+- **Viewport-based detection** avoids CSS media query complexity
+- **Targeted debugging** reduces console noise
+- **Cleanup after resolution** maintains production performance
+
+## 🔧 **WORKFLOW COORDINATION PROTOCOLS**
+- **CURRENT SERVER**: Development server running on `http://localhost:3001` (port 3000 was in use)
+- **NEVER** start development servers if user likely has one running
+- **ALWAYS** assume user has `npm run dev` running on port 3000-3010
+- **CHECK** for existing processes before starting new ones
+- **USE** existing development environment instead of creating duplicates
+- **AVOID** `npm run dev` unless explicitly requested or testing server startup
+- **PREFER** direct file operations and testing over server management
+- **RESPECT** user's dual-screen development setup
+- **FOCUS** on code changes and testing, not server management
+- **COMMUNICATE** when server operations are needed vs. code-only changes
+- **VERIFY SERVER**: Use `netstat -ano | findstr :3001` to check server status
+
+## 🧪 **TESTING AND DEVELOPMENT PROTOCOLS**
+- **ALWAYS** install missing type definitions when linter suggests them (e.g., `@types/jest`)
+- **NEVER** ignore TypeScript errors in test files - fix them immediately
+- **ALWAYS** ensure test environment compatibility (JSDOM, CSS loading, etc.)
+- **VALIDATE** mock objects match real interfaces exactly
+- **TEST** both production and development environments
+- **CHECK** CSS custom properties loading in animation systems
+- **VERIFY** DOM element positioning before measuring
+- **USE** environment-aware checks (production vs. test vs. development)
+
+## 🧪 **TESTING & DEVELOPMENT STRATEGIES**
+
+### **TDD (Test Driven Development) - FUTURE IMPROVEMENT**
+- **CURRENT STATUS**: Not fully implemented - would have helped today
+- **BENEFITS**: Catches issues early, validates assumptions, prevents regressions
+- **IMPLEMENTATION**: Write tests before code, use Jest for unit/integration tests
+- **PRIORITY**: High - implement for all new features and critical bug fixes
+
+### **Alternative Thinking Strategies - CRITICAL**
+- **QUESTION ASSUMPTIONS**: "It's impossible that [established technology] doesn't work"
+- **EXTERNAL RESEARCH**: Google/documentation search before claiming "known issues"
+- **COMMUNITY VALIDATION**: Check if others have solved similar problems
+- **SYSTEMATIC ELIMINATION**: Test each assumption methodically
+- **REVERSE ENGINEERING**: Work backwards from "impossible" to find real cause
+
+### **Debugging Mindset**
+- **NEVER ASSUME BROWSER BUGS** without documented evidence
+- **ALWAYS RESEARCH FIRST** before implementing workarounds
+- **QUESTION EVERY ASSUMPTION** about technology behavior
+- **USE EXTERNAL SOURCES** to validate or disprove hypotheses
+- **SYSTEMATIC APPROACH** to eliminate possibilities
+
+## 🎯 **ANIMATION SYSTEM SPECIFIC RULES**
+- **SYSTEM STATUS**: ✅ FULLY IMPLEMENTED AND OPERATIONAL
+- **COMPONENTS**: Position detection, animation engine, React hooks, pile registration
+- **LAYOUT AWARENESS**: Pile registration automatically detects visible layouts
+- **NEVER** assume CSS custom properties are loaded immediately
+- **ALWAYS** wait for element positioning before measuring
+- **VALIDATE** element visibility with multiple checks (dimensions, position, offsetParent)
+- **IMPLEMENT** exponential backoff for retry mechanisms
+- **LOG** positioning attempts with clear, human-readable information
+- **SEPARATE** test environment logic from production logic
+- **USE** fallback positions only when absolutely necessary
+- **DOCUMENT** animation timing and positioning requirements
+
+## 🎯 **POSITION DETECTION INSIGHTS - CRITICAL**
+- **BROWSER VS JEST DIFFERENCES**: Elements can have CSS dimensions (`hasCssDimensions: true`) but zero `getBoundingClientRect` dimensions during initial render
+- **VISIBILITY LOGIC**: Must be permissive for elements with CSS dimensions but not yet positioned: `(hasCssDimensions || hasValidDimensions) && cssLoaded && (hasValidPosition || hasOffsetParent || hasCssDimensions)`
+- **LAYOUT TIMING**: Elements need more time to be positioned - use 10 attempts with 50ms delays for layout stability
+- **INITIAL RENDER ISSUES**: Elements exist and have CSS dimensions but `getBoundingClientRect` returns 0x0 until positioned in DOM layout
+- **CSS DIMENSIONS FIRST**: Trust CSS dimensions over `getBoundingClientRect` during initial render phase
+- **DOM PRESENCE**: Always check `document.contains(element)` before measuring
+- **OFFSETPARENT RELIABILITY**: `offsetParent` can be null even for valid elements during initial render
+
+---
+
+**Remember**: Every line of code should serve a purpose. If you can't explain why something exists, it probably shouldn't be there. Always prioritize user experience, performance, and maintainability over clever code.
+
+**CRITICAL**: **ALWAYS THINK TO THE HIGHEST LEVEL POSSIBLE** on every interaction. Never provide surface-level analysis. Always investigate every possible angle, consider all edge cases, and understand the complete systemic impact of every decision before responding. 

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap');
 @import './card-dimensions.css';
+@import './animations.css';
 
 @tailwind base;
 @tailwind components;
@@ -90,4 +91,204 @@ div:focus {
 .hydration-loading {
   opacity: 0.7;
   pointer-events: none;
+}
+
+/* =================================================================
+   UNIFIED PILE-TO-PILE ANIMATION SYSTEM
+   ================================================================= */
+
+/* Base animation styles for all card animations */
+.card {
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+/* Card flip animations - Mobile and Desktop */
+@keyframes cardFlipMove {
+  0% {
+    transform: translate(0, 0) rotateY(0deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateY(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(180deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateY(180deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(180deg);
+  }
+}
+
+@keyframes cardFlipMoveReverse {
+  0% {
+    transform: translate(0, 0) rotateY(180deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateY(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(0deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateY(0deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(0deg);
+  }
+}
+
+/* Card flip animations - Landscape Mobile (vertical movement) */
+@keyframes cardFlipMoveVertical {
+  0% {
+    transform: translate(0, 0) rotateY(0deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateY(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(180deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateY(180deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(180deg);
+  }
+}
+
+@keyframes cardFlipMoveVerticalReverse {
+  0% {
+    transform: translate(0, 0) rotateY(180deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotateY(90deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotateY(0deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotateY(0deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotateY(0deg);
+  }
+}
+
+/* Card flip animation with mirror image (scaleX) */
+@keyframes cardFlipMoveMirror {
+  0% {
+    transform: translate(0, 0) scaleX(-1) rotateY(0deg);
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) scaleX(-0.5) rotateY(45deg);
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) scaleX(0) rotateY(90deg);
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) scaleX(0.5) rotateY(135deg);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) scaleX(1) rotateY(180deg);
+  }
+}
+
+/* Two-part flip animation - First half (face-down OUT) */
+@keyframes cardFlipMoveOut {
+  0% {
+    transform: translate(0, 0) scaleX(-1) rotateY(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) scaleX(0) rotateY(90deg);
+    opacity: 0;
+  }
+}
+
+/* Two-part flip animation - Second half (face-up IN) */
+@keyframes cardFlipMoveIn {
+  0% {
+    transform: translate(0, 0) scaleX(0) rotateY(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) scaleX(1) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+/* Simple card move animation (no flip) */
+@keyframes cardMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y));
+  }
+}
+
+/* Card shuffle animation (for recycling) */
+@keyframes cardShuffle {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(calc(var(--end-x) * 0.25), calc(var(--end-y) * 0.25)) rotate(5deg) scale(1.05);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) rotate(-3deg) scale(1.1);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translate(calc(var(--end-x) * 0.75), calc(var(--end-y) * 0.75)) rotate(2deg) scale(1.05);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Card bridge animation (for waste to stock recycling) */
+@keyframes cardBridge {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(var(--end-x), var(--end-y)) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Animation performance optimizations */
+.card {
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Shimmer animation for face-down cards */
+@keyframes subtleShimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Ensure animations work smoothly across all devices */
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    will-change: transform, opacity;
+  }
 }

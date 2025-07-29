@@ -138,6 +138,7 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, cardId, isBeingDragged,
       tabIndex={faceUp ? 0 : -1}
       aria-label={faceUp ? `${displayRank} of ${suit}` : 'Face-down card'}
       aria-describedby={faceUp ? undefined : 'card-back-description'}
+      data-card-element="true"
       className={cn(
         cardStyles.card,
         faceUp ? cardStyles.faceUp : cardStyles.faceDown,

@@ -1,45 +1,57 @@
-import { useState, useCallback, useEffect } from 'react';
-import { GameState, Card as CardType } from '@/types';
+import { useState, useEffect, useCallback } from 'react';
+import { Card, GameState } from '../types';
+import { useAnimation } from './useAnimation';
+import { usePileElements } from './usePileRegistration';
+import { playSoundEffect } from '../utils/soundUtils';
 
-interface AnimationState {
+export interface AnimationState {
   particleTrigger: number;
   isShuffling: boolean;
   isWinAnimating: boolean;
-  animatingCard: null | { 
-    card: CardType; 
+  animatingCard: {
+    card: any;
     type: 'stockToWaste' | 'wasteToStock';
     startPosition?: { x: number; y: number };
     endPosition?: { x: number; y: number };
     isLandscapeMobile?: boolean;
-  };
-  flyingCards: Array<{
-    id: string;
-    card: CardType;
-    startPosition: { x: number; y: number };
-    endPosition: { x: number; y: number };
-    flyX: number;
-    flyRotation: number;
-  }>;
-  bridgeCards: Array<{
-    id: string;
-    card: CardType;
-    startPosition: { x: number; y: number };
-    endPosition: { x: number; y: number };
-    delay: number;
-  }>;
+  } | null;
+  flyingCards: any[];
+  bridgeCards: any[];
 }
 
-export function useGameAnimations(gameState: GameState) {
+export interface GameAnimationHook {
+  // Animation state
+  particleTrigger: number;
+  isShuffling: boolean;
+  isWinAnimating: boolean;
+  
+  // Animation triggers
+  triggerShuffleAnimation: () => void;
+  
+  // Animation functions
+  animateStockFlip: (card: any, stockPosition?: { x: number; y: number } | null, wastePosition?: { x: number; y: number } | null, onComplete?: () => void, onError?: (error: string) => void) => Promise<void>;
+  animateWasteToStock: (cards: any[], onComplete?: () => void, onError?: (error: string) => void) => Promise<void>;
+  
+  // New animation system functions
+  animateStockToWaste: (card: Card, stockElement: HTMLElement, wasteElement: HTMLElement) => Promise<void>;
+  animateCardToFoundation: (card: Card, fromElement: HTMLElement, toElement: HTMLElement) => Promise<void>;
+  animateCardToTableau: (card: Card, fromElement: HTMLElement, toElement: HTMLElement) => Promise<void>;
+  animateShuffleWasteToStock: (cards: Card[], wasteElements: HTMLElement[], stockElement: HTMLElement) => Promise<void>;
+  animateCardFlip: (card: Card, element: HTMLElement) => Promise<void>;
+}
+
+export function useGameAnimations(gameState?: GameState): GameAnimationHook {
+  const { animateStockFlip: newAnimateStockFlip, animatePileToPile, animateShuffle } = useAnimation();
+  const { getPileElement } = usePileElements();
+  
+  // Animation state
   const [particleTrigger, setParticleTrigger] = useState(0);
   const [isShuffling, setIsShuffling] = useState(false);
   const [isWinAnimating, setIsWinAnimating] = useState(false);
-  const [animatingCard, setAnimatingCard] = useState<AnimationState['animatingCard']>(null);
-  const [flyingCards, setFlyingCards] = useState<AnimationState['flyingCards']>([]);
-  const [bridgeCards, setBridgeCards] = useState<AnimationState['bridgeCards']>([]);
 
   // Trigger particle effects when game is won
   useEffect(() => {
-    if (gameState.isGameWon && !isWinAnimating) {
+    if (gameState?.isGameWon && !isWinAnimating) {
       setIsWinAnimating(true);
       setParticleTrigger(prev => prev + 1);
       
@@ -50,113 +62,216 @@ export function useGameAnimations(gameState: GameState) {
       
       return () => clearTimeout(timer);
     }
-  }, [gameState.isGameWon, isWinAnimating]);
+  }, [gameState?.isGameWon, isWinAnimating]);
 
   const triggerShuffleAnimation = useCallback(() => {
     setIsShuffling(true);
     setTimeout(() => setIsShuffling(false), 1200);
   }, []);
 
-  const createShuffleCardsAnimation = useCallback(() => {
-    const cards = gameState.stockPile.slice(-10); // Animate last 10 cards
-    const newFlyingCards = cards.map((card, index) => {
-      const startX = Math.random() * window.innerWidth;
-      const startY = Math.random() * window.innerHeight;
-      const endX = Math.random() * window.innerWidth;
-      const endY = Math.random() * window.innerHeight;
+  // Legacy animateStockFlip function for backward compatibility
+  const animateStockFlip = useCallback(async (
+    card: any,
+    stockPosition?: { x: number; y: number } | null,
+    wastePosition?: { x: number; y: number } | null,
+    onComplete?: () => void,
+    onError?: (error: string) => void
+  ): Promise<void> => {
+    try {
+      console.log('[useGameAnimations] animateStockFlip called with:', {
+        card: {
+          id: card.id,
+          suit: card.suit,
+          rank: card.rank,
+          faceUp: card.faceUp
+        },
+        stockPosition,
+        wastePosition,
+        hasPositions: !!(stockPosition && wastePosition)
+      });
       
-      return {
-        id: `${card.id}-shuffle-${index}`,
-        card,
-        startPosition: { x: startX, y: startY },
-        endPosition: { x: endX, y: endY },
-        flyX: (endX - startX) * 0.3,
-        flyRotation: (Math.random() - 0.5) * 30,
-      };
+      if (gameState?.settings.soundEnabled) {
+        playSoundEffect.cardFlip();
+      }
+
+      // Use the new animation system with actual DOM elements
+      const stockElement = getPileElement('stock');
+      const wasteElement = getPileElement('waste');
+
+      if (stockElement && wasteElement) {
+        console.log('[useGameAnimations] Using new animation system for stock flip');
+        await newAnimateStockFlip(card, stockElement, wasteElement);
+      } else {
+        console.warn('[useGameAnimations] Pile elements not found, falling back to immediate completion');
+      }
+
+      onComplete?.();
+    } catch (error) {
+      console.error('Stock flip animation failed:', error);
+      onError?.(error as string);
+    }
+  }, [gameState?.settings.soundEnabled, newAnimateStockFlip, getPileElement]);
+
+  // Legacy animateWasteToStock function for backward compatibility
+  const animateWasteToStock = useCallback(async (
+    cards: any[],
+    onComplete?: () => void,
+    onError?: (error: string) => void
+  ): Promise<void> => {
+    try {
+      if (gameState?.settings.soundEnabled) {
+        if (cards.length === 1) {
+          playSoundEffect.cardFlip();
+        } else {
+          playSoundEffect.shuffle();
+        }
+      }
+
+      // Use the new animation system with actual DOM elements
+      const stockElement = getPileElement('stock');
+      const wasteElement = getPileElement('waste');
+
+      if (stockElement && wasteElement) {
+        console.log('[useGameAnimations] Using new animation system for waste to stock shuffle');
+        // Create waste elements array (simplified - in real implementation we'd get actual card elements)
+        const wasteElements = Array(cards.length).fill(wasteElement);
+        await animateShuffle(cards, wasteElements, stockElement);
+      } else {
+        console.warn('[useGameAnimations] Pile elements not found, falling back to immediate completion');
+      }
+
+      onComplete?.();
+    } catch (error) {
+      console.error('Waste to stock animation failed:', error);
+      onError?.(error as string);
+    }
+  }, [gameState?.settings.soundEnabled, animateShuffle, getPileElement]);
+
+  // New animation system functions
+  const animateStockToWaste = useCallback(async (
+    card: Card,
+    stockElement: HTMLElement,
+    wasteElement: HTMLElement
+  ): Promise<void> => {
+    console.log('[useGameAnimations] animateStockToWaste:', {
+      cardId: card.id,
+      cardSuit: card.suit,
+      cardRank: card.rank,
+      faceUp: card.faceUp
     });
-    
-    setFlyingCards(newFlyingCards);
-    
-    // Clear flying cards after animation
-    setTimeout(() => {
-      setFlyingCards([]);
-    }, 1000);
-  }, [gameState.stockPile]);
 
-  const animateStockFlip = useCallback((
-    card: CardType,
-    startPosition: { x: number; y: number },
-    endPosition: { x: number; y: number },
-    type: 'stockToWaste' | 'wasteToStock',
-    isLandscapeMobile = false
-  ) => {
-    setAnimatingCard({
-      card,
-      type,
-      startPosition,
-      endPosition,
-      isLandscapeMobile,
+    try {
+      await newAnimateStockFlip(card, stockElement, wasteElement);
+      console.log('[useGameAnimations] Stock to waste animation completed');
+    } catch (error) {
+      console.error('[useGameAnimations] Stock to waste animation failed:', error);
+      throw error;
+    }
+  }, [newAnimateStockFlip]);
+
+  const animateCardToFoundation = useCallback(async (
+    card: Card,
+    fromElement: HTMLElement,
+    toElement: HTMLElement
+  ): Promise<void> => {
+    console.log('[useGameAnimations] animateCardToFoundation:', {
+      cardId: card.id,
+      cardSuit: card.suit,
+      cardRank: card.rank,
+      fromElement: fromElement.id || fromElement.className,
+      toElement: toElement.id || toElement.className
     });
-    
-    // Clear animation after completion
-    setTimeout(() => {
-      setAnimatingCard(null);
-    }, 300);
-  }, []);
 
-  const createCardBridgeAnimation = useCallback((
-    wastePosition: { x: number; y: number },
-    stockPosition: { x: number; y: number },
-    isLandscapeMobile = false
-  ) => {
-    // Get all cards from waste pile
-    const wasteCards = gameState.wastePile;
-    if (wasteCards.length === 0) return;
+    try {
+      await animatePileToPile(card, fromElement, toElement);
+      console.log('[useGameAnimations] Card to foundation animation completed');
+    } catch (error) {
+      console.error('[useGameAnimations] Card to foundation animation failed:', error);
+      throw error;
+    }
+  }, [animatePileToPile]);
 
-    // Calculate timing for exactly 1 second total duration
-    const totalDuration = 1000; // 1 second
-    const animationDuration = 300; // Each card animation takes 300ms
-    const staggerDelay = wasteCards.length > 1 
-      ? (totalDuration - animationDuration) / (wasteCards.length - 1) 
-      : 0;
-
-    // Create bridge animation for each card
-    const newBridgeCards = wasteCards.map((card, index) => {
-      const delay = index * staggerDelay;
-      
-      return {
-        id: `${card.id}-bridge-${index}`,
-        card,
-        startPosition: wastePosition,
-        endPosition: stockPosition,
-        delay,
-      };
+  const animateCardToTableau = useCallback(async (
+    card: Card,
+    fromElement: HTMLElement,
+    toElement: HTMLElement
+  ): Promise<void> => {
+    console.log('[useGameAnimations] animateCardToTableau:', {
+      cardId: card.id,
+      cardSuit: card.suit,
+      cardRank: card.rank,
+      fromElement: fromElement.id || fromElement.className,
+      toElement: toElement.id || toElement.className
     });
-    
-    setBridgeCards(newBridgeCards);
-    
-    // Clear bridge cards after exactly 1 second
-    setTimeout(() => {
-      setBridgeCards([]);
-    }, totalDuration);
-  }, [gameState.wastePile]);
+
+    try {
+      await animatePileToPile(card, fromElement, toElement);
+      console.log('[useGameAnimations] Card to tableau animation completed');
+    } catch (error) {
+      console.error('[useGameAnimations] Card to tableau animation failed:', error);
+      throw error;
+    }
+  }, [animatePileToPile]);
+
+  const animateShuffleWasteToStock = useCallback(async (
+    cards: Card[],
+    wasteElements: HTMLElement[],
+    stockElement: HTMLElement
+  ): Promise<void> => {
+    console.log('[useGameAnimations] animateShuffleWasteToStock:', {
+      cardCount: cards.length,
+      stockElement: stockElement.id || stockElement.className
+    });
+
+    try {
+      await animateShuffle(cards, wasteElements, stockElement);
+      console.log('[useGameAnimations] Shuffle waste to stock animation completed');
+    } catch (error) {
+      console.error('[useGameAnimations] Shuffle waste to stock animation failed:', error);
+      throw error;
+    }
+  }, [animateShuffle]);
+
+  const animateCardFlip = useCallback(async (
+    card: Card,
+    element: HTMLElement
+  ): Promise<void> => {
+    console.log('[useGameAnimations] animateCardFlip:', {
+      cardId: card.id,
+      cardSuit: card.suit,
+      cardRank: card.rank,
+      element: element.id || element.className
+    });
+
+    try {
+      // For a card flip in place, we animate from the element to itself
+      // This will trigger the flip animation without movement
+      await animatePileToPile(card, element, element);
+      console.log('[useGameAnimations] Card flip animation completed');
+    } catch (error) {
+      console.error('[useGameAnimations] Card flip animation failed:', error);
+      throw error;
+    }
+  }, [animatePileToPile]);
 
   return {
+    // Animation state
     particleTrigger,
-    setParticleTrigger,
     isShuffling,
-    setIsShuffling,
     isWinAnimating,
-    setIsWinAnimating,
-    animatingCard,
-    setAnimatingCard,
-    flyingCards,
-    setFlyingCards,
-    bridgeCards,
-    setBridgeCards,
+    
+    // Animation triggers
     triggerShuffleAnimation,
-    createShuffleCardsAnimation,
-    createCardBridgeAnimation,
+    
+    // Legacy animation functions
     animateStockFlip,
+    animateWasteToStock,
+    
+    // New animation system functions
+    animateStockToWaste,
+    animateCardToFoundation,
+    animateCardToTableau,
+    animateShuffleWasteToStock,
+    animateCardFlip
   };
 } 

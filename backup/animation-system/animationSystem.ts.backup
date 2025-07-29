@@ -1,0 +1,1126 @@
+/* =================================================================
+   UNIFIED PILE-TO-PILE ANIMATION SYSTEM
+   ================================================================= */
+
+import { Card as CardType } from '@/types';
+import React from 'react';
+import { createRoot, Root } from 'react-dom/client';
+import Card from '@/components/Card/Card';
+
+/**
+ * Represents a pile that can participate in animations
+ */
+export interface PileReference {
+  id: string;
+  type: 'stock' | 'waste' | 'foundation' | 'tableau';
+  index?: number; // For foundation/tableau piles
+  getPosition: () => { x: number; y: number } | null;
+  getElement: () => HTMLElement | null;
+  isVisible: () => boolean;
+}
+
+/**
+ * Animation types for universal card movements
+ */
+export type AnimationType = 'flip' | 'move' | 'shuffle' | 'auto';
+
+/**
+ * Movement analysis for direction-aware animations
+ */
+export interface MovementAnalysis {
+  direction: 'horizontal' | 'vertical' | 'diagonal';
+  distance: number;
+  angle: number; // degrees from horizontal
+  isShortDistance: boolean;
+  isLongDistance: boolean;
+  recommendedType: AnimationType;
+}
+
+/**
+ * Universal animation descriptor for any pile-to-pile movement
+ */
+export interface AnimationDescriptor {
+  id: string;
+  card: CardType;
+  startPile: PileReference;
+  endPile: PileReference;
+  animationType: AnimationType;
+  duration?: number;
+  delay?: number;
+  onComplete?: () => void;
+  onError?: (error: string) => void;
+  // Optional overrides for custom positioning
+  startPosition?: { x: number; y: number };
+  endPosition?: { x: number; y: number };
+}
+
+/**
+ * Position with fallback strategies
+ */
+interface PositionResult {
+  position: { x: number; y: number };
+  confidence: 'high' | 'medium' | 'low';
+  source: 'element' | 'cache' | 'fallback';
+}
+
+/**
+ * Central registry for all piles in the game
+ */
+class PileRegistry {
+  private piles = new Map<string, PileReference>();
+  private positionCache = new Map<string, { position: { x: number; y: number }; timestamp: number }>();
+  private readonly CACHE_TTL = 100; // 100ms cache TTL for performance
+
+  /**
+   * Register a pile with the animation system
+   */
+  register(pile: PileReference): void {
+    const key = this.getPileKey(pile);
+    this.piles.set(key, pile);
+    console.log('[PileRegistry] Registered pile:', {
+      key,
+      type: pile.type,
+      id: pile.id,
+      visible: pile.isVisible(),
+      element: pile.getElement() ? 'present' : 'null'
+    });
+  }
+
+  /**
+   * Unregister a pile from the animation system
+   */
+  unregister(pile: PileReference): void {
+    const key = this.getPileKey(pile);
+    this.piles.delete(key);
+    this.positionCache.delete(key);
+  }
+
+  /**
+   * Get a pile by type and optional index
+   */
+  getPile(type: PileReference['type'], index?: number): PileReference | null {
+    const key = `${type}${index !== undefined ? `-${index}` : ''}`;
+    const pile = this.piles.get(key) || null;
+    
+    if (!pile) {
+      console.warn('[PileRegistry] Pile not found:', {
+        type,
+        index,
+        key,
+        availablePiles: Array.from(this.piles.keys()),
+        totalPiles: this.piles.size
+      });
+    } else if (!pile.isVisible()) {
+      console.warn('[PileRegistry] Pile found but not visible:', {
+        type,
+        index,
+        key,
+        element: pile.getElement() ? 'present' : 'null',
+        offsetParent: pile.getElement()?.offsetParent ? 'present' : 'null'
+      });
+    }
+    
+    return pile;
+  }
+
+  /**
+   * Wait for a pile to be available and visible
+   */
+  async waitForPile(type: PileReference['type'], index?: number, maxAttempts: number = 10): Promise<PileReference> {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const pile = this.getPile(type, index);
+      
+      if (pile && pile.isVisible()) {
+        return pile;
+      }
+      
+      if (attempt < maxAttempts) {
+        console.log(`[PileRegistry] Waiting for pile ${type}${index !== undefined ? `-${index}` : ''} (attempt ${attempt}/${maxAttempts})`);
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    
+    // Fallback: return the pile even if not fully visible, but with a warning
+    const fallbackPile = this.getPile(type, index);
+    if (fallbackPile) {
+      console.warn(`[PileRegistry] Using fallback pile ${type}${index !== undefined ? `-${index}` : ''} (not fully visible but available)`);
+      return fallbackPile;
+    }
+    
+    throw new Error(`Pile ${type}${index !== undefined ? `-${index}` : ''} not available after ${maxAttempts} attempts`);
+  }
+
+  /**
+   * Get position for a pile with fallback strategies
+   */
+  getPosition(pile: PileReference): PositionResult {
+    const key = this.getPileKey(pile);
+    const now = Date.now();
+
+    // Try cached position first (if recent)
+    const cached = this.positionCache.get(key);
+    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
+      return {
+        position: cached.position,
+        confidence: 'high',
+        source: 'cache'
+      };
+    }
+
+    // Try to get fresh position from pile
+    const freshPosition = pile.getPosition();
+    if (freshPosition) {
+      // Cache the position
+      this.positionCache.set(key, { position: freshPosition, timestamp: now });
+      return {
+        position: freshPosition,
+        confidence: 'high',
+        source: 'element'
+      };
+    }
+
+    // Try to get position from DOM element directly
+    const element = pile.getElement();
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const position = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+      this.positionCache.set(key, { position, timestamp: now });
+      return {
+        position,
+        confidence: 'medium',
+        source: 'element'
+      };
+    }
+
+    // Use cached position even if stale
+    if (cached) {
+      return {
+        position: cached.position,
+        confidence: 'low',
+        source: 'cache'
+      };
+    }
+
+    // Ultimate fallback - calculated positions based on pile type
+    const fallbackPosition = this.getFallbackPosition(pile);
+    return {
+      position: fallbackPosition,
+      confidence: 'low',
+      source: 'fallback'
+    };
+  }
+
+  /**
+   * Clear position cache (call on layout changes)
+   */
+  clearCache(): void {
+    this.positionCache.clear();
+  }
+
+  private getPileKey(pile: PileReference): string {
+    return `${pile.type}${pile.index !== undefined ? `-${pile.index}` : ''}`;
+  }
+
+  private getFallbackPosition(pile: PileReference): { x: number; y: number } {
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+
+    // Reasonable fallback positions based on typical layouts
+    switch (pile.type) {
+      case 'stock':
+        return { x: centerX - 120, y: centerY - 100 };
+      case 'waste':
+        return { x: centerX - 60, y: centerY - 100 };
+      case 'foundation':
+        const foundationX = centerX + 60 + (pile.index || 0) * 80;
+        return { x: foundationX, y: centerY - 100 };
+      case 'tableau':
+        const tableauX = centerX - 240 + (pile.index || 0) * 80;
+        return { x: tableauX, y: centerY + 50 };
+      default:
+        return { x: centerX, y: centerY };
+    }
+  }
+}
+
+/**
+ * Unified animation coordinator with universal movement analysis
+ */
+class AnimationCoordinator {
+  private activeAnimations = new Map<string, AnimationDescriptor>();
+  private animationElements = new Map<string, HTMLElement>();
+
+  constructor(private registry: PileRegistry) {}
+
+  /**
+   * Analyze movement between two positions for optimal animation
+   */
+  private analyzeMovement(startPos: { x: number; y: number }, endPos: { x: number; y: number }): MovementAnalysis {
+    const deltaX = endPos.x - startPos.x;
+    const deltaY = endPos.y - startPos.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+    
+    // Direction analysis
+    const absAngle = Math.abs(angle);
+    let direction: 'horizontal' | 'vertical' | 'diagonal';
+    
+    if (absAngle <= 15 || absAngle >= 165) {
+      direction = 'horizontal';
+    } else if (absAngle >= 75 && absAngle <= 105) {
+      direction = 'vertical';
+    } else {
+      direction = 'diagonal';
+    }
+    
+    // Distance analysis (relative to viewport)
+    const viewportDiagonal = Math.sqrt(window.innerWidth ** 2 + window.innerHeight ** 2);
+    const isShortDistance = distance < viewportDiagonal * 0.2; // Less than 20% of screen
+    const isLongDistance = distance > viewportDiagonal * 0.5;  // More than 50% of screen
+    
+    // Recommended animation type based on analysis
+    let recommendedType: AnimationType = 'move';
+    if (isShortDistance) {
+      recommendedType = 'move'; // Simple slide for short distances
+    } else if (isLongDistance) {
+      recommendedType = 'flip'; // Flip for dramatic long movements
+    } else {
+      recommendedType = 'move'; // Default to move for medium distances
+    }
+    
+    console.log('[AnimationSystem] Movement Analysis:', {
+      deltaX, deltaY, distance, angle: angle.toFixed(1),
+      direction, isShortDistance, isLongDistance, recommendedType,
+      viewportDiagonal: viewportDiagonal.toFixed(0)
+    });
+    
+    return {
+      direction,
+      distance,
+      angle,
+      isShortDistance,
+      isLongDistance,
+      recommendedType
+    };
+  }
+
+  /**
+   * Start a universal pile-to-pile animation
+   */
+  async animate(descriptor: AnimationDescriptor): Promise<void> {
+    // Validate animation descriptor
+    const validation = this.validateAnimation(descriptor);
+    if (!validation.valid) {
+      descriptor.onError?.(validation.error!);
+      throw new Error(`Animation validation failed: ${validation.error}`);
+    }
+
+    // Get positions (use overrides if provided, otherwise get from piles)
+    const startPos = descriptor.startPosition || this.registry.getPosition(descriptor.startPile).position;
+    const endPos = descriptor.endPosition || this.registry.getPosition(descriptor.endPile).position;
+
+    // Check for zero-distance animation (same position)
+    const deltaX = endPos.x - startPos.x;
+    const deltaY = endPos.y - startPos.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    if (distance < 1) {
+      console.warn('[AnimationSystem] Zero-distance animation detected, skipping:', {
+        id: descriptor.id,
+        startPos,
+        endPos,
+        distance
+      });
+      descriptor.onComplete?.();
+      return;
+    }
+
+    // UNIVERSAL MOVEMENT ANALYSIS
+    const movement = this.analyzeMovement(startPos, endPos);
+    
+    // Determine final animation type (use 'auto' recommendation if specified)
+    const finalAnimationType = descriptor.animationType === 'auto' 
+      ? movement.recommendedType 
+      : descriptor.animationType;
+
+    console.log('[AnimationSystem] Universal Animation Starting:', {
+      id: descriptor.id,
+      requestedType: descriptor.animationType,
+      finalType: finalAnimationType,
+      movement,
+      positions: { start: startPos, end: endPos }
+    });
+
+    // Create animation element with universal positioning
+    const animationElement = this.createUniversalAnimationElement(descriptor, startPos, endPos, movement);
+    
+    // Track active animation
+    this.activeAnimations.set(descriptor.id, descriptor);
+    this.animationElements.set(descriptor.id, animationElement);
+
+    // Execute animation
+    return new Promise((resolve, reject) => {
+      const cleanup = () => {
+        this.activeAnimations.delete(descriptor.id);
+        const element = this.animationElements.get(descriptor.id);
+        if (element) {
+          // Cleanup React root
+          const reactRoot = (element as any).__reactRoot as Root;
+          if (reactRoot) {
+            reactRoot.unmount();
+          }
+          // Remove from DOM
+          if (element.parentNode) {
+            element.parentNode.removeChild(element);
+          }
+        }
+        this.animationElements.delete(descriptor.id);
+      };
+
+      const onComplete = () => {
+        cleanup();
+        descriptor.onComplete?.();
+        resolve();
+      };
+
+      const onError = (error: string) => {
+        cleanup();
+        descriptor.onError?.(error);
+        reject(new Error(error));
+      };
+
+      try {
+        // UNIVERSAL ANIMATION EXECUTION
+        switch (finalAnimationType) {
+          case 'flip':
+            this.executeUniversalFlipAnimation(animationElement, startPos, endPos, movement, descriptor, onComplete);
+            break;
+          case 'move':
+            this.executeUniversalMoveAnimation(animationElement, startPos, endPos, movement, descriptor, onComplete);
+            break;
+          case 'shuffle':
+            this.executeUniversalShuffleAnimation(animationElement, startPos, endPos, movement, descriptor, onComplete);
+            break;
+          default:
+            onError(`Unknown animation type: ${finalAnimationType}`);
+        }
+      } catch (error) {
+        onError(`Animation execution failed: ${error}`);
+      }
+    });
+  }
+
+  /**
+   * Cancel an active animation
+   */
+  cancel(animationId: string): void {
+    const element = this.animationElements.get(animationId);
+    if (element) {
+      // Cleanup React root
+      const reactRoot = (element as any).__reactRoot as Root;
+      if (reactRoot) {
+        reactRoot.unmount();
+      }
+      // Remove from DOM
+      if (element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    }
+    this.activeAnimations.delete(animationId);
+    this.animationElements.delete(animationId);
+  }
+
+  /**
+   * Cancel all active animations
+   */
+  cancelAll(): void {
+    for (const animationId of this.activeAnimations.keys()) {
+      this.cancel(animationId);
+    }
+  }
+
+  private validateAnimation(descriptor: AnimationDescriptor): { valid: boolean; error?: string } {
+    if (!descriptor.startPile || !descriptor.endPile) {
+      return { valid: false, error: 'Missing start or end pile' };
+    }
+
+    // Enhanced visibility checking with detailed logging
+    const startVisible = descriptor.startPile.isVisible();
+    const endVisible = descriptor.endPile.isVisible();
+    
+    if (!startVisible || !endVisible) {
+      console.error('[AnimationSystem] Pile visibility check failed:', {
+        startPile: {
+          id: descriptor.startPile.id,
+          type: descriptor.startPile.type,
+          visible: startVisible,
+          element: descriptor.startPile.getElement() ? 'present' : 'null',
+          offsetParent: descriptor.startPile.getElement()?.offsetParent ? 'present' : 'null'
+        },
+        endPile: {
+          id: descriptor.endPile.id,
+          type: descriptor.endPile.type,
+          visible: endVisible,
+          element: descriptor.endPile.getElement() ? 'present' : 'null',
+          offsetParent: descriptor.endPile.getElement()?.offsetParent ? 'present' : 'null'
+        }
+      });
+      return { valid: false, error: 'Start or end pile is not visible' };
+    }
+
+    // Check if start and end piles are the same
+    if (descriptor.startPile.id === descriptor.endPile.id) {
+      return { valid: false, error: 'Start and end pile cannot be the same' };
+    }
+
+    return { valid: true };
+  }
+
+  private createUniversalAnimationElement(
+    descriptor: AnimationDescriptor,
+    startPos: { x: number; y: number },
+    endPos: { x: number; y: number },
+    movement: MovementAnalysis
+  ): HTMLElement {
+    // UNIVERSAL CONTAINER: Works for any direction, any distance
+    const container = document.createElement('div');
+    container.id = `animation-${descriptor.id}`;
+    container.style.position = 'fixed';
+    container.style.zIndex = '1000';
+    container.style.pointerEvents = 'none';
+    
+    // Get standard card dimensions
+    const computedStyle = getComputedStyle(document.documentElement);
+    const cardWidth = parseInt(computedStyle.getPropertyValue('--card-width').trim()) || 52;
+    const cardHeight = parseInt(computedStyle.getPropertyValue('--card-height').trim()) || 72;
+    
+    // UNIVERSAL POSITIONING: Works for any start/end positions
+    const startTopLeft = {
+      x: startPos.x - cardWidth / 2,
+      y: startPos.y - cardHeight / 2
+    };
+    const endTopLeft = {
+      x: endPos.x - cardWidth / 2,
+      y: endPos.y - cardHeight / 2
+    };
+    
+    // Position the container at start position
+    container.style.left = `${startTopLeft.x}px`;
+    container.style.top = `${startTopLeft.y}px`;
+    container.style.width = `${cardWidth}px`;
+    container.style.height = `${cardHeight}px`;
+    container.style.transformStyle = 'preserve-3d';
+    container.style.perspective = '1000px';
+
+    // UNIVERSAL CSS PROPERTIES: Delta works for any direction
+    const deltaX = endTopLeft.x - startTopLeft.x;
+    const deltaY = endTopLeft.y - startTopLeft.y;
+    container.style.setProperty('--end-x', `${deltaX}px`);
+    container.style.setProperty('--end-y', `${deltaY}px`);
+    container.style.setProperty('--distance', `${movement.distance}px`);
+    container.style.setProperty('--angle', `${movement.angle}deg`);
+
+    // RENDER CARD COMPONENT (styling will be applied by animation methods)
+    const root = createRoot(container);
+    root.render(React.createElement(Card, {
+      suit: descriptor.card.suit,
+      rank: descriptor.card.rank,
+      faceUp: descriptor.card.faceUp,
+      cardId: descriptor.card.id,
+      onClick: () => {}
+      // Note: No inline styles - applied by specific animation methods
+    }));
+
+    document.body.appendChild(container);
+    (container as any).__reactRoot = root;
+    
+    console.log('[AnimationSystem] Universal Animation Element Created:', {
+      approach: 'UNIVERSAL_POSITIONING',
+      movement,
+      positions: { start: startPos, end: endPos },
+      deltas: { x: deltaX, y: deltaY },
+      cssProperties: {
+        endX: `${deltaX}px`,
+        endY: `${deltaY}px`, 
+        distance: `${movement.distance}px`,
+        angle: `${movement.angle}deg`
+      }
+    });
+    
+    return container;
+  }
+
+  private createSecondFlipElement(
+    descriptor: AnimationDescriptor,
+    startPos: { x: number; y: number },
+    endPos: { x: number; y: number }
+  ): HTMLElement {
+    // Create second container for face-up card (starts at 50% position)
+    const container = document.createElement('div');
+    container.id = `animation-${descriptor.id}-second`;
+    container.style.position = 'fixed';
+    container.style.zIndex = '1001'; // Slightly higher than first element
+    container.style.pointerEvents = 'none';
+    
+    // Get card dimensions
+    const computedStyle = getComputedStyle(document.documentElement);
+    const cardWidth = parseInt(computedStyle.getPropertyValue('--card-width').trim()) || 52;
+    const cardHeight = parseInt(computedStyle.getPropertyValue('--card-height').trim()) || 72;
+    
+    // Position at 50% point of the animation path
+    const midPointX = (startPos.x + endPos.x) / 2;
+    const midPointY = (startPos.y + endPos.y) / 2;
+    
+    const midTopLeft = {
+      x: midPointX - cardWidth / 2,
+      y: midPointY - cardHeight / 2
+    };
+    const endTopLeft = {
+      x: endPos.x - cardWidth / 2,
+      y: endPos.y - cardHeight / 2
+    };
+    
+    container.style.left = `${midTopLeft.x}px`;
+    container.style.top = `${midTopLeft.y}px`;
+    container.style.width = `${cardWidth}px`;
+    container.style.height = `${cardHeight}px`;
+    container.style.transformStyle = 'preserve-3d';
+    container.style.perspective = '1000px';
+
+    // Set end position for second half of animation
+    container.style.setProperty('--end-x', `${endTopLeft.x - midTopLeft.x}px`);
+    container.style.setProperty('--end-y', `${endTopLeft.y - midTopLeft.y}px`);
+
+    // Render face-up card
+    const root = createRoot(container);
+    (container as any).__reactRoot = root;
+
+    document.body.appendChild(container);
+    return container;
+  }
+
+  private findSourceCard(descriptor: AnimationDescriptor): HTMLElement | null {
+    if (descriptor.startPile.type === 'stock') {
+      const stockElement = document.querySelector('[data-pile-type="stock"]') as HTMLElement;
+      const cardElement = stockElement?.querySelector('[data-card-element="true"]') as HTMLElement;
+      return cardElement || null;
+    }
+    return null;
+  }
+
+
+  private getSuitSymbol(suit: string): string {
+    switch (suit) {
+      case 'hearts': return '♥';
+      case 'diamonds': return '♦';
+      case 'clubs': return '♣';
+      case 'spades': return '♠';
+      default: return suit;
+    }
+  }
+
+  /**
+   * UNIVERSAL FLIP ANIMATION - Works in any direction
+   */
+  private executeUniversalFlipAnimation(
+    element: HTMLElement,
+    startPos: { x: number; y: number },
+    endPos: { x: number; y: number },
+    movement: MovementAnalysis,
+    descriptor: AnimationDescriptor,
+    onComplete: () => void
+  ): void {
+    const duration = descriptor.duration || 300;
+    const halfDuration = duration / 2;
+    
+    // PROPER 2-ELEMENT FLIP ANIMATION:
+    // Element 1: Face-down card animates OUT (first half)
+    // Element 2: Face-up card animates IN (second half)
+    
+    console.log('[AnimationSystem] Starting 2-element flip animation:', {
+      totalDuration: duration,
+      halfDuration,
+      phase1: 'Face-down card OUT (0% to 50%)',
+      phase2: 'Face-up card IN (50% to 100%)'
+    });
+    
+    // PHASE 1: Face-down card animates OUT (first half only)
+    const reactRoot1 = (element as any).__reactRoot as Root;
+    if (reactRoot1) {
+      reactRoot1.render(React.createElement(Card, {
+        suit: descriptor.card.suit,
+        rank: descriptor.card.rank,
+        faceUp: false, // Face-down for first half
+        cardId: descriptor.card.id,
+        onClick: () => {},
+        style: {
+          transform: 'scaleX(-1)',
+          transformStyle: 'preserve-3d',
+          // Only animate FIRST HALF (0% to 50%) - disappearing
+          animation: `cardFlipMoveOut ${halfDuration}ms cubic-bezier(0.4, 0, 0.2, 1) forwards`,
+          animationDelay: `${descriptor.delay || 0}ms`
+        }
+      }));
+    }
+    
+    // PHASE 2: Create second element for face-up card at 50% point
+    setTimeout(() => {
+      // Create second animation element for face-up card
+      const element2 = this.createSecondFlipElement(descriptor, startPos, endPos);
+      
+      const reactRoot2 = (element2 as any).__reactRoot as Root;
+      if (reactRoot2) {
+        reactRoot2.render(React.createElement(Card, {
+          suit: descriptor.card.suit,
+          rank: descriptor.card.rank,
+          faceUp: true, // Face-up for second half
+          cardId: descriptor.card.id,
+          onClick: () => {},
+          style: {
+            transform: 'scaleX(1)', // Normal orientation for face-up
+            transformStyle: 'preserve-3d',
+            // Only animate SECOND HALF (50% to 100%) - appearing
+            animation: `cardFlipMoveIn ${halfDuration}ms cubic-bezier(0.4, 0, 0.2, 1) forwards`,
+            animationDelay: '0ms'
+          }
+        }));
+      }
+      
+      // Store second element for cleanup
+      this.animationElements.set(`${descriptor.id}-second`, element2);
+      
+      console.log('[AnimationSystem] Phase 2: Face-up card IN animation started');
+    }, (descriptor.delay || 0) + halfDuration);
+
+    setTimeout(() => {
+      // Cleanup second element
+      const element2 = this.animationElements.get(`${descriptor.id}-second`);
+      if (element2) {
+        const reactRoot2 = (element2 as any).__reactRoot as Root;
+        if (reactRoot2) {
+          reactRoot2.unmount();
+        }
+        if (element2.parentNode) {
+          element2.parentNode.removeChild(element2);
+        }
+        this.animationElements.delete(`${descriptor.id}-second`);
+      }
+      
+      onComplete();
+    }, (descriptor.delay || 0) + duration);
+  }
+
+  /**
+   * UNIVERSAL MOVE ANIMATION - Works in any direction
+   */
+  private executeUniversalMoveAnimation(
+    element: HTMLElement,
+    startPos: { x: number; y: number },
+    endPos: { x: number; y: number },
+    movement: MovementAnalysis,
+    descriptor: AnimationDescriptor,
+    onComplete: () => void
+  ): void {
+    const duration = descriptor.duration || 300;
+    
+    // Apply universal move animation
+    const reactRoot = (element as any).__reactRoot as Root;
+    if (reactRoot) {
+      reactRoot.render(React.createElement(Card, {
+        suit: descriptor.card.suit,
+        rank: descriptor.card.rank,
+        faceUp: descriptor.card.faceUp,
+        cardId: descriptor.card.id,
+        onClick: () => {},
+        style: {
+          animation: `cardMove ${duration}ms ease-out forwards`,
+          animationDelay: `${descriptor.delay || 0}ms`
+        }
+      }));
+    }
+
+    setTimeout(() => {
+      onComplete();
+    }, (descriptor.delay || 0) + duration);
+  }
+
+  /**
+   * UNIVERSAL SHUFFLE ANIMATION - Works in any direction
+   */
+  private executeUniversalShuffleAnimation(
+    element: HTMLElement,
+    startPos: { x: number; y: number },
+    endPos: { x: number; y: number },
+    movement: MovementAnalysis,
+    descriptor: AnimationDescriptor,
+    onComplete: () => void
+  ): void {
+    const duration = descriptor.duration || 1000;
+    
+    // Apply universal shuffle animation
+    const reactRoot = (element as any).__reactRoot as Root;
+    if (reactRoot) {
+      reactRoot.render(React.createElement(Card, {
+        suit: descriptor.card.suit,
+        rank: descriptor.card.rank,
+        faceUp: descriptor.card.faceUp,
+        cardId: descriptor.card.id,
+        onClick: () => {},
+        style: {
+          animation: `cardShuffle ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+          animationDelay: `${descriptor.delay || 0}ms`
+        }
+      }));
+    }
+
+    setTimeout(() => {
+      onComplete();
+    }, (descriptor.delay || 0) + duration);
+  }
+
+  private executeMoveAnimation(
+    element: HTMLElement,
+    startPos: { x: number; y: number },
+    endPos: { x: number; y: number },
+    descriptor: AnimationDescriptor,
+    onComplete: () => void
+  ): void {
+    const duration = descriptor.duration || 300;
+    
+    // Apply move animation to the React Card component
+    const reactRoot = (element as any).__reactRoot as Root;
+    if (reactRoot) {
+      reactRoot.render(React.createElement(Card, {
+        suit: descriptor.card.suit,
+        rank: descriptor.card.rank,
+        faceUp: descriptor.card.faceUp,
+        cardId: descriptor.card.id,
+        onClick: () => {},
+        style: {
+          // Apply move animation directly to Card component
+          animation: `cardMove ${duration}ms ease-out forwards`,
+          animationDelay: `${descriptor.delay || 0}ms`
+        }
+      }));
+    }
+
+    setTimeout(() => {
+      onComplete();
+    }, (descriptor.delay || 0) + duration);
+  }
+
+  private executeShuffleAnimation(
+    element: HTMLElement,
+    startPos: { x: number; y: number },
+    endPos: { x: number; y: number },
+    descriptor: AnimationDescriptor,
+    onComplete: () => void
+  ): void {
+    const duration = descriptor.duration || 1000;
+    
+    // Apply shuffle animation to the React Card component
+    const reactRoot = (element as any).__reactRoot as Root;
+    if (reactRoot) {
+      reactRoot.render(React.createElement(Card, {
+        suit: descriptor.card.suit,
+        rank: descriptor.card.rank,
+        faceUp: descriptor.card.faceUp,
+        cardId: descriptor.card.id,
+        onClick: () => {},
+        style: {
+          // Apply shuffle animation directly to Card component
+          animation: `cardShuffle ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards`,
+          animationDelay: `${descriptor.delay || 0}ms`
+        }
+      }));
+    }
+
+    setTimeout(() => {
+      onComplete();
+    }, (descriptor.delay || 0) + duration);
+  }
+
+  private executeBridgeAnimation(
+    element: HTMLElement,
+    startPos: { x: number; y: number },
+    endPos: { x: number; y: number },
+    descriptor: AnimationDescriptor,
+    onComplete: () => void
+  ): void {
+    const duration = descriptor.duration || 300;
+    element.style.animation = `cardBridge ${duration}ms ease-out forwards`;
+    element.style.animationDelay = `${descriptor.delay || 0}ms`;
+
+    setTimeout(() => {
+      onComplete();
+    }, (descriptor.delay || 0) + duration);
+  }
+}
+
+// Global instances
+export const pileRegistry = new PileRegistry();
+export const animationCoordinator = new AnimationCoordinator(pileRegistry);
+
+/**
+ * Utility function to create a pile reference
+ */
+export function createPileReference(
+  type: PileReference['type'],
+  element: HTMLElement | (() => HTMLElement | null),
+  index?: number
+): PileReference {
+  return {
+    id: `${type}${index !== undefined ? `-${index}` : ''}`,
+    type,
+    index,
+    getPosition: () => {
+      const el = typeof element === 'function' ? element() : element;
+      if (!el) return null;
+      const rect = el.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+    },
+    getElement: () => typeof element === 'function' ? element() : element,
+    isVisible: () => {
+      const el = typeof element === 'function' ? element() : element;
+      if (!el) return false;
+      
+      // Try multiple approaches to determine visibility
+      const rect = el.getBoundingClientRect();
+      
+      // Check if element has position from getBoundingClientRect
+      const hasValidDimensions = rect.width > 0 && rect.height > 0;
+      const hasValidPosition = rect.left !== 0 || rect.top !== 0;
+      
+      // Check if element is in the layout flow
+      const hasOffsetParent = el.offsetParent !== null;
+      
+      // Check if CSS custom properties are loaded (only in production)
+      let cssLoaded = true; // Default to true for test environments
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+        try {
+          const computedStyle = getComputedStyle(document.documentElement);
+          const cardWidth = computedStyle.getPropertyValue('--card-width').trim();
+          const cardHeight = computedStyle.getPropertyValue('--card-height').trim();
+          cssLoaded = cardWidth !== '' && cardHeight !== '' && 
+                     parseFloat(cardWidth) > 0 && parseFloat(cardHeight) > 0;
+        } catch (error) {
+          // Fallback if getComputedStyle fails (e.g., in test environment)
+          console.warn('[PileReference] Failed to check CSS properties:', error);
+          cssLoaded = true; // Assume loaded in case of error
+        }
+      }
+      
+      // Try to get CSS dimensions if we're in a browser environment
+      let hasCssDimensions = false;
+      let cssWidth = 0;
+      let cssHeight = 0;
+      
+      if (typeof window !== 'undefined' && window.getComputedStyle) {
+        try {
+          const computedStyle = window.getComputedStyle(el);
+          cssWidth = parseFloat(computedStyle.width);
+          cssHeight = parseFloat(computedStyle.height);
+          hasCssDimensions = cssWidth > 0 && cssHeight > 0;
+        } catch (error) {
+          // Fallback if getComputedStyle fails (e.g., in test environment)
+          console.warn('[PileReference] getComputedStyle failed, using fallback:', error);
+        }
+      }
+      
+      // Element is visible if it has either CSS dimensions or valid rect dimensions
+      // AND CSS custom properties are loaded (for consistent sizing)
+      const isVisible = (hasCssDimensions || hasValidDimensions) && 
+                       (hasValidPosition || hasOffsetParent) && 
+                       cssLoaded;
+      
+      // Debug logging for visibility issues
+      if (!isVisible) {
+        console.warn('[PileReference] Element not visible:', {
+          id: `${type}${index !== undefined ? `-${index}` : ''}`,
+          hasOffsetParent,
+          hasValidDimensions,
+          hasValidPosition,
+          hasCssDimensions,
+          cssLoaded,
+          rect: { width: rect.width, height: rect.height, left: rect.left, top: rect.top },
+          css: { width: cssWidth, height: cssHeight },
+          offsetParent: el.offsetParent ? 'present' : 'null'
+        });
+      }
+      
+      return isVisible;
+    }
+  };
+}
+
+/**
+ * Layout type for responsive animation positioning
+ */
+export type LayoutType = 'mobile' | 'desktop' | 'landscape-mobile';
+
+/**
+ * Cleanup function for animation system
+ */
+export function cleanupAnimationSystem(): void {
+  animationCoordinator.cancelAll();
+  pileRegistry.clearCache();
+}
+
+/**
+ * High-level animation functions
+ */
+export const animations = {
+  /**
+   * Animate card from stock to waste pile
+   */
+  stockToWaste: async (card: CardType, onComplete?: () => void): Promise<void> => {
+    console.log('[AnimationSystem] stockToWaste called:', {
+      cardId: card.id,
+      cardSuit: card.suit,
+      cardRank: card.rank
+    });
+    
+    try {
+      // Wait for piles to be available and visible
+      const stockPile = await pileRegistry.waitForPile('stock');
+      const wastePile = await pileRegistry.waitForPile('waste');
+      
+      console.log('[AnimationSystem] Piles ready for animation:', {
+        stockPile: { id: stockPile.id, type: stockPile.type, visible: stockPile.isVisible() },
+        wastePile: { id: wastePile.id, type: wastePile.type, visible: wastePile.isVisible() }
+      });
+
+      return animationCoordinator.animate({
+        id: `stock-to-waste-${card.id}-${Date.now()}`,
+        card,
+        startPile: stockPile,
+        endPile: wastePile,
+        animationType: 'flip',
+        duration: 300,
+        onComplete
+      });
+    } catch (error) {
+      console.error('[AnimationSystem] Failed to get piles for stockToWaste:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Animate card from waste to stock pile
+   */
+  wasteToStock: (card: CardType, onComplete?: () => void): Promise<void> => {
+    const stockPile = pileRegistry.getPile('stock');
+    const wastePile = pileRegistry.getPile('waste');
+    
+    if (!stockPile || !wastePile) {
+      throw new Error('Stock or waste pile not found');
+    }
+
+    return animationCoordinator.animate({
+      id: `waste-to-stock-${card.id}-${Date.now()}`,
+      card,
+      startPile: wastePile,
+      endPile: stockPile,
+      animationType: 'flip',
+      duration: 300,
+      onComplete
+    });
+  },
+
+  /**
+   * Animate cards from any pile to any pile
+   */
+  pileToPile: async (
+    card: CardType,
+    fromType: PileReference['type'],
+    toType: PileReference['type'],
+    fromIndex?: number,
+    toIndex?: number,
+    onComplete?: () => void
+  ): Promise<void> => {
+    try {
+      // Wait for piles to be available and visible
+      const startPile = await pileRegistry.waitForPile(fromType, fromIndex);
+      const endPile = await pileRegistry.waitForPile(toType, toIndex);
+      
+      console.log('[AnimationSystem] Piles ready for pileToPile animation:', {
+        startPile: { id: startPile.id, type: startPile.type, visible: startPile.isVisible() },
+        endPile: { id: endPile.id, type: endPile.type, visible: endPile.isVisible() }
+      });
+
+      return animationCoordinator.animate({
+        id: `pile-to-pile-${card.id}-${Date.now()}`,
+        card,
+        startPile,
+        endPile,
+        animationType: 'move',
+        duration: 300,
+        onComplete
+      });
+    } catch (error) {
+      console.error('[AnimationSystem] Failed to get piles for pileToPile:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Animate waste pile shuffle/recycle to stock with multiple cards
+   */
+  shuffle: async (cards: CardType[], onComplete?: () => void): Promise<void> => {
+    try {
+      // Wait for piles to be available and visible
+      const stockPile = await pileRegistry.waitForPile('stock');
+      const wastePile = await pileRegistry.waitForPile('waste');
+      
+      console.log('[AnimationSystem] Piles ready for shuffle animation:', {
+        stockPile: { id: stockPile.id, type: stockPile.type, visible: stockPile.isVisible() },
+        wastePile: { id: wastePile.id, type: wastePile.type, visible: wastePile.isVisible() }
+      });
+
+      if (cards.length === 0) {
+        onComplete?.();
+        return Promise.resolve();
+      }
+
+      // Animate multiple cards with precise timing to complete within exactly 1 second
+      const animationPromises: Promise<void>[] = [];
+      const totalCards = Math.min(cards.length, 8); // Limit to 8 cards for performance
+      const totalDuration = 1000; // Exactly 1 second to match sound
+      
+      // Calculate timing so all cards complete within 1 second
+      const cardDelay = totalCards > 1 ? totalDuration / (totalCards + 1) : 0; // Even distribution
+      const animationDuration = totalCards > 1 ? cardDelay * 2.5 : totalDuration; // Overlap for smooth cascade
+      
+      for (let i = 0; i < totalCards; i++) {
+        const card = cards[cards.length - 1 - i]; // Start from top card
+        const delay = i * cardDelay; // Calculated delay for precise timing
+        const duration = Math.min(animationDuration, totalDuration - delay); // Ensure completion within 1 second
+        
+        const animationPromise = animationCoordinator.animate({
+          id: `shuffle-${card.id}-${Date.now()}-${i}`,
+          card,
+          startPile: wastePile,
+          endPile: stockPile,
+          animationType: 'shuffle',
+          duration,
+          delay,
+          onComplete: i === totalCards - 1 ? onComplete : undefined // Only call onComplete for last card
+        });
+        
+        animationPromises.push(animationPromise);
+      }
+
+      // Return promise that resolves when all animations complete
+      return Promise.all(animationPromises).then(() => {});
+    } catch (error) {
+      console.error('[AnimationSystem] Failed to get piles for shuffle:', error);
+      throw error;
+    }
+  }
+};

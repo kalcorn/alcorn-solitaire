@@ -1,19 +1,30 @@
-import React from 'react';
-import Header from './Header';
-import DragPreview from './DragPreview';
-import ParticleEffects from './ParticleEffects';
-import SubtleHints from './SubtleHints';
-import UndoButton from './UndoButton';
-import LandscapeMobileLayout from './layout/LandscapeMobileLayout';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useGameState } from '../hooks/useGameState';
+import { useGameAnimations } from '../hooks/useGameAnimations';
+import { useGameTimer } from '../hooks/useGameTimer';
+import { useUndo } from '../hooks/useUndo';
+import { useDragAndDrop } from '../hooks/useDragAndDrop';
+import { useGameHydration } from '../hooks/useGameHydration';
+import { getCardDimensions } from '../utils/cardDimensions';
+import StockPile from './StockPile/StockPile';
+import WastePile from './WastePile/WastePile';
+import FoundationPile from './FoundationPile/FoundationPile';
+import TableauPile from './TableauPile/TableauPile';
+import DragPreview from './DragPreview/DragPreview';
+import WinOverlay from './WinOverlay';
 import MobileLayout from './layout/MobileLayout';
 import DesktopLayout from './layout/DesktopLayout';
-import WinOverlay from './WinOverlay';
-import AnimatedCard from './AnimatedCard';
-import FlyingCards from './FlyingCards';
+import LandscapeMobileLayout from './layout/LandscapeMobileLayout';
+import ParticleEffects from './ParticleEffects';
+import Header from './Header/Header';
+import SettingsPanel from './SettingsPanel';
+import HintsPanel from './HintsPanel';
+import UndoRedoButtons from './UndoRedoButtons';
+import SubtleHints from './SubtleHints';
+import AnimatedCard from './AnimatedCard/AnimatedCard';
+import FlyingCards from './FlyingCards/FlyingCards';
 import BridgeCards from './BridgeCards';
-import { useGameState } from '@/hooks/useGameState';
-import { useDragAndDrop } from '@/hooks/useDragAndDrop';
-import { useGameAnimations } from '@/hooks/useGameAnimations';
+// Removed old animation system imports - using new system instead
 import { createEventHandlers } from '@/utils/eventHandlers';
 import { Card as CardType, CardPosition } from '@/types';
 import { useIsClient } from '@/utils/hydrationUtils';
@@ -39,13 +50,9 @@ const GameBoard: React.FC = () => {
     particleTrigger,
     isShuffling,
     isWinAnimating,
-    animatingCard,
-    flyingCards,
-    bridgeCards,
     triggerShuffleAnimation,
-    createShuffleCardsAnimation,
-    createCardBridgeAnimation,
-    animateStockFlip
+    animateStockFlip,
+    animateWasteToStock
   } = useGameAnimations(gameState);
 
   const {
@@ -67,7 +74,8 @@ const GameBoard: React.FC = () => {
     selectCards,
     getMovableCards,
     startDrag,
-    animateStockFlip
+    // Provide a dummy function for the old animateStockFlip parameter
+    () => {} // This is no longer used but required by the interface
   );
 
   // Enhanced move cards with particle effects
@@ -80,92 +88,172 @@ const GameBoard: React.FC = () => {
     return result;
   }, [moveCards, triggerShuffleAnimation]);
 
-  // Animated stock flip handler
-  const handleAnimatedStockFlip = () => {
-    if (animatingCard) return;
-    
+  // Animated stock flip handler with immediate position capture
+  const handleAnimatedStockFlip = async (event?: React.MouseEvent) => {
     const isRecycling = gameState.stockPile.length === 0;
-    const isLandscapeMobile = window.innerHeight <= 500 && window.innerWidth >= 640 && window.innerWidth <= 1024;
-    
-    // Get positions for animation - try all layouts
-    let stockPosition = null;
-    let wastePosition = null;
-    
-    if (isLandscapeMobile) {
-      // For landscape mobile, look in the landscape mobile layout first
-      stockPosition = eventHandlers.getElementPosition('.landscape-mobile-left-sidebar .stock-pile-responsive');
-      wastePosition = eventHandlers.getElementPosition('.landscape-mobile-left-sidebar .waste-pile-responsive');
-    } else if (window.innerWidth < 1024) {
-      // For mobile (both portrait and landscape), look in the mobile layout
-      // Try more specific selectors for mobile layout
-      stockPosition = eventHandlers.getElementPosition('.block.md\\:hidden.lg\\:hidden .stock-pile-responsive');
-      wastePosition = eventHandlers.getElementPosition('.block.md\\:hidden.lg\\:hidden .waste-pile-responsive');
-      
-      // Fallback to generic selectors if specific ones don't work
-      if (!stockPosition) {
-        stockPosition = eventHandlers.getElementPosition('.stock-pile-responsive');
-      }
-      if (!wastePosition) {
-        wastePosition = eventHandlers.getElementPosition('.waste-pile-responsive');
-      }
-    } else {
-      // For desktop, look in the standard layout
-      stockPosition = eventHandlers.getElementPosition('.standard-layout .stock-pile-responsive');
-      wastePosition = eventHandlers.getElementPosition('.standard-layout .waste-pile-responsive');
-    }
-    
-    // Fallback positions if elements not found
-    if (!stockPosition) {
-      stockPosition = { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 };
-    }
-    if (!wastePosition) {
-      wastePosition = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    }
 
     if (isRecycling && gameState.wastePile.length > 0) {
-      // Start sound first (async) to counteract any lag
-      if (gameState.settings.soundEnabled) {
-        if (gameState.wastePile.length === 1) {
-          playSoundEffect.cardFlip();
-        } else {
-          playSoundEffect.shuffle();
+      // Animate waste to stock (recycling)
+      await animateWasteToStock(
+        gameState.wastePile,
+        () => {
+          // Animation complete - perform the actual stock flip
+          handleStockFlip(true); // Skip sound since we already played it
+        },
+        (error) => {
+          console.error('Recycling animation failed:', error);
+          // Fallback to immediate stock flip
+          handleStockFlip(true);
+        }
+      );
+    } else if (gameState.stockPile.length > 0) {
+      // Animate stock to waste with immediate position capture
+      const topStockCard = gameState.stockPile[gameState.stockPile.length - 1];
+      
+      // Capture positions immediately from the click event if available
+      let stockPosition: { x: number; y: number } | null = null;
+      let wastePosition: { x: number; y: number } | null = null;
+      let topCardElement: HTMLElement | null = null;
+      
+      if (event) {
+        console.log('[GameBoard] Capturing positions immediately to capture hover state');
+        
+        // Get stock position from the actual top card element (accounting for hover/focus effects)
+        const stockElement = document.querySelector('[data-pile-type="stock"]') as HTMLElement;
+        if (stockElement) {
+          // Try to find the actual top card element first
+          topCardElement = stockElement.querySelector('[data-card-element="true"]') as HTMLElement;
+          let stockRect: DOMRect;
+          
+          if (topCardElement) {
+            // IMPORTANT: Capture position immediately while hover state is active
+            // The hover effect: transform: translateY(-6px) scale(1.02)
+            stockRect = topCardElement.getBoundingClientRect();
+            console.log('[GameBoard] Using HOVER-STATE top card element for position');
+          } else {
+            // Fallback to pile container
+            stockRect = stockElement.getBoundingClientRect();
+            console.log('[GameBoard] Using pile container for position (no card element found)');
+          }
+          
+          const cardDimensions = getCardDimensions();
+          const computedStyle = getComputedStyle(document.documentElement);
+          const cssCardWidth = computedStyle.getPropertyValue('--card-width').trim();
+          const cssCardHeight = computedStyle.getPropertyValue('--card-height').trim();
+          
+          // Convert top-left coordinates to center coordinates for animation system
+          stockPosition = {
+            x: stockRect.left + stockRect.width / 2,
+            y: stockRect.top + stockRect.height / 2
+          };
+          
+          // Add animating class to prevent hover effects during animation
+          if (topCardElement) {
+            topCardElement.classList.add('animating');
+          }
+          
+          console.log('[GameBoard] Stock position captured (HOVER STATE):', {
+            position: stockPosition,
+            cardRect: { left: stockRect.left, top: stockRect.top, width: stockRect.width, height: stockRect.height },
+            cardDimensions: { width: cardDimensions.width, height: cardDimensions.height },
+            cssProperties: { width: cssCardWidth, height: cssCardHeight },
+            calculation: `CENTER = ${stockRect.left} + ${stockRect.width/2} = ${stockRect.left + stockRect.width/2}, ${stockRect.top} + ${stockRect.height/2} = ${stockRect.top + stockRect.height/2}`,
+            hoverState: topCardElement ? 'ACTIVE (hover transform applied)' : 'NOT_DETECTED',
+            expectedHoverTransform: 'translateY(-6px) scale(1.02)',
+            debug: {
+              cardElementFound: !!topCardElement,
+              rectSource: topCardElement ? 'HOVER_CARD_ELEMENT' : 'PILE_CONTAINER',
+              hoverOffset: topCardElement ? 'Y: -6px, Scale: 1.02' : 'NO_HOVER',
+              centerCalculation: `(${stockRect.left}, ${stockRect.top}) + (${stockRect.width/2}, ${stockRect.height/2}) = (${stockPosition.x}, ${stockPosition.y})`
+            },
+            pileElement: {
+              className: stockElement.className,
+              tagName: stockElement.tagName,
+              children: stockElement.children.length,
+              hasCardElement: !!topCardElement
+            }
+          });
+        }
+
+        // Get waste position from the waste pile container
+        const wasteElement = document.querySelector('[data-pile-type="waste"]') as HTMLElement;
+        if (wasteElement) {
+          const wasteRect = wasteElement.getBoundingClientRect();
+          // Since pile containers are the same size as cards, position at pile container
+          const cardDimensions = getCardDimensions();
+          
+          // Convert top-left coordinates to center coordinates for animation system  
+          // Add slight downward offset for more natural diagonal movement
+          wastePosition = {
+            x: wasteRect.left + wasteRect.width / 2,
+            y: wasteRect.top + wasteRect.height / 2 + 8 // Add 8px downward for subtle diagonal
+          };
+          console.log('[GameBoard] Waste position from pile container:', {
+            position: wastePosition,
+            pileRect: { left: wasteRect.left, top: wasteRect.top, width: wasteRect.width, height: wasteRect.height },
+            cardDimensions: { width: cardDimensions.width, height: cardDimensions.height },
+            calculation: `${wasteRect.left} (pile left), ${wasteRect.top} (pile top)`,
+            alignment: 'Animated card left edge aligned with waste pile left edge',
+            debug: {
+              pileWidth: wasteRect.width,
+              pileHeight: wasteRect.height,
+              cardWidth: cardDimensions.width,
+              cardHeight: cardDimensions.height,
+              widthDifference: wasteRect.width - cardDimensions.width,
+              heightDifference: wasteRect.height - cardDimensions.height,
+              reason: 'Pile and card dimensions are identical - using container positioning',
+              finalPosition: {
+                cardLeftEdge: wasteRect.left,
+                cardRightEdge: wasteRect.left + cardDimensions.width,
+                pileLeftEdge: wasteRect.left,
+                pileRightEdge: wasteRect.left + wasteRect.width,
+                alignment: 'Card left edge = Pile left edge'
+              }
+            },
+            pileElement: {
+              className: wasteElement.className,
+              tagName: wasteElement.tagName,
+              children: wasteElement.children.length
+            }
+          });
         }
       }
       
-      // Create card bridge animation - cards move one by one from waste to stock
-      createCardBridgeAnimation(wastePosition, stockPosition, isLandscapeMobile);
-      
-      // Delay the actual stock flip until bridge animation completes (exactly 1 second)
-      setTimeout(() => {
-        handleStockFlip(true); // Skip sound since we already played it
-      }, 1000);
-    } else if (gameState.stockPile.length > 0) {
-      // Start sound first (async) to counteract any lag
-      if (gameState.settings.soundEnabled) {
-        playSoundEffect.cardFlip();
+      // Debug movement calculation
+      if (stockPosition && wastePosition) {
+        const deltaX = wastePosition.x - stockPosition.x;
+        const deltaY = wastePosition.y - stockPosition.y;
+        console.log('[GameBoard] Movement delta analysis:', {
+          stockPosition,
+          wastePosition,
+          delta: { x: deltaX, y: deltaY },
+          movement: {
+            horizontal: Math.abs(deltaX) > Math.abs(deltaY) ? 'PRIMARY' : 'secondary',
+            vertical: Math.abs(deltaY) > Math.abs(deltaX) ? 'PRIMARY' : 'secondary',
+            direction: `${deltaX > 0 ? 'RIGHT' : 'LEFT'} ${deltaY > 0 ? 'DOWN' : 'UP'}`,
+            distance: Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+          },
+          expectedMovement: deltaX > 0 && Math.abs(deltaY) > 5 ? 'DIAGONAL' : deltaX > 0 ? 'HORIZONTAL_ONLY' : 'UNEXPECTED'
+        });
       }
       
-      // Animate card from stock to waste
-      const topStockCard = gameState.stockPile[gameState.stockPile.length - 1];
-      
-      // Use the actual stock pile position (center) for the animation start
-      const stockStartPosition = {
-        x: stockPosition.x,
-        y: stockPosition.y
-      };
-      
-      // Use the center of waste pile for the animation end (so card lands on top)
-      const wasteEndPosition = {
-        x: wastePosition.x,
-        y: wastePosition.y
-      };
-      
-      animateStockFlip(topStockCard, stockStartPosition, wasteEndPosition, 'stockToWaste', isLandscapeMobile);
-      
-      // Delay the actual stock flip until animation completes
-      setTimeout(() => {
-        handleStockFlip(true); // Skip sound since we already played it
-      }, 300);
+      await animateStockFlip(
+        topStockCard,
+        stockPosition,
+        wastePosition,
+        () => {
+          // Animation complete - remove animating class and perform the actual stock flip
+          if (topCardElement) {
+            topCardElement.classList.remove('animating');
+          }
+          handleStockFlip(true); // Skip sound since we already played it
+        },
+        (error) => {
+          console.error('Stock flip animation failed:', error);
+          // Fallback to immediate stock flip
+          handleStockFlip(true);
+        }
+      );
     }
   };
 
@@ -176,7 +264,7 @@ const GameBoard: React.FC = () => {
       playSoundEffect.shuffle();
     }
     
-    createShuffleCardsAnimation();
+    triggerShuffleAnimation();
     
     setTimeout(() => {
       startNewGame();
@@ -240,7 +328,6 @@ const GameBoard: React.FC = () => {
         aria-label="Solitaire game board"
       >
 
-
         {/* Mobile Layout - Default (mobile-first) */}
         <MobileLayout
           gameState={gameState}
@@ -272,58 +359,51 @@ const GameBoard: React.FC = () => {
         </div>
 
         {/* Desktop Layout - md and up (mobile-first) */}
-        <DesktopLayout
-          gameState={gameState}
-          isShuffling={isShuffling}
-          isWinAnimating={isWinAnimating}
-          isCardBeingDragged={isCardBeingDragged}
-          isZoneHovered={isZoneHovered}
-          onStockFlip={handleAnimatedStockFlip}
-          onCardClick={eventHandlers.handleCardClick}
-          onCardDragStart={eventHandlers.handleCardDragStart}
-          startDrag={startDrag}
-          getMovableCards={getMovableCards}
+        <div className="hidden md:block w-full flex-1">
+          <DesktopLayout
+            gameState={gameState}
+            isShuffling={isShuffling}
+            isWinAnimating={isWinAnimating}
+            isCardBeingDragged={isCardBeingDragged}
+            isZoneHovered={isZoneHovered}
+            onStockFlip={handleAnimatedStockFlip}
+            onCardClick={eventHandlers.handleCardClick}
+            onCardDragStart={eventHandlers.handleCardDragStart}
+            startDrag={startDrag}
+            getMovableCards={getMovableCards}
+          />
+        </div>
+
+        {/* Drag Preview */}
+        <DragPreview 
+          cards={dragState.draggedCards}
+          style={getDragPreviewStyle()}
+          isOverDropZone={!!hoveredZone}
+          isSnapBack={dragState.isSnapBack}
         />
-          
-        {/* Win condition display */}
-        <WinOverlay
+
+        {/* Particle Effects */}
+        <ParticleEffects trigger={particleTrigger} />
+
+        {/* Subtle Hints */}
+        <SubtleHints gameState={gameState} />
+
+        {/* Undo Button */}
+        <UndoRedoButtons onUndo={performUndo} canUndo={canUndo(gameState)} />
+
+        {/* Win Overlay */}
+        <WinOverlay 
           isGameWon={gameState.isGameWon}
           moves={gameState.moves}
           score={gameState.score}
           onNewGame={handleAnimatedNewGame}
         />
 
-        {/* Drag Preview */}
-        {dragState.isDragging && (
-          <DragPreview
-            cards={dragState.draggedCards}
-            style={getDragPreviewStyle()}
-            isOverDropZone={!!hoveredZone}
-            isSnapBack={dragState.isSnapBack}
-          />
-        )}
-
-        {/* Animated Card Flyover */}
-        <AnimatedCard animatingCard={animatingCard} />
-
-        {/* Flying Cards Shuffle Animation */}
-        <FlyingCards flyingCards={flyingCards} />
-
-        {/* Bridge Cards Animation */}
-        <BridgeCards bridgeCards={bridgeCards} />
+        {/* Animation components are no longer needed - animations are handled by the unified system */}
+        
+        {/* Animation Debugger - REMOVED FOR CLEANUP */}
+        {/* <AnimationDebugger /> */}
       </div>
-
-      {/* Particle Effects */}
-      <ParticleEffects trigger={particleTrigger} />
-
-      {/* Subtle Hints */}
-      <SubtleHints gameState={gameState} />
-
-      {/* Undo Button */}
-      <UndoButton 
-        onUndo={performUndo}
-        canUndo={canUndo(gameState)}
-      />
     </>
   );
 };

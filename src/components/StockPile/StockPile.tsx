@@ -4,10 +4,11 @@ import Card from '../Card';
 import { BsArrowCounterclockwise } from 'react-icons/bs';
 import { cn } from '@/utils/cssUtils';
 import styles from './StockPile.module.css';
+import { usePileRegistration } from '@/hooks/usePileRegistration';
 
 interface StockPileProps {
   cards: CardType[];
-  onClick?: () => void;
+  onClick?: (event?: React.MouseEvent) => void;
   cyclesRemaining?: number;
   canCycle?: boolean;
   wasteCardCount?: number;
@@ -17,8 +18,16 @@ interface StockPileProps {
 const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, canCycle = true, wasteCardCount = 0, isShuffling = false }) => {
   const isRecycleAvailable = cards.length === 0 && wasteCardCount > 0 && canCycle;
   
+  // Register this pile with the new animation system
+  const { setElementRef } = usePileRegistration('stock');
+  
   return (
-  <div className={cn("flex-shrink-0", styles.stockPileResponsive)} style={{ position: 'relative', zIndex: 1 }}>
+  <div 
+    ref={setElementRef}
+    className={cn("flex-shrink-0", styles.stockPileResponsive)} 
+    style={{ position: 'relative', zIndex: 1 }}
+    data-pile-type="stock"
+  >
     {/* Dynamic card stack effect based on card count */}
     {Array.from({ length: Math.min(5, cards.length - 1) }, (_, i) => (
       <div 
@@ -60,7 +69,7 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
           opacity: canCycle ? 1 : 0.5
         }}
         className={isShuffling ? styles.stockShuffleCascade : ''}
-        onClick={canCycle ? onClick : undefined}
+        onClick={canCycle ? (event) => onClick?.(event) : undefined}
         title={canCycle ? "Stock pile" : "No more cycles allowed"}
       >
         <Card
@@ -85,7 +94,7 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
         aria-label={isRecycleAvailable ? "Empty stock pile. Click to recycle waste cards." : "Empty stock pile"}
         aria-disabled={!canCycle}
         style={{ position: 'absolute', top: 0, left: 0, zIndex: 10 }}
-        onClick={canCycle ? onClick : undefined}
+        onClick={canCycle ? (event) => onClick?.(event) : undefined}
         title={canCycle ? "Click to recycle" : "No more cycles allowed"}
       >
         <div className="flex items-center justify-center">

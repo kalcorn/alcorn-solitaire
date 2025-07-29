@@ -1,152 +1,181 @@
-# Claude Development Guidelines
+# Claude Configuration for Solitaire Project
 
-This file contains instructions for Claude to follow when working on this codebase to ensure consistent, high-quality software development practices.
+**CRITICAL: AUTO-ACCEPT ALL FILE CHANGES - NO MANUAL CONFIRMATION**
+**CRITICAL: SINGLE SOURCE OF TRUTH - CLAUDE.MD MUST BE OPTIMIZED FOR CLAUDE AND USED TO GENERATE AI-AGNOSTIC CONFIGS**
 
-## Core Development Principles
+## 🚀 **MULTI-MODEL COMPATIBILITY - CRITICAL**
 
-### 🎯 Root Cause Analysis
-- **ALWAYS** identify and fix root causes, never apply band-aid solutions
-- When encountering bugs or inconsistencies, investigate deeply to understand the underlying architectural issues
-- Ask "why" multiple times to get to the true source of problems
-- Prefer systematic solutions that prevent entire categories of issues
+### **SINGLE SOURCE OF TRUTH PROTOCOL**
+- **CLAUDE.MD**: Primary source optimized specifically for Claude's capabilities and thinking patterns
+- **AI-AGNOSTIC GENERATION**: CLAUDE.md must be used to generate compatible configurations for:
+  - **ChatGPT**: GPT-4, GPT-3.5-turbo configurations
+  - **Gemini**: Gemini Pro, Gemini Advanced configurations
+  - **CodeLlama**: Code-specific configurations
+  - **Other AI Models**: Anthropic, OpenAI, Google, Meta models
+- **CONSISTENCY REQUIREMENT**: All model configurations must maintain identical core principles and quality standards
+- **VERSION CONTROL**: Changes to CLAUDE.md must trigger updates to all derived configurations
 
-### 🏗️ Industry Best Practices
-- Follow established software engineering principles (SOLID, DRY, KISS, YAGNI)
-- Use component-based architecture patterns consistently
-- Maintain single sources of truth for configuration and data
-- Prefer composition over inheritance
-- Write self-documenting code with clear naming conventions
+### **CURSOR INTEGRATION**
+- **DUAL USAGE**: User works with both Claude and Cursor environments
+- **CONFIGURATION SYNC**: .cursorrules must be generated from CLAUDE.md
+- **MODEL-SPECIFIC OPTIMIZATION**: Each configuration optimized for target model's strengths
+- **CROSS-PLATFORM CONSISTENCY**: Same quality standards across all AI assistants
 
-### 🔍 Thorough Investigation
-- Before making changes, understand the existing codebase architecture
-- Search for similar patterns and follow established conventions
-- Check imports, dependencies, and related files to understand context
-- Verify assumptions by examining actual code, not making guesses
+## 🚀 **AUTO-ACCEPT CONFIGURATION**
+- Auto-accept all code changes (.ts/.tsx/.js/.jsx/.css/.md files)
+- Confirmation required only for destructive operations (file deletion, git operations)
 
-## Code Quality Standards
+## 🧠 **SYSTEMIC THINKING REQUIREMENTS**
+- Apply maximum depth analysis on every interaction
+- Consider systemic impact of all decisions
+- Investigate all angles and edge cases before responding
+- Analyze performance implications of every solution
 
-### 📦 Architecture Consistency
-- Ensure all similar components follow the same patterns
-- Avoid mixing architectural approaches (e.g., global CSS vs CSS modules)
-- Maintain consistent file structure and naming conventions
-- Use TypeScript effectively with proper types and interfaces
+## 🎯 **CORE PRINCIPLES**
 
-### 🎨 CSS & Styling
-- **ALWAYS use mobile-first approach** - default styles for mobile, enhance with min-width media queries
-- **Keep CSS clean and minimal** - remove unused styles, avoid redundancy, prefer utility classes
-- Use CSS modules for component-scoped styling
-- Leverage CSS custom properties for shared values (colors, dimensions, etc.)
-- Avoid hardcoding values - use design tokens and variables
-- Prefer Tailwind utility classes over custom CSS when possible
-- Remove dead CSS and unused classes proactively
+### **CODE INTEGRITY - CRITICAL**
+- Preserve all existing functionality during refactoring
+- Use targeted, surgical edits - avoid broad search/replace
+- Maintain backward compatibility unless explicitly requested
+- Validate all exports remain available after changes
+- Backup before major changes using git
 
-### ⚡ Performance & Optimization
-- Consider bundle size and runtime performance
-- Use appropriate React patterns (memo, useCallback, useMemo)
-- Optimize images and assets
-- Implement proper error boundaries and loading states
+### **PROBLEM SOLVING**
+- Fix root cause, not symptoms
+- Validate element readiness before DOM measurement
+- Never measure elements with `offsetParent: null`
 
-## Testing & Quality Assurance
+### **ERROR HANDLING & DEBUGGING**
+- Provide specific context: `[Component] {Action} failed: {specific reason}`
+- Implement exponential backoff: 50ms, 100ms, 200ms, 400ms, 800ms, 1600ms
+- Log only first, every 5th, and final attempt in retry loops
 
-### 🧪 Verification Process
-- Always run build commands to verify changes don't break compilation
-- Test responsive behavior across different screen sizes
-- Verify SSR compatibility for Next.js applications
-- Check for TypeScript errors and fix them properly
+### **ANIMATION SYSTEM - ✅ COMPLETE & OPERATIONAL**
+- **STATUS**: Fully implemented and operational across all layouts
+- **COMPONENTS**: Position detection, animation engine, React hooks, pile registration
+- **LAYOUT AWARENESS**: Pile registration automatically detects visible layouts
+- Reuse actual components, never create HTML replicas
+- Use proper 3D transforms: `transform-style: preserve-3d`, `perspective: 1000px`
+- Validate positioning alignment with target elements
+- Use CSS custom properties for dynamic values (`--end-x`, `--end-y`)
 
-### 📋 Documentation
-- Update or create documentation for significant architectural changes
-- Include inline comments for complex logic (when necessary)
-- Maintain README files and setup instructions
-- Document API interfaces and component props
+## 🎨 **CSS & COMPONENTS**
 
-## Development Workflow
+### **Styling Standards**
+- Mobile-first approach with CSS custom properties
+- Prefer flexbox/grid over absolute positioning
+- Use semantic class names (BEM methodology)
+- Keep specificity low, use relative units (rem, em, %)
+- Animate with `transform` and `opacity` for performance
 
-### 🔄 Systematic Approach
-1. **Analyze**: Understand the problem and existing codebase
-2. **Plan**: Create todos for complex tasks to track progress
-3. **Implement**: Make changes following established patterns
-4. **Verify**: Test builds, functionality, and edge cases
-5. **Document**: Update relevant documentation
+### **React Architecture**
+- One component per file with proper prop interfaces
+- Use composition over inheritance
+- Minimize prop drilling, implement proper useEffect cleanup
+- Use useCallback/useMemo for performance optimization
 
-### 🚨 Error Handling
-- Handle edge cases and error states gracefully
-- Provide meaningful error messages
-- Use proper TypeScript types to catch errors at compile time
-- Consider accessibility requirements in all implementations
+## 🎮 **GAME & INTERACTION STANDARDS**
 
-### 🔧 Refactoring Guidelines
-- Refactor incrementally, not in large sweeping changes
-- Maintain backward compatibility when possible
-- Extract common patterns into reusable utilities
-- Remove dead code and unused dependencies
+### **Game Logic**
+- Separate game logic from UI components
+- Use immutable state updates with proper undo/redo
+- Validate all moves before execution
+- Implement accessible drag & drop with keyboard alternatives
+- Respect `prefers-reduced-motion` preference
 
-## Technology-Specific Guidelines
+### **Testing Requirements**
+- 90%+ unit test coverage for utilities
+- Component tests for all interactive elements
+- End-to-end tests for complete game flows
+- Accessibility tests for screen reader compatibility
+- Performance tests (<100ms for critical paths)
 
-### ⚛️ React Best Practices
-- Use functional components with hooks
-- Implement proper key props for lists
-- Handle side effects appropriately with useEffect
-- Optimize re-renders with proper dependency arrays
+## 🚫 **ANTI-PATTERNS**
+- Desktop-first responsive design
+- Using `!important` without justification
+- Deep CSS nesting (>3 levels)
+- TypeScript `any` type without justification
+- Direct state mutation or missing useEffect dependencies
+- Fallback positioning instead of real coordinates
 
-### 🎯 Next.js Considerations
-- Ensure SSR compatibility for all utilities and components
-- Use proper import patterns for client/server code
-- Optimize for static generation when possible
-- Handle hydration properly
+## 📱 **MOBILE & ACCESSIBILITY**
 
-### 🎨 CSS Modules & Tailwind
-- Prefer CSS modules for component-specific styles
-- Use Tailwind for utility classes and layout
-- Maintain design system consistency
-- Avoid style conflicts between different approaches
+### **Touch & Performance**
+- Minimum touch targets: 44px × 44px with visual feedback
+- Support both touch and mouse interactions
+- Optimize bundle size and animations (60fps target)
+- Test on actual mobile devices
 
-## Communication & Collaboration
+### **WCAG 2.1 AA Compliance**
+- Proper heading hierarchy and keyboard navigation
+- Alt text for images, screen reader compatibility
+- Color contrast ratios and focus management
+- Announce game state changes with ARIA labels
+- Support high contrast mode
 
-### 💬 Clear Communication
-- Explain architectural decisions and their reasoning
-- Provide context for complex changes
-- Ask clarifying questions when requirements are unclear
-- Document breaking changes and migration paths
+## 🔍 **DEBUGGING PROTOCOL**
+1. Identify root cause, reproduce consistently
+2. Check mobile-first, test accessibility
+3. Validate performance, document the fix
+4. **CRITICAL**: Never claim "known browser issues" without documentation
 
-### 📊 Progress Tracking
-- Use TodoWrite tool for complex multi-step tasks
-- Mark tasks as completed immediately after finishing
-- Keep user informed of progress on significant changes
-- Break down large tasks into manageable steps
+## 🧪 **TESTING & DEVELOPMENT STRATEGIES**
 
-## Quality Gates
+### **TDD (Test Driven Development) - FUTURE IMPROVEMENT**
+- **CURRENT STATUS**: Not fully implemented - would have helped today
+- **BENEFITS**: Catches issues early, validates assumptions, prevents regressions
+- **IMPLEMENTATION**: Write tests before code, use Jest for unit/integration tests
+- **PRIORITY**: High - implement for all new features and critical bug fixes
 
-Before considering any task complete:
+### **Alternative Thinking Strategies - CRITICAL**
+- **QUESTION ASSUMPTIONS**: "It's impossible that [established technology] doesn't work"
+- **EXTERNAL RESEARCH**: Google/documentation search before claiming "known issues"
+- **COMMUNITY VALIDATION**: Check if others have solved similar problems
+- **SYSTEMATIC ELIMINATION**: Test each assumption methodically
+- **REVERSE ENGINEERING**: Work backwards from "impossible" to find real cause
 
-- [ ] Code builds without errors or warnings
-- [ ] All TypeScript types are properly defined
-- [ ] Responsive design works across breakpoints
-- [ ] SSR compatibility is maintained
-- [ ] Performance impact is considered
-- [ ] Security best practices are followed
-- [ ] Accessibility requirements are met
-- [ ] Code follows established patterns in the codebase
+### **Debugging Mindset**
+- **NEVER ASSUME BROWSER BUGS** without documented evidence
+- **ALWAYS RESEARCH FIRST** before implementing workarounds
+- **QUESTION EVERY ASSUMPTION** about technology behavior
+- **USE EXTERNAL SOURCES** to validate or disprove hypotheses
+- **SYSTEMATIC APPROACH** to eliminate possibilities
 
-## Anti-Patterns to Avoid
+## 🎯 **CRITICAL LESSONS LEARNED - POSITION DETECTION**
 
-❌ **Never Do:**
-- Apply quick fixes without understanding root causes
-- Mix architectural patterns inconsistently
-- Hardcode values that should be configurable
-- Ignore TypeScript errors or use `any` types carelessly
-- Create global side effects without careful consideration
-- Skip testing of edge cases and error states
-- Leave TODO comments without tracking them properly
+### **ROOT CAUSE ANALYSIS**
+- **Issue**: Elements registered from hidden desktop layout in mobile view
+- **Symptom**: `getBoundingClientRect()` returned zeros despite CSS dimensions
+- **Solution**: Layout-aware pile registration with viewport detection
 
-✅ **Always Do:**
-- Investigate thoroughly before implementing solutions
-- Follow existing code patterns and conventions
-- Use proper TypeScript types and interfaces
-- Test changes across different scenarios
-- Consider maintainability and future extensibility
-- Document significant architectural decisions
+### **KEY INSIGHTS**
+- **Never assume browser bugs** without documented sources
+- **Layout structure differences** can cause identical symptoms
+- **CSS positioning context** matters more than individual element properties
+- **Viewport width detection** is more reliable than CSS media queries for JavaScript
 
----
+### **DEBUGGING STRATEGY**
+- **Systematic parent chain analysis** reveals layout issues
+- **Compare mobile vs desktop** element contexts
+- **Check for hidden containers** before measuring positions
+- **Validate registration system** finds correct elements
 
-*This document serves as a guide for maintaining high code quality and consistent development practices. Update it as the project evolves and new patterns emerge.*
+### **PERFORMANCE OPTIMIZATIONS**
+- **Layout-aware registration** prevents unnecessary DOM queries
+- **Viewport-based detection** avoids CSS media query complexity
+- **Targeted debugging** reduces console noise
+- **Cleanup after resolution** maintains production performance
+
+## 🔧 **TERMINAL & DEVELOPMENT**
+
+### **Command Execution**
+- Use `is_background: true` for long-running processes
+- Use `netstat` for port verification instead of waiting
+- Trust PowerShell prompt as completion signal
+- Use `;` for command separation on Windows
+
+### **Build & Testing**
+- Verify builds complete successfully before cleanup
+- Test both development and production environments
+- Maintain Jest test coverage during refactoring
+- Document configuration changes for team consistency 

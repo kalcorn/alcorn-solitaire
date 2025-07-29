@@ -13,6 +13,39 @@ A classic Solitaire card game built with Next.js, React, TypeScript, and Tailwin
 - Supports draw-1 stock pile mode  
 - Mobile-friendly layout with horizontal scrolling  
 
+## Configuration Management
+
+### Dual AI Configuration Setup
+
+This project uses two configuration files for different AI contexts:
+
+- **`.cursorrules`**: Primary configuration for Cursor IDE
+- **`CLAUDE.md`**: Configuration for Claude CLI and other AI tools
+
+Both files are kept in sync automatically. The key differences:
+
+1. **`.cursorrules`** includes: `**CRITICAL: IGNORE CLAUDE.MD FILE - USE ONLY THIS .cursorrules FILE**`
+2. **`CLAUDE.md`** includes: `**CRITICAL: IGNORE THIS FILE WHEN RUNNING IN CURSOR - USE .cursorrules INSTEAD**`
+
+### Syncing Configuration Files
+
+To keep both files in sync after making changes to `.cursorrules`:
+
+```bash
+npm run sync-configs
+```
+
+This script:
+- Reads `.cursorrules` content
+- Creates `CLAUDE.md` with appropriate ignore directive
+- Preserves all configuration rules and protocols
+
+### Usage Guidelines
+
+- **In Cursor**: Only `.cursorrules` is used (CLAUDE.md is ignored)
+- **In Claude CLI**: Only `CLAUDE.md` is used
+- **Manual editing**: Always edit `.cursorrules`, then run `npm run sync-configs`
+
 ## Getting Started
 
 ### Prerequisites
@@ -23,20 +56,20 @@ A classic Solitaire card game built with Next.js, React, TypeScript, and Tailwin
 ### Installation
 
 1. Clone the repository:  
-   ```bash
+   ```shell
    git clone https://github.com/yourusername/alcorn-solitaire.git
    cd alcorn-solitaire
    ```
 
 2. Install dependencies:  
-   ```bash
+   ```shell
    npm install
    # or
    yarn install
    ```
 
 3. Run the development server:  
-   ```bash
+   ```shell
    npm run dev
    # or
    yarn dev

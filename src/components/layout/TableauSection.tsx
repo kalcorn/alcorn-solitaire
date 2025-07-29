@@ -32,6 +32,7 @@ const TableauSection: React.FC<TableauSectionProps> = ({
           data-pile-index={i}
         >
           <TableauPile 
+            index={i}
             cards={pile}
             isDropZone={isZoneHovered('tableau', i)}
             onCardClick={(cardId) => {

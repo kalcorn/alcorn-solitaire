@@ -1,0 +1,141 @@
+import { useState, useEffect, useCallback } from 'react';
+import { GameState } from '@/types';
+import { animations, animationCoordinator, cleanupAnimationSystem } from '@/utils/animationSystem';
+import { playSoundEffect } from '@/utils/soundUtils';
+
+export interface AnimationState {
+  particleTrigger: number;
+  isShuffling: boolean;
+  isWinAnimating: boolean;
+  animatingCard: {
+    card: any;
+    type: 'stockToWaste' | 'wasteToStock';
+    startPosition?: { x: number; y: number };
+    endPosition?: { x: number; y: number };
+    isLandscapeMobile?: boolean;
+  } | null;
+  flyingCards: any[];
+  bridgeCards: any[];
+}
+
+export function useGameAnimations(gameState: GameState) {
+  const [particleTrigger, setParticleTrigger] = useState(0);
+  const [isShuffling, setIsShuffling] = useState(false);
+  const [isWinAnimating, setIsWinAnimating] = useState(false);
+
+  // Trigger particle effects when game is won
+  useEffect(() => {
+    if (gameState.isGameWon && !isWinAnimating) {
+      setIsWinAnimating(true);
+      setParticleTrigger(prev => prev + 1);
+      
+      // Reset win animation after delay
+      const timer = setTimeout(() => {
+        setIsWinAnimating(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.isGameWon, isWinAnimating]);
+
+  const triggerShuffleAnimation = useCallback(() => {
+    setIsShuffling(true);
+    setTimeout(() => setIsShuffling(false), 1200);
+  }, []);
+
+  // Enhanced stock flip animation using the new unified system with immediate position capture
+  const animateStockFlip = useCallback(async (
+    card: any,
+    stockPosition?: { x: number; y: number } | null,
+    wastePosition?: { x: number; y: number } | null,
+    onComplete?: () => void,
+    onError?: (error: string) => void
+  ): Promise<void> => {
+    try {
+      console.log('[useGameAnimations] animateStockFlip called with:', {
+        card: {
+          id: card.id,
+          suit: card.suit,
+          rank: card.rank,
+          faceUp: card.faceUp
+        },
+        stockPosition,
+        wastePosition,
+        hasPositions: !!(stockPosition && wastePosition)
+      });
+      
+      if (gameState.settings.soundEnabled) {
+        playSoundEffect.cardFlip();
+      }
+
+      console.log('[useGameAnimations] Using position detection system');
+      // Longer delay to ensure piles are properly registered and visible
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await animations.stockToWaste(card, onComplete);
+    } catch (error) {
+      console.error('Stock flip animation failed:', error);
+      onError?.(error as string);
+    }
+  }, [gameState.settings.soundEnabled]);
+
+  // Enhanced waste to stock animation (recycling)
+  const animateWasteToStock = useCallback(async (
+    cards: any[],
+    onComplete?: () => void,
+    onError?: (error: string) => void
+  ): Promise<void> => {
+    try {
+      if (gameState.settings.soundEnabled) {
+        if (cards.length === 1) {
+          playSoundEffect.cardFlip();
+        } else {
+          playSoundEffect.shuffle();
+        }
+      }
+
+      await animations.shuffle(cards, onComplete);
+    } catch (error) {
+      console.error('Waste to stock animation failed:', error);
+      onError?.(error as string);
+    }
+  }, [gameState.settings.soundEnabled]);
+
+  // Enhanced pile to pile animation
+  const animatePileToPile = useCallback(async (
+    card: any,
+    fromType: 'stock' | 'waste' | 'foundation' | 'tableau',
+    toType: 'stock' | 'waste' | 'foundation' | 'tableau',
+    fromIndex?: number,
+    toIndex?: number,
+    onComplete?: () => void,
+    onError?: (error: string) => void
+  ): Promise<void> => {
+    try {
+      await animations.pileToPile(card, fromType, toType, fromIndex, toIndex, onComplete);
+    } catch (error) {
+      console.error('Pile to pile animation failed:', error);
+      onError?.(error as string);
+    }
+  }, []);
+
+  // Cleanup function for component unmount
+  useEffect(() => {
+    return () => {
+      cleanupAnimationSystem();
+    };
+  }, []);
+
+  return {
+    particleTrigger,
+    isShuffling,
+    isWinAnimating,
+    triggerShuffleAnimation,
+    animateStockFlip,
+    animateWasteToStock,
+    animatePileToPile,
+    // Legacy properties for backward compatibility
+    animatingCard: null,
+    flyingCards: [],
+    bridgeCards: []
+  };
+} 

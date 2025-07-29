@@ -3,18 +3,25 @@ import Card from '../Card';
 import { Card as CardType } from '@/types';
 import { cn } from '@/utils/cssUtils';
 import { getCardDimensions } from '@/utils/cardDimensions';
+
 import styles from './TableauPile.module.css';
+import { usePileRegistration } from '@/hooks/usePileRegistration';
 
 interface TableauPileProps {
   cards: CardType[];
+  index: number; // Add index prop for pile identification
   onCardClick?: (cardId: string) => void;
   onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   isDropZone?: boolean;
   isCardBeingDragged?: (cardId: string) => boolean;
 }
 
-const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDragStart, isDropZone, isCardBeingDragged }) => {
+const TableauPile: React.FC<TableauPileProps> = ({ cards, index, onCardClick, onCardDragStart, isDropZone, isCardBeingDragged }) => {
   const [windowSize, setWindowSize] = React.useState({ width: 1200, height: 800 });
+
+  // Register this pile with the animation system
+  // Register this pile with the new animation system
+  const { setElementRef } = usePileRegistration(`tableau-${index}`);
 
   // Update window size on resize for responsive spacing
   React.useEffect(() => {
@@ -104,6 +111,7 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDra
 
   return (
     <div 
+      ref={setElementRef}
       className={cn(
         styles.tableauPile,
         "relative",
@@ -115,14 +123,14 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, onCardClick, onCardDra
       {cards.length === 0 ? (
         <div className={styles.tableauEmptyPlaceholder} />
       ) : (
-        cards.map((card, index) => (
+        cards.map((card, cardIndex) => (
           <div
             key={card.id}
             className={styles.tableauCardPosition}
             style={{ 
-              '--card-index': index,
+              '--card-index': cardIndex,
               '--dynamic-spacing': `${cardSpacing}px`,
-              top: `${index * cardSpacing}px`
+              top: `${cardIndex * cardSpacing}px`
             } as React.CSSProperties}
           >
           <Card

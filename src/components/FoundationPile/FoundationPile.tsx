@@ -4,6 +4,7 @@ import Card from '../Card';
 import { BsSuitHeartFill, BsSuitDiamondFill, BsSuitClubFill, BsSuitSpadeFill } from 'react-icons/bs';
 import { cn } from '@/utils/cssUtils';
 import styles from './FoundationPile.module.css';
+import { usePileRegistration } from '@/hooks/usePileRegistration';
 
 interface FoundationPileProps {
   cards: CardType[];
@@ -20,8 +21,13 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
   const suitColors = ['text-red-500', 'text-red-500', 'text-gray-100', 'text-gray-100'];
   const topCard = cards.length > 0 ? cards[cards.length - 1] : null;
   
+  // Register this pile with the animation system
+  // Register this pile with the new animation system
+  const { setElementRef } = usePileRegistration(`foundation-${suits[index]}`);
+  
   return (
     <div
+      ref={setElementRef}
       className={cn(
         styles.foundationPile,
         isDropZone && styles.dropZone
