@@ -454,4 +454,100 @@ describe('Position Detection System', () => {
       expect(position.confidence).toBe('high');
     });
   });
+
+  describe('calculateAbsolutePosition', () => {
+    it('should calculate absolute position using getBoundingClientRect', async () => {
+      const element = createMockElement({
+        left: 100,
+        top: 200,
+        width: 52,
+        height: 72
+      });
+
+      const { calculateAbsolutePosition } = require('../utils/positionDetection');
+      const position = calculateAbsolutePosition(element);
+
+      expect(position.x).toBe(100);
+      expect(position.y).toBe(200);
+    });
+
+    it('should return zero position when getBoundingClientRect returns zero', async () => {
+      const element = createMockElement({
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0
+      });
+
+      const { calculateAbsolutePosition } = require('../utils/positionDetection');
+      const position = calculateAbsolutePosition(element);
+
+      expect(position.x).toBe(0);
+      expect(position.y).toBe(0);
+    });
+
+    it('should handle offsetParent chain calculation', async () => {
+      const parent = document.createElement('div');
+      parent.style.cssText = 'position: relative; left: 50px; top: 50px;';
+      document.body.appendChild(parent);
+
+      const element = createMockElement({
+        left: 100,
+        top: 200,
+        width: 52,
+        height: 72
+      });
+      parent.appendChild(element);
+
+      const { calculateAbsolutePosition } = require('../utils/positionDetection');
+      const position = calculateAbsolutePosition(element);
+
+      expect(position.x).toBe(100);
+      expect(position.y).toBe(200);
+
+      document.body.removeChild(parent);
+    });
+  });
+
+  describe('comparePositionMethods', () => {
+    it('should compare position methods without logging when discrepancy is small', async () => {
+      const element = createMockElement({
+        left: 100,
+        top: 200,
+        width: 52,
+        height: 72
+      });
+
+      const { comparePositionMethods } = require('../utils/positionDetection');
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      comparePositionMethods(element);
+
+      expect(consoleSpy).not.toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
+    });
+
+    it('should log warning when position methods disagree significantly', async () => {
+      const element = createMockElement({
+        left: 100,
+        top: 200,
+        width: 52,
+        height: 72
+      });
+
+      // Mock offsetLeft and offsetTop to create a discrepancy
+      Object.defineProperty(element, 'offsetLeft', { value: 1000, writable: true });
+      Object.defineProperty(element, 'offsetTop', { value: 1000, writable: true });
+
+      const { comparePositionMethods } = require('../utils/positionDetection');
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      comparePositionMethods(element);
+
+      expect(consoleSpy).toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
+    });
+  });
 }); 

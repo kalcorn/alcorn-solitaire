@@ -114,14 +114,13 @@ const GameBoard: React.FC = () => {
     // Play shuffle sound
     playSoundEffect.shuffle();
 
-    // Calculate timing for 5-second total animation (DEBUG - was 1 second)
-    const totalCards = cards.length;
-    const animationDuration = 300; // ms per card
-    const totalAnimationWindow = 5000; // 5 seconds total (DEBUG)
-    const maxStartTime = totalAnimationWindow - animationDuration; // 4700ms
+    // Calculate timing for 5-second total animation
+    const cardDelay = 100; // 100ms between each card
+    const cardDuration = 800; // 800ms per card animation
+    const totalAnimationWindow = 5000; // 5 seconds total
     
     // Calculate delay between card animation starts
-    const delayBetweenCards = totalCards <= 1 ? 0 : maxStartTime / (totalCards - 1);
+    const delayBetweenCards = totalAnimationWindow / (cards.length + 1); // Adjust for total window
 
     // Keep top 3 cards visible throughout animation - this maintains the visual stack
     const initialTopThreeVisible = Math.min(3, cards.length);
@@ -144,8 +143,6 @@ const GameBoard: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, startDelay));
       }
       
-      console.log(`[DEBUG] Animating card ${card.id} (position ${i})`);
-      
       // Find the specific card element by ID
       const cardElement = wasteElement.querySelector(`[data-card-id="${card.id}"]`) as HTMLElement;
       
@@ -163,7 +160,7 @@ const GameBoard: React.FC = () => {
           stockElement,
           {
             type: 'flip',
-            duration: animationDuration,
+            duration: cardDuration,
             card: { ...card, faceUp: false },
             onComplete: () => {
               // Animation completed successfully
@@ -588,8 +585,6 @@ const GameBoard: React.FC = () => {
 
         {/* Animation components are no longer needed - animations are handled by the unified system */}
         
-        {/* Animation Debugger - REMOVED FOR CLEANUP */}
-        {/* <AnimationDebugger /> */}
       </div>
     </>
   );

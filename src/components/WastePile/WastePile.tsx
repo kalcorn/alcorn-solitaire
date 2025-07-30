@@ -44,15 +44,7 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
             const isInTopThree = index >= cards.length - 3;
             const visualIndex = isInTopThree ? (cards.length - 1 - index) : 0; // 0, 1, 2 for top 3, 0 for rest
             
-            const shouldBeVisible = cardVisibility && cardVisibility[card.id] === true 
-              ? true 
-              : cardVisibility && cardVisibility[card.id] === false 
-              ? false 
-              : isInTopThree;
-              
-            if (cardVisibility?.[card.id] !== undefined) {
-              console.log(`[DEBUG] Card ${card.id} explicit visibility:`, cardVisibility[card.id], 'shouldBeVisible:', shouldBeVisible);
-            }
+            const shouldBeVisible = cardVisibility[card.id] || false;
             
             return (
               <div

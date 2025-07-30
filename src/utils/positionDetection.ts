@@ -37,12 +37,13 @@ function measureElementPosition(element: HTMLElement): ElementPosition {
   let hasCssDimensions = false;
   
   try {
-  const computedStyle = getComputedStyle(element);
+    const computedStyle = getComputedStyle(element);
     cssWidth = parseFloat(computedStyle.width);
     cssHeight = parseFloat(computedStyle.height);
     hasCssDimensions = cssWidth > 0 && cssHeight > 0;
   } catch (error) {
-    // Ignore computed style errors
+    // getComputedStyle failed - treat as no CSS dimensions
+    hasCssDimensions = false;
   }
   
   // Check if element has position from getBoundingClientRect
@@ -54,8 +55,16 @@ function measureElementPosition(element: HTMLElement): ElementPosition {
   // Check if element is in the layout flow
   const hasOffsetParent = element.offsetParent !== null;
   
-  // CSS is assumed to be loaded
-  const cssLoaded = true;
+  // Check if CSS custom properties are loaded
+  let cssLoaded = false;
+  try {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const cardWidth = documentStyle.getPropertyValue('--card-width').trim();
+    const cardHeight = documentStyle.getPropertyValue('--card-height').trim();
+    cssLoaded = cardWidth !== '' && cardHeight !== '';
+  } catch (error) {
+    cssLoaded = false;
+  }
     
     // Calculate center position
   // If getBoundingClientRect returns zero dimensions but we have CSS dimensions,
@@ -72,8 +81,8 @@ function measureElementPosition(element: HTMLElement): ElementPosition {
   }
   
   // Element is visible if it has valid dimensions and position
-  const isVisible = (hasCssDimensions || hasValidDimensions) && 
-                   (hasValidPosition || hasOffsetParent);
+  // CSS must be loaded for elements to be considered visible
+  const isVisible = hasValidPosition && (hasCssDimensions || hasValidDimensions) && cssLoaded;
   
   
   

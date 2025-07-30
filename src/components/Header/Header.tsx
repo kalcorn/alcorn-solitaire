@@ -87,23 +87,6 @@ const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
           
-          {/* Temporary Undo Button for Mobile Debugging */}
-          {onUndo && (
-            <button
-              onClick={onUndo}
-              disabled={!canUndo}
-              className={`w-9 h-9 text-sm font-bold text-white rounded-lg border transition-all duration-200 flex items-center justify-center shadow-lg focus:outline-none ${
-                canUndo 
-                  ? 'bg-gradient-to-b from-blue-600 to-blue-700 border-blue-500 hover:from-blue-700 hover:to-blue-800 hover:border-blue-600 active:scale-95' 
-                  : 'bg-gradient-to-b from-gray-600 to-gray-700 border-gray-500 opacity-50'
-              }`}
-              title="Undo (DEBUG)"
-              aria-label="Undo last move"
-            >
-              ↶
-            </button>
-          )}
-          
           {/* Settings cog */}
           <div className="flex-shrink-0">
             <SettingsPanel 

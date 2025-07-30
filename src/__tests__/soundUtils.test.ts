@@ -3,6 +3,25 @@ import { soundManager, playSoundEffect } from '@/utils/soundUtils';
 // Mock fetch to return a mock audio buffer
 const mockFetch = global.fetch as jest.MockedFunction<typeof fetch>;
 
+// Mock Web Audio API
+const mockAudioContext = {
+  decodeAudioData: jest.fn().mockResolvedValue({}),
+  createBufferSource: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    start: jest.fn(),
+  }),
+  createGain: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    gain: { setValueAtTime: jest.fn() },
+  }),
+};
+
+// Mock window.AudioContext
+Object.defineProperty(window, 'AudioContext', {
+  value: jest.fn().mockImplementation(() => mockAudioContext),
+  writable: true,
+});
+
 describe('soundUtils', () => {
   beforeEach(() => {
     // Reset any mocks before each test
@@ -13,6 +32,9 @@ describe('soundUtils', () => {
       ok: true,
       arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(1024)),
     } as any);
+    
+    // Reset soundManager state
+    soundManager.setEnabled(true);
   });
 
   describe('soundManager', () => {
@@ -61,7 +83,7 @@ describe('soundUtils', () => {
     });
 
     it('should call soundManager.playSound with correct parameters', async () => {
-      const playSoundSpy = jest.spyOn(soundManager, 'playSound');
+      const playSoundSpy = jest.spyOn(soundManager, 'playSoundIfEnabled').mockResolvedValue();
       
       await playSoundEffect.cardFlip();
       expect(playSoundSpy).toHaveBeenCalledWith('cardFlip');
@@ -71,6 +93,8 @@ describe('soundUtils', () => {
       
       await playSoundEffect.win();
       expect(playSoundSpy).toHaveBeenCalledWith('win');
+      
+      playSoundSpy.mockRestore();
     });
   });
 });
