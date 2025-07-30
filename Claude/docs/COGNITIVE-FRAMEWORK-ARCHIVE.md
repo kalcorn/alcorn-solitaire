@@ -231,7 +231,7 @@ In your first response, demonstrate:
 - `.cursorrules`: Active configuration optimized for Cursor environment
 
 ### **Documentation**
-- `COGNITIVE-FRAMEWORK-ARCHIVE.md`: This comprehensive session archive
+- `docs/COGNITIVE-FRAMEWORK-ARCHIVE.md`: This comprehensive session archive
 
 ### **Deleted Files**
 - `CLAUDE.md`: Renamed to `CLAUDE-CLI-CONFIG.md`
