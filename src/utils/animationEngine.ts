@@ -448,7 +448,7 @@ export async function animateElement(
     // Step 5: Handle completion
     await animationPromise;
     
-    options.onComplete?.();
+    // onComplete already called during animation for early display - don't call again
     
   } catch (error) {
     options.onError?.(error instanceof Error ? error.message : String(error));

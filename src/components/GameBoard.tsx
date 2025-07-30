@@ -39,6 +39,7 @@ const GameBoard: React.FC = () => {
     startNewGame,
     moveCards,
     handleStockFlip,
+    handleSingleCardMove,
     handleAutoMoveToFoundation,
     selectCards,
     getMovableCards,
@@ -49,12 +50,16 @@ const GameBoard: React.FC = () => {
 
   // State for managing card visibility during shuffle
   const [cardVisibility, setCardVisibility] = useState<{ [cardId: string]: boolean }>({});
+  
+  // State for tracking which cards are currently being animated
+  const [animatingCardIds, setAnimatingCardIds] = useState<Set<string>>(new Set());
 
   const {
     particleTrigger,
     isShuffling,
     isWinAnimating,
     triggerShuffleAnimation,
+    resetShuffleAnimation,
     animateStockFlip
   } = useGameAnimations(gameState);
 
@@ -91,67 +96,123 @@ const GameBoard: React.FC = () => {
     return result;
   }, [moveCards, triggerShuffleAnimation]);
 
-  // New shuffle function using Card visibility
-  const handleShuffleWithVisibility = useCallback(async (cards: CardType[]) => {
+  // New shuffle function with one-by-one card processing and callbacks
+  const handleShuffleWithVisibility = useCallback(async (
+    cards: CardType[], 
+    onSuccess?: () => void, 
+    onError?: (error: string) => void
+  ) => {
     const stockElement = document.querySelector('[data-pile-type="stock"]') as HTMLElement;
     const wasteElement = document.querySelector('[data-pile-type="waste"]') as HTMLElement;
     
     if (!stockElement || !wasteElement) {
       console.error('Stock or waste element not found');
+      onError?.('Stock or waste element not found');
       return;
     }
 
     // Play shuffle sound
     playSoundEffect.shuffle();
 
-    // Animate each card sequentially
-    for (let i = 0; i < cards.length; i++) {
+    // Calculate timing for 5-second total animation (DEBUG - was 1 second)
+    const totalCards = cards.length;
+    const animationDuration = 300; // ms per card
+    const totalAnimationWindow = 5000; // 5 seconds total (DEBUG)
+    const maxStartTime = totalAnimationWindow - animationDuration; // 4700ms
+    
+    // Calculate delay between card animation starts
+    const delayBetweenCards = totalCards <= 1 ? 0 : maxStartTime / (totalCards - 1);
+
+    // Keep top 3 cards visible throughout animation - this maintains the visual stack
+    const initialTopThreeVisible = Math.min(3, cards.length);
+    const topThreeCards = cards.slice(-initialTopThreeVisible);
+    setCardVisibility(prev => {
+      const updated = { ...prev };
+      topThreeCards.forEach(card => {
+        updated[card.id] = true;
+      });
+      return updated;
+    });
+
+    // Process cards one by one from top to bottom (reverse order)
+    for (let i = cards.length - 1; i >= 0; i--) {
       const card = cards[i];
+      const startDelay = (cards.length - 1 - i) * delayBetweenCards;
       
+      // Wait for calculated delay
+      if (startDelay > 0) {
+        await new Promise(resolve => setTimeout(resolve, startDelay));
+      }
+      
+      console.log(`[DEBUG] Animating card ${card.id} (position ${i})`);
+      
+      // Find the specific card element by ID
+      const cardElement = wasteElement.querySelector(`[data-card-id="${card.id}"]`) as HTMLElement;
+      
+      if (!cardElement) {
+        console.error('Card element not found for card:', card.id);
+        // Still move card even if animation fails
+        handleSingleCardMove();
+        continue;
+      }
+      
+      // Execute flip animation with callbacks for proper state management (NO AWAIT!)
       try {
-        // Make card visible
-        setCardVisibility(prev => ({ ...prev, [card.id]: true }));
-        
-        // Wait for React to update DOM
-        await new Promise(resolve => requestAnimationFrame(resolve));
-        
-        // Find the card element
-        const cardElement = wasteElement.querySelector(`[data-card-element="true"]`) as HTMLElement;
-        if (!cardElement) {
-          console.error('Card element not found');
-          continue;
-        }
-        
-        // Execute flip animation with error handling
-        await animateElement(
+        animateElement(
           cardElement,
           stockElement,
           {
             type: 'flip',
-            duration: 300,
+            duration: animationDuration,
             card: { ...card, faceUp: false },
             onComplete: () => {
-              // Hide card after animation completes
-              setCardVisibility(prev => ({ ...prev, [card.id]: false }));
+              // Animation completed successfully
+              handleSingleCardMove(); // Move card from waste to stock
+              
+              // Hide this card and potentially show the next one in line
+              setCardVisibility(prev => {
+                const updated = { ...prev };
+                updated[card.id] = false;
+                
+                // If there are remaining cards, ensure next 3 are visible
+                const remainingIndex = i - 1;
+                if (remainingIndex >= 0) {
+                  const nextVisibleCount = Math.min(3, remainingIndex + 1);
+                  for (let j = Math.max(0, remainingIndex - nextVisibleCount + 1); j <= remainingIndex; j++) {
+                    if (cards[j]) {
+                      updated[cards[j].id] = true;
+                    }
+                  }
+                }
+                
+                return updated;
+              });
             },
             onError: (error) => {
               console.error('Animation failed:', error);
-              // Hide card on error
+              // Still hide card and move it on error
+              handleSingleCardMove(); // Move card even if animation failed
               setCardVisibility(prev => ({ ...prev, [card.id]: false }));
             }
           }
         );
-        
-        // Small delay between cards
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
       } catch (error) {
-        console.error('Card animation failed:', error);
-        // Ensure card is hidden on error
+        console.error('Card animation setup failed:', error);
+        // Fallback: hide card and move without animation
         setCardVisibility(prev => ({ ...prev, [card.id]: false }));
+        handleSingleCardMove();
       }
     }
-  }, []);
+    
+    // All animations complete - clear all visibility overrides
+    setCardVisibility({});
+    
+    // Wait a bit longer to ensure DOM updates finish
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Signal successful completion
+    onSuccess?.();
+  }, [handleSingleCardMove]);
 
   // Calculate visual center offset for proper alignment between stock and waste piles
   const calculateVisualCenterOffset = (element: HTMLElement, pileType: 'stock' | 'waste'): number => {
@@ -204,33 +265,52 @@ const GameBoard: React.FC = () => {
 
   // Animated stock flip handler with immediate position capture
   const handleAnimatedStockFlip = async (event?: React.MouseEvent) => {
-    const clickTime = performance.now();
-    console.log('[TIMING] Stock/Recycle button clicked at:', clickTime);
-    
     const isRecycling = gameState.stockPile.length === 0;
-    console.log('[TIMING] Is recycling:', isRecycling);
 
     try {
       if (isRecycling && gameState.wastePile.length > 0) {
-        const preAnimationTime = performance.now();
-        console.log('[TIMING] Starting recycle animation preparation at:', preAnimationTime, 'Delay since click:', preAnimationTime - clickTime, 'ms');
         // Capture current waste pile data AND DOM elements before updating state
         const wasteCardsForAnimation = [...gameState.wastePile];
         
-        // Animate the visual transition first (while DOM elements still exist)
-        const animationStartTime = performance.now();
-        console.log('[TIMING] Calling animateWasteToStock at:', animationStartTime, 'Delay since click:', animationStartTime - clickTime, 'ms');
-        
-        await handleShuffleWithVisibility(wasteCardsForAnimation);
-        
-        const animationEndTime = performance.now();
-        console.log('[TIMING] animateWasteToStock completed at:', animationEndTime, 'Total duration:', animationEndTime - animationStartTime, 'ms');
-        
-        // Update game state AFTER animation completes
-        handleStockFlip(true); // Skip sound since animation already played it
+        // Animate the visual transition with individual card moves
+        await handleShuffleWithVisibility(
+          wasteCardsForAnimation,
+          () => {
+            // Animation completed successfully - reset shuffling state
+            // This will make the waste pile border reappear when appropriate
+            resetShuffleAnimation();
+            console.log('Shuffle animation completed successfully');
+          },
+          (error) => {
+            // Also reset on error to avoid stuck state
+            resetShuffleAnimation();
+            console.error('Shuffle animation failed:', error);
+          }
+        );
       } else if (gameState.stockPile.length > 0) {
         // Capture current top stock card for animation BEFORE updating game state
         const topStockCard = gameState.stockPile[gameState.stockPile.length - 1];
+        
+        // Check if this specific card is already being animated
+        if (animatingCardIds.has(topStockCard.id)) {
+          return;
+        }
+        
+        // Mark this card as being animated
+        setAnimatingCardIds(prev => new Set(prev).add(topStockCard.id));
+        
+        // Update game state IMMEDIATELY so next click sees different top card
+        const gameStateUpdateResult = handleStockFlip(true); // Skip sound initially
+        
+        // If the state update failed, clean up and return
+        if (!gameStateUpdateResult.success) {
+          setAnimatingCardIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(topStockCard.id);
+            return newSet;
+          });
+          return;
+        }
         
         // Capture positions immediately from the click event if available
         let stockPosition: { x: number; y: number } | null = null;
@@ -324,28 +404,35 @@ const GameBoard: React.FC = () => {
           }
         }
         
-        // Animate the visual transition FIRST (before updating game state)
+        // Animate the visual transition (game state already updated)
         await animateStockFlip(
           topStockCard,
           stockPosition,
           wastePosition,
           () => {
-            // Animation complete - remove animating class
+            // Animation complete - remove animating class and card tracking
             if (topCardElement) {
               topCardElement.classList.remove('animating');
             }
+            setAnimatingCardIds(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(topStockCard.id);
+              return newSet;
+            });
           },
           (error) => {
             console.error('Stock flip animation failed:', error);
-            // Remove animating class on error too
+            // Remove animating class and card tracking on error too
             if (topCardElement) {
               topCardElement.classList.remove('animating');
             }
+            setAnimatingCardIds(prev => {
+              const newSet = new Set(prev);
+              newSet.delete(topStockCard.id);
+              return newSet;
+            });
           }
         );
-        
-        // Update game state AFTER animation completes
-        handleStockFlip(true); // Skip sound since animation already played it
       }
     } catch (error) {
       console.error('Animation error:', error);
@@ -416,6 +503,8 @@ const GameBoard: React.FC = () => {
         onNewGame={handleAnimatedNewGame}
         settings={gameState.settings}
         onSettingsChange={updateSettings}
+        onUndo={performUndo}
+        canUndo={canUndo(gameState)}
       />
       <div 
         className={`w-full flex grow flex-col items-center bg-transparent min-h-screen overflow-hidden ${!isClient ? 'hydration-loading' : ''}`}

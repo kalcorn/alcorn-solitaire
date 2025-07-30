@@ -27,7 +27,12 @@
       "Bash(mv:*)",
       "Bash(grep:*)",
       "Bash(timeout 5 npm run dev)",
-      "Bash(timeout 3 npm run dev)"
+      "Bash(timeout 3 npm run dev)",
+      "WebFetch(domain:www.anthropic.com)",
+      "Bash(powershell:*)",
+      "Bash(move:*)",
+      "Bash(timeout:*)",
+      "WebFetch(domain:stackoverflow.com)"
     ],
     "deny": []
   }

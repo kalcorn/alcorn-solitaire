@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { GameState, Card, CardPosition, MoveResult } from '@/types';
 import { createInitialGameState } from '@/utils/gameUtils';
-import { validateAndExecuteMove, flipStock, autoMoveToFoundation } from '@/utils/moveValidation';
+import { validateAndExecuteMove, flipStock, autoMoveToFoundation, moveOneCardWasteToStock } from '@/utils/moveValidation';
 import { soundManager, playSoundEffect } from '@/utils/soundUtils';
 import { saveSettings, loadSettings, saveGameState, loadGameState, clearGameState } from '@/utils/localStorage';
 import { useUndo } from './useUndo';
@@ -119,6 +119,20 @@ export function useGameState() {
     return result;
   }, [gameState, gameStarted, saveState]);
 
+  const handleSingleCardMove = useCallback((): MoveResult => {
+    const result = moveOneCardWasteToStock(gameState);
+
+    if (result.success && result.newGameState) {
+      const historyUpdate = saveState('Move card waste to stock', result.newGameState, gameState.history, gameState.historyIndex);
+      setGameState({
+        ...result.newGameState,
+        history: historyUpdate.history,
+        historyIndex: historyUpdate.historyIndex
+      });
+    }
+    return result;
+  }, [gameState, saveState]);
+
   const updateSettings = useCallback((newSettings: Partial<GameState['settings']>) => {
     setGameState(prev => {
       const updatedSettings = { ...prev.settings, ...newSettings };
@@ -185,6 +199,7 @@ export function useGameState() {
     deselectCards,
     moveCards,
     handleStockFlip,
+    handleSingleCardMove,
     handleAutoMoveToFoundation,
     updateSettings,
     undo: handleUndo,

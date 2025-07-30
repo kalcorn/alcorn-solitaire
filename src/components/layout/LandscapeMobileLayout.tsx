@@ -60,6 +60,7 @@ const LandscapeMobileLayout: React.FC<LandscapeMobileLayoutProps> = ({
           <WastePile 
             cards={gameState.wastePile}
             cardVisibility={cardVisibility}
+            isShuffling={isShuffling}
             onCardClick={(cardId) => {
               const cardIndex = gameState.wastePile.findIndex(c => c.id === cardId);
               if (cardIndex !== -1) {

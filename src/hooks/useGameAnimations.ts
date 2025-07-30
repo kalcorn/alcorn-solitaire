@@ -10,14 +10,14 @@ export interface AnimationState {
   isShuffling: boolean;
   isWinAnimating: boolean;
   animatingCard: {
-    card: any;
+    card: Card;
     type: 'stockToWaste' | 'wasteToStock';
     startPosition?: { x: number; y: number };
     endPosition?: { x: number; y: number };
     isLandscapeMobile?: boolean;
   } | null;
-  flyingCards: any[];
-  bridgeCards: any[];
+  flyingCards: Card[];
+  bridgeCards: Card[];
 }
 
 export interface GameAnimationHook {
@@ -28,9 +28,10 @@ export interface GameAnimationHook {
   
   // Animation triggers
   triggerShuffleAnimation: () => void;
+  resetShuffleAnimation: () => void;
   
   // Animation functions
-  animateStockFlip: (card: any, stockPosition?: { x: number; y: number } | null, wastePosition?: { x: number; y: number } | null, onComplete?: () => void, onError?: (error: string) => void) => Promise<void>;
+  animateStockFlip: (card: Card, stockPosition?: { x: number; y: number } | null, wastePosition?: { x: number; y: number } | null, onComplete?: () => void, onError?: (error: string) => void) => Promise<void>;
   
   // New animation system functions
   animateStockToWaste: (card: Card, stockElement: HTMLElement, wasteElement: HTMLElement) => Promise<void>;
@@ -73,12 +74,16 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
 
   const triggerShuffleAnimation = useCallback(() => {
     setIsShuffling(true);
-    setTimeout(() => setIsShuffling(false), 1200);
+    // Don't auto-reset - let the animation completion callback handle it
+  }, []);
+  
+  const resetShuffleAnimation = useCallback(() => {
+    setIsShuffling(false);
   }, []);
 
   // Legacy animateStockFlip function for backward compatibility
   const animateStockFlip = useCallback(async (
-    card: any,
+    card: Card,
     stockPosition?: { x: number; y: number } | null,
     wastePosition?: { x: number; y: number } | null,
     onComplete?: () => void,
@@ -92,9 +97,6 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
       const wasteElement = getPileElement('waste');
 
       if (stockElement && wasteElement) {
-        console.log('[DEBUG] Stock element found:', stockElement);
-        console.log('[DEBUG] Waste element found:', wasteElement);
-        console.log('[DEBUG] Using positions:', { stockPosition, wastePosition });
         
         if (stockPosition && wastePosition) {
           // Use position-aware animation for precise positioning
@@ -113,7 +115,7 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
           onComplete?.();
         }
       } else {
-        console.warn('[DEBUG] Elements not found - stock:', !!stockElement, 'waste:', !!wasteElement);
+        console.warn('Animation elements not found - stock:', !!stockElement, 'waste:', !!wasteElement);
       }
 
       onComplete?.();
@@ -197,6 +199,7 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     
     // Animation triggers
     triggerShuffleAnimation,
+    resetShuffleAnimation,
     
     // Legacy animation functions
     animateStockFlip,

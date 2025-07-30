@@ -11,11 +11,12 @@ interface WastePileProps {
   onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   isCardBeingDragged?: (cardId: string) => boolean;
   cardVisibility?: { [cardId: string]: boolean };
+  isShuffling?: boolean;
 }
 
-const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart, isCardBeingDragged, cardVisibility }) => {
-  // Don't filter cards - just check if there are any cards
-  const hasVisibleCards = cards.length > 0;
+const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart, isCardBeingDragged, cardVisibility, isShuffling = false }) => {
+  // Don't show empty state during shuffle animation, even if no cards remain
+  const hasVisibleCards = cards.length > 0 || isShuffling;
 
   // Register this pile with the animation system
   // Register this pile with the new animation system
@@ -43,6 +44,16 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
             const isInTopThree = index >= cards.length - 3;
             const visualIndex = isInTopThree ? (cards.length - 1 - index) : 0; // 0, 1, 2 for top 3, 0 for rest
             
+            const shouldBeVisible = cardVisibility && cardVisibility[card.id] === true 
+              ? true 
+              : cardVisibility && cardVisibility[card.id] === false 
+              ? false 
+              : isInTopThree;
+              
+            if (cardVisibility?.[card.id] !== undefined) {
+              console.log(`[DEBUG] Card ${card.id} explicit visibility:`, cardVisibility[card.id], 'shouldBeVisible:', shouldBeVisible);
+            }
+            
             return (
               <div
                 key={card.id}
@@ -56,12 +67,13 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
                   willChange: 'transform'
                 }}
                 data-card-element="true"
+                data-card-id={card.id}
               >
                 <Card
                   suit={card.suit}
                   rank={card.rank}
                   faceUp={card.faceUp}
-                  visible={cardVisibility ? cardVisibility[card.id] : true}
+                  visible={shouldBeVisible}
                   cardId={card.id}
                   isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
                   onClick={isTopCard ? 

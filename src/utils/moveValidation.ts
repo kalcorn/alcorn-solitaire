@@ -257,6 +257,40 @@ function calculateScoreForMove(from: CardPosition, to: CardPosition, cardCount: 
 }
 
 /**
+ * Moves one card from waste pile to stock pile (for shuffle animation)
+ */
+export function moveOneCardWasteToStock(gameState: GameState): MoveResult {
+  const newState = cloneGameState(gameState);
+  
+  try {
+    if (newState.wastePile.length === 0) {
+      return { success: false, error: 'No cards in waste pile to move' };
+    }
+    
+    // Remove top card from waste pile
+    const topCard = newState.wastePile.pop();
+    if (!topCard) {
+      return { success: false, error: 'Failed to remove card from waste pile' };
+    }
+    
+    // Add card to stock pile (face down)
+    newState.stockPile.push({
+      ...topCard,
+      faceUp: false,
+      draggable: false
+    });
+    
+    // Update draggable states
+    const finalState = updateDraggableStates(newState);
+    
+    return { success: true, newGameState: finalState };
+    
+  } catch (error) {
+    return { success: false, error: `Single card move failed: ${error}` };
+  }
+}
+
+/**
  * Handles stock pile flip (deal 3 cards to waste)
  */
 export function flipStock(gameState: GameState): MoveResult {
