@@ -5,7 +5,12 @@ export function useGameTimer(gameStarted: boolean, isGameWon: boolean, setTimeEl
     let interval: NodeJS.Timeout;
     if (gameStarted && !isGameWon) {
       interval = setInterval(() => {
-        setTimeElapsed(prev => prev + 1);
+        try {
+          setTimeElapsed(prev => prev + 1);
+        } catch (error) {
+          // Silently handle callback errors to prevent timer from breaking
+          console.warn('Timer callback error:', error);
+        }
       }, 1000);
     }
     return () => {

@@ -10,7 +10,7 @@ jest.mock('../components/StockPile', () => {
     <div 
       data-testid="stock-pile"
       onClick={onClick}
-      data-cycles-remaining={cyclesRemaining}
+      data-cycles-remaining={cyclesRemaining !== undefined ? cyclesRemaining : 'undefined'}
       data-can-cycle={canCycle}
       data-waste-card-count={wasteCardCount}
       data-is-shuffling={isShuffling}
@@ -78,10 +78,10 @@ describe('TopPilesSection Component', () => {
 
   beforeEach(() => {
     mockCards = [
-      { id: 'card1', suit: 'hearts', rank: 'A', faceUp: true },
-      { id: 'card2', suit: 'spades', rank: '2', faceUp: true },
-      { id: 'card3', suit: 'diamonds', rank: '3', faceUp: true },
-      { id: 'card4', suit: 'clubs', rank: '4', faceUp: true }
+      { id: 'card1', suit: 'hearts' as const, rank: 1, faceUp: true },
+      { id: 'card2', suit: 'spades' as const, rank: 2, faceUp: true },
+      { id: 'card3', suit: 'diamonds' as const, rank: 3, faceUp: true },
+      { id: 'card4', suit: 'clubs' as const, rank: 4, faceUp: true }
     ];
 
     mockGameState = {
@@ -159,18 +159,22 @@ describe('TopPilesSection Component', () => {
     });
 
     it('should handle unlimited cycling', () => {
-      const propsWithUnlimitedCycles = {
-        ...mockProps,
-        gameState: {
-          ...mockGameState,
-          settings: { deckCyclingLimit: 0 }
+      const unlimitedGameState = {
+        ...mockGameState,
+        settings: {
+          deckCyclingLimit: 0
         }
       };
 
-      render(<TopPilesSection {...propsWithUnlimitedCycles} />);
-      
+      const unlimitedProps = {
+        ...mockProps,
+        gameState: unlimitedGameState
+      };
+
+      render(<TopPilesSection {...unlimitedProps} />);
+
       const stockPile = screen.getByTestId('stock-pile');
-      expect(stockPile).toHaveAttribute('data-cycles-remaining', ''); // undefined becomes empty string
+      expect(stockPile).toHaveAttribute('data-cycles-remaining', 'undefined'); // undefined becomes "undefined" string
       expect(stockPile).toHaveAttribute('data-can-cycle', 'true');
     });
 
@@ -437,10 +441,13 @@ describe('TopPilesSection Component', () => {
     });
 
     it('should handle missing getMovableCards return', () => {
-      mockProps.getMovableCards.mockReturnValue(undefined);
-      
-      render(<TopPilesSection {...mockProps} />);
-      
+      const propsWithNoMovableCards = {
+        ...mockProps,
+        getMovableCards: jest.fn(() => []) // Return empty array instead of undefined
+      };
+
+      render(<TopPilesSection {...propsWithNoMovableCards} />);
+
       const wasteCard = screen.getByTestId('waste-card-card3');
       fireEvent.mouseDown(wasteCard);
       

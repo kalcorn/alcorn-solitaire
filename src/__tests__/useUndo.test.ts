@@ -85,7 +85,7 @@ describe('useUndo Hook', () => {
       
       const gameStateWithSelection = {
         ...mockGameState,
-        selectedCards: [{ id: 'card1', suit: 'hearts', rank: 'A', faceUp: true }],
+        selectedCards: [{ id: 'card1', suit: 'hearts' as const, rank: 1, faceUp: true }],
         selectedPileType: 'tableau' as const,
         selectedPileIndex: 0
       };
@@ -149,8 +149,8 @@ describe('useUndo Hook', () => {
         moves: 5,
         score: 100,
         stockCycles: 2,
-        stockPile: [{ id: 'card1', suit: 'hearts', rank: 'A', faceUp: false }],
-        wastePile: [{ id: 'card2', suit: 'spades', rank: 'K', faceUp: true }]
+        stockPile: [{ id: 'card1', suit: 'hearts' as const, rank: 1, faceUp: false }],
+        wastePile: [{ id: 'card2', suit: 'spades' as const, rank: 13, faceUp: true }]
       };
       
       const savedResult = result.current.saveState('Test', gameStateWithData, [], -1);
@@ -246,7 +246,11 @@ describe('useUndo Hook', () => {
           timestamp: Date.now() - 1000,
           action: 'Initial'
         },
-        null as any // Corrupted entry
+        {
+          state: { ...mockGameState, moves: 1 },
+          timestamp: Date.now(),
+          action: 'Valid'
+        }
       ];
       
       const currentState = {
@@ -254,6 +258,9 @@ describe('useUndo Hook', () => {
         history,
         historyIndex: 1
       };
+      
+      // Corrupt the history entry by removing required properties
+      history[0].state = { ...history[0].state, tableauPiles: undefined as any };
       
       const undoResult = result.current.undo(currentState);
       
@@ -266,14 +273,14 @@ describe('useUndo Hook', () => {
       
       const history: GameHistoryEntry[] = [
         {
-          state: { ...mockGameState, moves: 0 },
+          state: null as any, // Corrupted entry at index 0
           timestamp: Date.now() - 1000,
-          action: 'Initial'
+          action: 'Corrupted'
         },
         {
-          state: null as any,
+          state: { ...mockGameState, moves: 1 },
           timestamp: Date.now(),
-          action: 'Corrupted'
+          action: 'Valid'
         }
       ];
       

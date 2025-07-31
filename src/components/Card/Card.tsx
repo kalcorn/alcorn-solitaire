@@ -15,6 +15,8 @@ interface CardProps {
   onClick?: () => void;
   onMouseDown?: (event: React.MouseEvent) => void;
   onTouchStart?: (event: React.TouchEvent) => void;
+  onDragStart?: (event: React.MouseEvent) => void;
+  className?: string;
   style?: React.CSSProperties;
 }
 
@@ -29,7 +31,7 @@ const rankMap = {
   1: "A", 11: "J", 12: "Q", 13: "K"
 };
 
-const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId, isBeingDragged, onClick, onMouseDown, onTouchStart, style }) => {
+const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId, isBeingDragged, onClick, onMouseDown, onTouchStart, onDragStart, className, style }) => {
   const SuitIcon = suitIcons[suit];
   const displayRank = rankMap[rank as keyof typeof rankMap] || rank;
   const [isMouseDown, setIsMouseDown] = React.useState(false);
@@ -56,6 +58,11 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId,
     const clientX = event.clientX;
     const clientY = event.clientY;
     const button = event.button;
+    
+    // Call onDragStart immediately for left mouse button
+    if (onDragStart && button === 0) {
+      onDragStart(event);
+    }
     
     // Set a timeout to distinguish between click and drag
     dragTimeoutRef.current = setTimeout(() => {
@@ -95,6 +102,11 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId,
     const touch = event.touches[0];
     const clientX = touch.clientX;
     const clientY = touch.clientY;
+    
+    // Call onDragStart immediately for touch events
+    if (onDragStart) {
+      onDragStart(event as any);
+    }
     
     // Set a timeout to distinguish between tap and drag
     dragTimeoutRef.current = setTimeout(() => {
@@ -140,15 +152,18 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId,
       aria-label={faceUp ? `${displayRank} of ${suit}` : 'Face-down card'}
       aria-describedby={faceUp ? undefined : 'card-back-description'}
       data-card-element="true"
+      data-testid={cardId ? `card-${cardId}` : `card-${rank}-${suit}`}
       className={cn(
         cardStyles.card,
         faceUp ? cardStyles.faceUp : cardStyles.faceDown,
-        isBeingDragged && "opacity-0 pointer-events-none"
+        isBeingDragged && "opacity-0 pointer-events-none",
+        className
       )}
       onMouseDown={onMouseDown ? handleMouseDown : onClick}
       onMouseUp={onMouseDown ? handleMouseUp : undefined}
       onTouchStart={onTouchStart ? handleTouchStart : onClick}
       onTouchEnd={onTouchStart ? handleTouchEnd : undefined}
+      onContextMenu={(e) => e.preventDefault()}
       style={{
         userSelect: 'none',
         touchAction: 'none', // Prevent all default touch behaviors

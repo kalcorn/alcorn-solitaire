@@ -6,7 +6,7 @@ import { playSoundEffect, initializeSoundSystem } from '../utils/soundUtils';
 import { animateElement } from '../utils/animationEngine';
 
 export interface AnimationState {
-  particleTrigger: number;
+  particleTrigger: boolean;
   isShuffling: boolean;
   isWinAnimating: boolean;
   animatingCard: {
@@ -22,7 +22,7 @@ export interface AnimationState {
 
 export interface GameAnimationHook {
   // Animation state
-  particleTrigger: number;
+  particleTrigger: boolean;
   isShuffling: boolean;
   isWinAnimating: boolean;
   
@@ -53,7 +53,7 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
   }, [gameState?.settings]);
   
   // Animation state
-  const [particleTrigger, setParticleTrigger] = useState(0);
+  const [particleTrigger, setParticleTrigger] = useState(false);
   const [isShuffling, setIsShuffling] = useState(false);
   const [isWinAnimating, setIsWinAnimating] = useState(false);
 
@@ -61,11 +61,12 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
   useEffect(() => {
     if (gameState?.isGameWon && !isWinAnimating) {
       setIsWinAnimating(true);
-      setParticleTrigger(prev => prev + 1);
+      setParticleTrigger(true);
       
       // Reset win animation after delay
       const timer = setTimeout(() => {
         setIsWinAnimating(false);
+        setParticleTrigger(false);
       }, 3000);
       
       return () => clearTimeout(timer);
@@ -74,11 +75,13 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
 
   const triggerShuffleAnimation = useCallback(() => {
     setIsShuffling(true);
+    setParticleTrigger(true);
     // Don't auto-reset - let the animation completion callback handle it
   }, []);
   
   const resetShuffleAnimation = useCallback(() => {
     setIsShuffling(false);
+    setParticleTrigger(false);
   }, []);
 
   // Legacy animateStockFlip function for backward compatibility
@@ -90,7 +93,10 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
     onError?: (error: string) => void
   ): Promise<void> => {
     try {
-      playSoundEffect.cardFlip();
+      // Only play sound if sound is enabled
+      if (gameState?.settings?.soundEnabled !== false) {
+        playSoundEffect.cardFlip();
+      }
 
       // Use the new animation system with position overrides if provided
       const stockElement = getPileElement('stock');
@@ -123,11 +129,7 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
       console.error('Stock flip animation failed:', error);
       onError?.(error as string);
     }
-  }, [gameState?.settings.soundEnabled, newAnimateStockFlip, getPileElement]);
-
-
-
-
+  }, [gameState?.settings?.soundEnabled, newAnimateStockFlip, getPileElement]);
 
   // New animation system functions
   const animateStockToWaste = useCallback(async (

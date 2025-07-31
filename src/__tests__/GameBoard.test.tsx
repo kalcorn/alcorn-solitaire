@@ -6,19 +6,25 @@ import GameBoard from '../components/GameBoard';
 // Mock the components used by GameBoard
 jest.mock('../components/layout/DesktopLayout', () => {
   return function MockDesktopLayout({ children, ...props }: any) {
-    return <div data-testid="desktop-layout" {...props}>{children}</div>;
+    // Filter out React-specific props that shouldn't be passed to DOM
+    const { isShuffling, isWinAnimating, isCardBeingDragged, isZoneHovered, onStockFlip, onCardClick, onCardDragStart, startDrag, getMovableCards, cardVisibility, ...domProps } = props;
+    return <div data-testid="desktop-layout" {...domProps}>{children}</div>;
   };
 });
 
 jest.mock('../components/layout/MobileLayout', () => {
   return function MockMobileLayout({ children, ...props }: any) {
-    return <div data-testid="mobile-layout" {...props}>{children}</div>;
+    // Filter out React-specific props that shouldn't be passed to DOM
+    const { isShuffling, isWinAnimating, isCardBeingDragged, isZoneHovered, onStockFlip, onCardClick, onCardDragStart, startDrag, getMovableCards, cardVisibility, ...domProps } = props;
+    return <div data-testid="mobile-layout" {...domProps}>{children}</div>;
   };
 });
 
 jest.mock('../components/layout/LandscapeMobileLayout', () => {
   return function MockLandscapeMobileLayout({ children, ...props }: any) {
-    return <div data-testid="landscape-mobile-layout" {...props}>{children}</div>;
+    // Filter out React-specific props that shouldn't be passed to DOM
+    const { isShuffling, isWinAnimating, isCardBeingDragged, isZoneHovered, onStockFlip, onCardClick, onCardDragStart, startDrag, getMovableCards, cardVisibility, ...domProps } = props;
+    return <div data-testid="landscape-mobile-layout" {...domProps}>{children}</div>;
   };
 });
 

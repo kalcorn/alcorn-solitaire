@@ -536,9 +536,32 @@ describe('Position Detection System', () => {
         height: 72
       });
 
-      // Mock offsetLeft and offsetTop to create a discrepancy
+      // Mock getBoundingClientRect to return one position
+      const originalGetBoundingClientRect = element.getBoundingClientRect;
+      element.getBoundingClientRect = jest.fn().mockReturnValue({
+        left: 100,
+        top: 200,
+        width: 52,
+        height: 72,
+        right: 152,
+        bottom: 272,
+        x: 100,
+        y: 200,
+        toJSON: () => ({})
+      });
+
+      // Mock offsetLeft and offsetTop to create a significant discrepancy
       Object.defineProperty(element, 'offsetLeft', { value: 1000, writable: true });
       Object.defineProperty(element, 'offsetTop', { value: 1000, writable: true });
+      
+      // Mock offsetParent to create a chain
+      const mockParent = document.createElement('div');
+      Object.defineProperty(mockParent, 'offsetLeft', { value: 500, writable: true });
+      Object.defineProperty(mockParent, 'offsetTop', { value: 500, writable: true });
+      Object.defineProperty(mockParent, 'scrollLeft', { value: 0, writable: true });
+      Object.defineProperty(mockParent, 'scrollTop', { value: 0, writable: true });
+      Object.defineProperty(mockParent, 'offsetParent', { value: null, writable: true });
+      Object.defineProperty(element, 'offsetParent', { value: mockParent, writable: true });
 
       const { comparePositionMethods } = require('../utils/positionDetection');
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
@@ -548,6 +571,9 @@ describe('Position Detection System', () => {
       expect(consoleSpy).toHaveBeenCalled();
 
       consoleSpy.mockRestore();
+      
+      // Restore original method
+      element.getBoundingClientRect = originalGetBoundingClientRect;
     });
   });
 }); 

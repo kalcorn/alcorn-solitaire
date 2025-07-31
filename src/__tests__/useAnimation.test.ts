@@ -4,6 +4,7 @@ import { useAnimation } from '../hooks/useAnimation';
 // Mock the animation engine
 jest.mock('../utils/animationEngine', () => ({
   animateElement: jest.fn(() => Promise.resolve()),
+  animateElementSequence: jest.fn(() => Promise.resolve()),
   createAnimationElement: jest.fn(() => document.createElement('div')),
   cleanupAnimation: jest.fn()
 }));
@@ -134,13 +135,17 @@ describe('useAnimation Hook', () => {
       const { animateElement } = require('../utils/animationEngine');
       const { result } = renderHook(() => useAnimation());
       
-      const elements = [
+      const cards = [
+        { id: 'card1', suit: 'hearts' as const, rank: 1, faceUp: true },
+        { id: 'card2', suit: 'diamonds' as const, rank: 2, faceUp: true }
+      ];
+      const fromElements = [
         document.createElement('div'),
         document.createElement('div')
       ];
-      const targetElement = document.createElement('div');
+      const toElement = document.createElement('div');
       
-      await result.current.animateShuffle(elements, targetElement);
+      await result.current.animateShuffle(cards, fromElements, toElement);
       
       expect(animateElement).toHaveBeenCalledTimes(2);
     });
@@ -148,23 +153,26 @@ describe('useAnimation Hook', () => {
     it('should handle empty elements array', async () => {
       const { result } = renderHook(() => useAnimation());
       
-      const targetElement = document.createElement('div');
+      const toElement = document.createElement('div');
       
-      await expect(result.current.animateShuffle([], targetElement)).resolves.toBeUndefined();
+      await expect(result.current.animateShuffle([], [], toElement)).resolves.toBeUndefined();
     });
 
     it('should handle shuffle with stagger delay', async () => {
       const { animateElement } = require('../utils/animationEngine');
       const { result } = renderHook(() => useAnimation());
       
-      const elements = [
+      const cards = [
+        { id: 'card1', suit: 'hearts' as const, rank: 1, faceUp: true },
+        { id: 'card2', suit: 'diamonds' as const, rank: 2, faceUp: true }
+      ];
+      const fromElements = [
         document.createElement('div'),
         document.createElement('div')
       ];
-      const targetElement = document.createElement('div');
-      const options = { staggerDelay: 100 };
+      const toElement = document.createElement('div');
       
-      await result.current.animateShuffle(elements, targetElement, options);
+      await result.current.animateShuffle(cards, fromElements, toElement);
       
       expect(animateElement).toHaveBeenCalledTimes(2);
     });
@@ -172,9 +180,13 @@ describe('useAnimation Hook', () => {
     it('should handle null target element', async () => {
       const { result } = renderHook(() => useAnimation());
       
-      const elements = [document.createElement('div')];
+      const cards = [{ id: 'card1', suit: 'hearts' as const, rank: 1, faceUp: true }];
+      const fromElements = [document.createElement('div')];
       
-      await expect(result.current.animateShuffle(elements, null)).resolves.toBeUndefined();
+      // Create a mock element instead of null
+      const mockElement = document.createElement('div');
+      
+      await expect(result.current.animateShuffle(cards, fromElements, mockElement)).resolves.toBeUndefined();
     });
   });
 

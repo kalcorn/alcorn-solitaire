@@ -4,8 +4,53 @@ import '@testing-library/jest-dom';
 import MobileLayout from '../components/layout/MobileLayout';
 
 describe('MobileLayout Component', () => {
+  const mockGameState = {
+    stockPile: [],
+    wastePile: [],
+    foundationPiles: [[], [], [], []],
+    tableauPiles: [[], [], [], [], [], [], []],
+    moves: 0,
+    score: 0,
+    isGameWon: false,
+    selectedCards: [],
+    selectedPileType: null,
+    selectedPileIndex: null,
+    stockCycles: 0,
+    settings: {
+      deckCyclingLimit: 0,
+      drawCount: 1,
+      autoMoveToFoundation: false,
+      soundEnabled: true,
+      showHints: true
+    },
+    stats: {
+      gamesPlayed: 0,
+      gamesWon: 0,
+      totalTime: 0,
+      bestTime: 0,
+      currentStreak: 0,
+      longestStreak: 0,
+      averageMoves: 0,
+      totalMoves: 0,
+      lastPlayed: 0
+    },
+    history: [],
+    historyIndex: -1,
+    gameStartTime: Date.now()
+  };
+
   const mockProps = {
-    children: <div data-testid="test-child">Test Child</div>
+    gameState: mockGameState,
+    isShuffling: false,
+    isWinAnimating: false,
+    isCardBeingDragged: jest.fn(() => false),
+    isZoneHovered: jest.fn(() => false),
+    onStockFlip: jest.fn(),
+    onCardClick: jest.fn(),
+    onCardDragStart: jest.fn(),
+    startDrag: jest.fn(),
+    getMovableCards: jest.fn(() => []),
+    cardVisibility: {}
   };
 
   beforeEach(() => {
@@ -29,23 +74,28 @@ describe('MobileLayout Component', () => {
     it('should render without crashing', () => {
       render(<MobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      // Should render the mobile layout structure with stock pile
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
-    it('should render children correctly', () => {
+    it('should render game components correctly', () => {
       render(<MobileLayout {...mockProps} />);
       
-      const child = screen.getByTestId('test-child');
-      expect(child).toBeInTheDocument();
-      expect(child).toHaveTextContent('Test Child');
+      // Should render stock pile, waste pile, and foundation piles
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty waste pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Hearts suit pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Diamonds suit pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Clubs suit pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Spades suit pile')).toBeInTheDocument();
     });
 
     it('should apply mobile-specific CSS classes', () => {
       render(<MobileLayout {...mockProps} />);
       
       // Layout should have appropriate classes for mobile
-      const child = screen.getByTestId('test-child');
-      expect(child).toBeInTheDocument();
+      const mobileLayout = screen.getByLabelText('Empty stock pile').closest('.block.md\\:hidden');
+      expect(mobileLayout).toBeInTheDocument();
     });
   });
 
@@ -53,11 +103,10 @@ describe('MobileLayout Component', () => {
     it('should handle touch interactions', () => {
       render(<MobileLayout {...mockProps} />);
       
-      const child = screen.getByTestId('test-child');
-      expect(child).toBeInTheDocument();
-      
       // Should render elements that are touch-friendly
-      expect(child.parentElement).toBeInTheDocument();
+      const stockPile = screen.getByLabelText('Empty stock pile');
+      expect(stockPile).toBeInTheDocument();
+      expect(stockPile).toHaveAttribute('role', 'button');
     });
 
     it('should optimize for small screens', () => {
@@ -68,7 +117,7 @@ describe('MobileLayout Component', () => {
       
       render(<MobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
     it('should handle portrait orientation', () => {
@@ -77,7 +126,7 @@ describe('MobileLayout Component', () => {
       
       render(<MobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
   });
 
@@ -85,28 +134,37 @@ describe('MobileLayout Component', () => {
     it('should have proper mobile HTML structure', () => {
       render(<MobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      // Should have the mobile layout structure
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty waste pile')).toBeInTheDocument();
     });
 
-    it('should handle multiple children in mobile layout', () => {
-      const multipleChildren = (
-        <>
-          <div data-testid="mobile-child-1">Mobile Child 1</div>
-          <div data-testid="mobile-child-2">Mobile Child 2</div>
-        </>
-      );
-
-      render(<MobileLayout>{multipleChildren}</MobileLayout>);
+    it('should render tableau section', () => {
+      render(<MobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('mobile-child-1')).toBeInTheDocument();
-      expect(screen.getByTestId('mobile-child-2')).toBeInTheDocument();
+      // Should render tableau piles
+      const tableauPiles = screen.getAllByLabelText('Play pile');
+      expect(tableauPiles).toHaveLength(7);
     });
 
-    it('should handle no children gracefully', () => {
-      render(<MobileLayout />);
+    it('should handle empty game state gracefully', () => {
+      const emptyGameState = {
+        ...mockGameState,
+        stockPile: [],
+        wastePile: [],
+        foundationPiles: [[], [], [], []],
+        tableauPiles: [[], [], [], [], [], [], []]
+      };
+
+      const propsWithEmptyState = {
+        ...mockProps,
+        gameState: emptyGameState
+      };
+
+      render(<MobileLayout {...propsWithEmptyState} />);
       
-      // Should render without crashing
-      expect(document.body).toBeInTheDocument();
+      // Should render without crashing even with empty state
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
   });
 
@@ -125,7 +183,7 @@ describe('MobileLayout Component', () => {
         
         render(<MobileLayout {...mockProps} />);
         
-        expect(screen.getByTestId('test-child')).toBeInTheDocument();
+        expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
         
         // Clean up for next iteration
         document.body.innerHTML = '';
@@ -135,7 +193,7 @@ describe('MobileLayout Component', () => {
     it('should handle viewport meta changes', () => {
       render(<MobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
   });
 
@@ -150,22 +208,30 @@ describe('MobileLayout Component', () => {
       
       // Should render quickly even on mobile
       expect(renderTime).toBeLessThan(100);
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
     it('should handle memory constraints', () => {
-      // Simulate memory-constrained environment
-      const largeChild = (
-        <div data-testid="large-child">
-          {Array.from({ length: 100 }, (_, i) => (
-            <div key={i}>Item {i}</div>
-          ))}
-        </div>
-      );
+      // Test with a game state that has many cards
+      const gameStateWithCards = {
+        ...mockGameState,
+        stockPile: Array.from({ length: 52 }, (_, i) => ({
+          id: `card-${i}`,
+          suit: 'hearts' as const,
+          rank: (i % 13) + 1,
+          faceUp: false
+        }))
+      };
 
-      render(<MobileLayout>{largeChild}</MobileLayout>);
+      const propsWithCards = {
+        ...mockProps,
+        gameState: gameStateWithCards
+      };
+
+      render(<MobileLayout {...propsWithCards} />);
       
-      expect(screen.getByTestId('large-child')).toBeInTheDocument();
+      // When stock pile has cards, the aria-label changes
+      expect(screen.getByLabelText(/Stock pile with \d+ cards/)).toBeInTheDocument();
     });
   });
 
@@ -177,24 +243,30 @@ describe('MobileLayout Component', () => {
       Object.defineProperty(window, 'innerWidth', { value: 667 });
       Object.defineProperty(window, 'innerHeight', { value: 375 });
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
     it('should handle dynamic content', () => {
-      const DynamicChild = () => {
-        const [count, setCount] = React.useState(0);
-        return (
-          <div data-testid="dynamic-child">
-            <span>Count: {count}</span>
-            <button onClick={() => setCount(c => c + 1)}>Increment</button>
-          </div>
-        );
-      };
-
-      render(<MobileLayout><DynamicChild /></MobileLayout>);
+      // Test with changing game state
+      const { rerender } = render(<MobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('dynamic-child')).toBeInTheDocument();
-      expect(screen.getByText('Count: 0')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
+      
+      // Change game state
+      const newGameState = {
+        ...mockGameState,
+        stockPile: [{ id: 'card-1', suit: 'hearts' as const, rank: 1, faceUp: true }]
+      };
+      
+      const newProps = {
+        ...mockProps,
+        gameState: newGameState
+      };
+      
+      rerender(<MobileLayout {...newProps} />);
+      
+      // When stock pile has cards, the aria-label changes
+      expect(screen.getByLabelText(/Stock pile with \d+ cards/)).toBeInTheDocument();
     });
   });
 });

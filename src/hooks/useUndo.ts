@@ -46,7 +46,12 @@ export const useUndo = (
     };
   }, []);
 
-  const undo = useCallback((gameState: GameState) => {
+  const undo = useCallback((gameState: GameState | null) => {
+    // Handle null game state gracefully
+    if (!gameState || !gameState.history || gameState.historyIndex === undefined) {
+      return false;
+    }
+    
     if (gameState.historyIndex > 0 && gameState.history.length > 0) {
       const previousIndex = gameState.historyIndex - 1;
       const historyEntry = gameState.history[previousIndex];
@@ -56,6 +61,12 @@ export const useUndo = (
       }
       
       const previousState = historyEntry.state;
+      
+      // Validate that the state has required properties
+      if (!previousState.tableauPiles || !previousState.foundationPiles || 
+          !previousState.stockPile || !previousState.wastePile) {
+        return false;
+      }
       
       setGameState({
         ...previousState,
@@ -71,6 +82,11 @@ export const useUndo = (
   return {
     saveState,
     undo,
-    canUndo: (gameState: GameState) => gameState.historyIndex > 0 && gameState.history.length > 0,
+    canUndo: (gameState: GameState | null) => {
+      if (!gameState || !gameState.history || gameState.historyIndex === undefined) {
+        return false;
+      }
+      return gameState.historyIndex > 0 && gameState.history.length > 0;
+    },
   };
 };

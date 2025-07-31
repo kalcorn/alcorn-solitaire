@@ -13,7 +13,12 @@ jest.mock('../components/layout/TopPilesSection', () => {
 
 jest.mock('../components/layout/TableauSection', () => {
   return function MockTableauSection(props: any) {
-    return <div data-testid="tableau-section">Tableau Section</div>;
+    return (
+      <div data-testid="tableau-section">
+        Tableau Section
+        {props.children}
+      </div>
+    );
   };
 });
 
@@ -173,33 +178,32 @@ describe('DesktopLayout Component', () => {
   });
 
   describe('Edge cases', () => {
-    it('should handle complex children', () => {
-      const complexChild = (
-        <div data-testid="complex-child">
-          <span>Nested content</span>
-          <button>Interactive element</button>
-        </div>
-      );
-
-      render(<DesktopLayout {...mockProps}>{complexChild}</DesktopLayout>);
+    it('should handle props without children', () => {
+      render(<DesktopLayout {...mockProps} />);
       
-      expect(screen.getByTestId('complex-child')).toBeInTheDocument();
-      expect(screen.getByText('Nested content')).toBeInTheDocument();
-      expect(screen.getByRole('button')).toBeInTheDocument();
+      expect(screen.getByTestId('top-piles-section')).toBeInTheDocument();
+      expect(screen.getByTestId('tableau-section')).toBeInTheDocument();
     });
 
-    it('should handle React fragments', () => {
-      const fragmentChild = (
-        <React.Fragment>
-          <div data-testid="fragment-child-1">Fragment 1</div>
-          <div data-testid="fragment-child-2">Fragment 2</div>
-        </React.Fragment>
-      );
+    it('should handle undefined optional props', () => {
+      const propsWithoutOptional = {
+        gameState: mockGameState,
+        isShuffling: false,
+        isWinAnimating: false,
+        isCardBeingDragged: jest.fn(),
+        isZoneHovered: jest.fn(),
+        onStockFlip: jest.fn(),
+        onCardClick: jest.fn(),
+        onCardDragStart: jest.fn(),
+        startDrag: jest.fn(),
+        getMovableCards: jest.fn()
+        // cardVisibility is optional
+      };
 
-      render(<DesktopLayout {...mockProps}>{fragmentChild}</DesktopLayout>);
+      render(<DesktopLayout {...propsWithoutOptional} />);
       
-      expect(screen.getByTestId('fragment-child-1')).toBeInTheDocument();
-      expect(screen.getByTestId('fragment-child-2')).toBeInTheDocument();
+      expect(screen.getByTestId('top-piles-section')).toBeInTheDocument();
+      expect(screen.getByTestId('tableau-section')).toBeInTheDocument();
     });
   });
 });

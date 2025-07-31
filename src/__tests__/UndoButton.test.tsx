@@ -100,7 +100,8 @@ describe('UndoButton Component', () => {
   });
 
   it('should handle focus events', () => {
-    render(<UndoButton {...defaultProps} />);
+    const onUndo = jest.fn();
+    render(<UndoButton onUndo={onUndo} canUndo={true} />);
     
     const button = screen.getByRole('button', { name: /undo/i });
     button.focus();

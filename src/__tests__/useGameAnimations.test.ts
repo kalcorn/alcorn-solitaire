@@ -6,7 +6,8 @@ jest.mock('../hooks/useAnimation', () => ({
   useAnimation: () => ({
     animateMove: jest.fn(() => Promise.resolve()),
     animateFlip: jest.fn(() => Promise.resolve()),
-    animateShuffle: jest.fn(() => Promise.resolve())
+    animateShuffle: jest.fn(() => Promise.resolve()),
+    animateStockFlip: jest.fn(() => Promise.resolve())
   })
 }));
 
@@ -15,7 +16,15 @@ jest.mock('../utils/animationEngine', () => ({
 }));
 
 jest.mock('../utils/soundUtils', () => ({
-  playSoundEffect: jest.fn()
+  playSoundEffect: {
+    cardFlip: jest.fn(),
+    cardMove: jest.fn(),
+    cardDrop: jest.fn(),
+    shuffle: jest.fn(),
+    win: jest.fn(),
+    click: jest.fn()
+  },
+  initializeSoundSystem: jest.fn()
 }));
 
 describe('useGameAnimations Hook', () => {
@@ -136,45 +145,37 @@ describe('useGameAnimations Hook', () => {
       const { useAnimation } = require('../hooks/useAnimation');
       const animationMocks = useAnimation();
       const { result } = renderHook(() => useGameAnimations(mockGameState));
-      
-      const sourceElement = document.createElement('div');
-      const targetElement = document.createElement('div');
+      const mockCard = { id: 'test-card', suit: 'hearts' as const, rank: 1, faceUp: true };
       
       await act(async () => {
-        await result.current.animateStockFlip(sourceElement, targetElement);
+        await result.current.animateStockFlip(mockCard);
       });
       
-      expect(animationMocks.animateFlip).toHaveBeenCalled();
+      expect(animationMocks.animateStockFlip).toHaveBeenCalled();
     });
 
     it('should handle null elements gracefully', async () => {
       const { result } = renderHook(() => useGameAnimations(mockGameState));
+      const mockCard = { id: 'test-card', suit: 'hearts' as const, rank: 1, faceUp: true };
       
       await act(async () => {
-        await result.current.animateStockFlip(null, null);
+        await result.current.animateStockFlip(mockCard);
       });
       
-      // Should not throw
+      // Should not throw even with null elements
       expect(true).toBe(true);
     });
 
     it('should play sound effects when enabled', async () => {
       const { playSoundEffect } = require('../utils/soundUtils');
-      const gameStateWithSound = {
-        ...mockGameState,
-        settings: { ...mockGameState.settings, soundEnabled: true }
-      };
-      
-      const { result } = renderHook(() => useGameAnimations(gameStateWithSound));
-      
-      const sourceElement = document.createElement('div');
-      const targetElement = document.createElement('div');
+      const { result } = renderHook(() => useGameAnimations(mockGameState));
+      const mockCard = { id: 'test-card', suit: 'hearts' as const, rank: 1, faceUp: true };
       
       await act(async () => {
-        await result.current.animateStockFlip(sourceElement, targetElement);
+        await result.current.animateStockFlip(mockCard);
       });
       
-      expect(playSoundEffect).toHaveBeenCalled();
+      expect(playSoundEffect.cardFlip).toHaveBeenCalled();
     });
 
     it('should not play sound when disabled', async () => {
@@ -183,17 +184,14 @@ describe('useGameAnimations Hook', () => {
         ...mockGameState,
         settings: { ...mockGameState.settings, soundEnabled: false }
       };
-      
       const { result } = renderHook(() => useGameAnimations(gameStateWithoutSound));
-      
-      const sourceElement = document.createElement('div');
-      const targetElement = document.createElement('div');
+      const mockCard = { id: 'test-card', suit: 'hearts' as const, rank: 1, faceUp: true };
       
       await act(async () => {
-        await result.current.animateStockFlip(sourceElement, targetElement);
+        await result.current.animateStockFlip(mockCard);
       });
       
-      expect(playSoundEffect).not.toHaveBeenCalled();
+      expect(playSoundEffect.cardFlip).not.toHaveBeenCalled();
     });
   });
 
@@ -284,17 +282,17 @@ describe('useGameAnimations Hook', () => {
     it('should handle concurrent animations', async () => {
       const { result } = renderHook(() => useGameAnimations(mockGameState));
       
-      const element1 = document.createElement('div');
-      const element2 = document.createElement('div');
+      const mockCard1 = { id: 'test-card-1', suit: 'hearts' as const, rank: 1, faceUp: true };
+      const mockCard2 = { id: 'test-card-2', suit: 'spades' as const, rank: 2, faceUp: true };
       
       await act(async () => {
-        const promise1 = result.current.animateStockFlip(element1, element2);
-        const promise2 = result.current.animateStockFlip(element2, element1);
+        const promise1 = result.current.animateStockFlip(mockCard1);
+        const promise2 = result.current.animateStockFlip(mockCard2);
         
         await Promise.all([promise1, promise2]);
       });
       
-      // Should handle concurrent animations without issues
+      // Should handle concurrent animations without errors
       expect(true).toBe(true);
     });
 
@@ -314,16 +312,15 @@ describe('useGameAnimations Hook', () => {
   describe('Error handling', () => {
     it('should handle animation errors gracefully', async () => {
       const { useAnimation } = require('../hooks/useAnimation');
-      useAnimation().animateFlip.mockRejectedValueOnce(new Error('Animation failed'));
+      useAnimation().animateStockFlip.mockRejectedValueOnce(new Error('Animation failed'));
       
       const { result } = renderHook(() => useGameAnimations(mockGameState));
       
-      const sourceElement = document.createElement('div');
-      const targetElement = document.createElement('div');
+      const mockCard = { id: 'test-card', suit: 'hearts' as const, rank: 1, faceUp: true };
       
       await act(async () => {
         await expect(
-          result.current.animateStockFlip(sourceElement, targetElement)
+          result.current.animateStockFlip(mockCard)
         ).rejects.toThrow('Animation failed');
       });
     });
@@ -334,7 +331,7 @@ describe('useGameAnimations Hook', () => {
       const invalidElement = {} as any;
       
       await act(async () => {
-        await result.current.animateStockFlip(invalidElement, invalidElement);
+        await result.current.animateStockFlip(invalidElement);
       });
       
       // Should not throw

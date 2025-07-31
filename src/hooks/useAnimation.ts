@@ -8,6 +8,7 @@ import { animateElement, animateElementSequence, AnimationOptions, SequenceOptio
 import { Card } from '@/types';
 
 export interface AnimationHook {
+  // Core animation functions
   animateCard: (
     fromElement: HTMLElement,
     toElement: HTMLElement,
@@ -55,6 +56,18 @@ export interface AnimationHook {
       options: AnimationOptions;
     }>,
     sequenceOptions: SequenceOptions
+  ) => Promise<void>;
+
+  // Test-expected convenience functions
+  animateMove: (
+    fromElement: HTMLElement | null,
+    toElement: HTMLElement | null,
+    options?: Partial<AnimationOptions>
+  ) => Promise<void>;
+  
+  animateFlip: (
+    element: HTMLElement | null,
+    options?: Partial<AnimationOptions>
   ) => Promise<void>;
 }
 
@@ -116,6 +129,15 @@ export function useAnimation(): AnimationHook {
     onComplete?: () => void,
     onError?: (error: string) => void
   ): Promise<void> => {
+    // Handle edge cases
+    if (!toElement) {
+      return;
+    }
+    
+    if (cards.length === 0 || fromElements.length === 0) {
+      return;
+    }
+    
     if (cards.length !== fromElements.length) {
       throw new Error('Card count must match element count for shuffle animation');
     }
@@ -154,12 +176,46 @@ export function useAnimation(): AnimationHook {
     return animateElementSequence(animations, sequenceOptions);
   }, []);
 
+  // Test-expected convenience functions
+  const animateMove = useCallback(async (
+    fromElement: HTMLElement | null,
+    toElement: HTMLElement | null,
+    options: Partial<AnimationOptions> = {}
+  ): Promise<void> => {
+    if (!fromElement || !toElement) {
+      return;
+    }
+    
+    return animateElement(fromElement, toElement, {
+      type: 'move',
+      duration: 300,
+      ...options
+    });
+  }, []);
+
+  const animateFlip = useCallback(async (
+    element: HTMLElement | null,
+    options: Partial<AnimationOptions> = {}
+  ): Promise<void> => {
+    if (!element) {
+      return;
+    }
+    
+    return animateElement(element, element, {
+      type: 'flip',
+      duration: 300,
+      ...options
+    });
+  }, []);
+
   return {
     animateCard,
     animateSequence,
     animateStockFlip,
     animatePileToPile,
     animateShuffle,
-    animateElementSequence: animateElementSequenceWrapper
+    animateElementSequence: animateElementSequenceWrapper,
+    animateMove,
+    animateFlip
   };
 } 

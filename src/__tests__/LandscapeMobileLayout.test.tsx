@@ -4,8 +4,29 @@ import '@testing-library/jest-dom';
 import LandscapeMobileLayout from '../components/layout/LandscapeMobileLayout';
 
 describe('LandscapeMobileLayout Component', () => {
+  const mockGameState = {
+    stockPile: [],
+    wastePile: [],
+    foundationPiles: [[], [], [], []],
+    tableauPiles: [[], [], [], [], [], [], []],
+    stockCycles: 0,
+    settings: {
+      deckCyclingLimit: 0
+    }
+  };
+
   const mockProps = {
-    children: <div data-testid="test-child">Test Child</div>
+    gameState: mockGameState,
+    isShuffling: false,
+    isWinAnimating: false,
+    isCardBeingDragged: jest.fn(() => false),
+    isZoneHovered: jest.fn(() => false),
+    onStockFlip: jest.fn(),
+    onCardClick: jest.fn(),
+    onCardDragStart: jest.fn(),
+    startDrag: jest.fn(),
+    getMovableCards: jest.fn(() => []),
+    cardVisibility: {}
   };
 
   beforeEach(() => {
@@ -29,23 +50,25 @@ describe('LandscapeMobileLayout Component', () => {
     it('should render without crashing', () => {
       render(<LandscapeMobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      // Should render the landscape layout structure with stock pile
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
-    it('should render children correctly', () => {
+    it('should render game components correctly', () => {
       render(<LandscapeMobileLayout {...mockProps} />);
       
-      const child = screen.getByTestId('test-child');
-      expect(child).toBeInTheDocument();
-      expect(child).toHaveTextContent('Test Child');
+      // Should render stock pile, waste pile, and tableau piles
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty waste pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Tableau piles')).toBeInTheDocument();
     });
 
     it('should apply landscape-specific CSS classes', () => {
       render(<LandscapeMobileLayout {...mockProps} />);
       
       // Layout should have appropriate classes for landscape mobile
-      const child = screen.getByTestId('test-child');
-      expect(child).toBeInTheDocument();
+      const landscapeLayout = screen.getByLabelText('Empty stock pile').closest('.flex.flex-row');
+      expect(landscapeLayout).toBeInTheDocument();
     });
   });
 
@@ -53,7 +76,7 @@ describe('LandscapeMobileLayout Component', () => {
     it('should optimize for landscape orientation', () => {
       render(<LandscapeMobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
     it('should handle different landscape aspect ratios', () => {
@@ -69,7 +92,7 @@ describe('LandscapeMobileLayout Component', () => {
         
         render(<LandscapeMobileLayout {...mockProps} />);
         
-        expect(screen.getByTestId('test-child')).toBeInTheDocument();
+        expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
         
         // Clean up for next iteration
         document.body.innerHTML = '';
@@ -79,11 +102,9 @@ describe('LandscapeMobileLayout Component', () => {
     it('should handle horizontal space efficiently', () => {
       render(<LandscapeMobileLayout {...mockProps} />);
       
-      const child = screen.getByTestId('test-child');
-      expect(child).toBeInTheDocument();
-      
-      // Should utilize horizontal space effectively
-      expect(child.parentElement).toBeInTheDocument();
+      // Should utilize horizontal space effectively with flex-row layout
+      const landscapeLayout = screen.getByLabelText('Empty stock pile').closest('.flex.flex-row');
+      expect(landscapeLayout).toBeInTheDocument();
     });
   });
 
@@ -91,28 +112,36 @@ describe('LandscapeMobileLayout Component', () => {
     it('should have proper landscape HTML structure', () => {
       render(<LandscapeMobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      // Should have the landscape layout structure
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
+      expect(screen.getByLabelText('Tableau piles')).toBeInTheDocument();
     });
 
-    it('should handle multiple children in landscape layout', () => {
-      const multipleChildren = (
-        <>
-          <div data-testid="landscape-child-1">Landscape Child 1</div>
-          <div data-testid="landscape-child-2">Landscape Child 2</div>
-        </>
-      );
-
-      render(<LandscapeMobileLayout>{multipleChildren}</LandscapeMobileLayout>);
+    it('should render tableau section', () => {
+      render(<LandscapeMobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('landscape-child-1')).toBeInTheDocument();
-      expect(screen.getByTestId('landscape-child-2')).toBeInTheDocument();
+      // Should render tableau piles in landscape layout
+      expect(screen.getByLabelText('Tableau piles')).toBeInTheDocument();
     });
 
-    it('should handle empty children gracefully', () => {
-      render(<LandscapeMobileLayout />);
+    it('should handle empty game state gracefully', () => {
+      const emptyGameState = {
+        ...mockGameState,
+        stockPile: [],
+        wastePile: [],
+        foundationPiles: [[], [], [], []],
+        tableauPiles: [[], [], [], [], [], [], []]
+      };
+
+      const propsWithEmptyState = {
+        ...mockProps,
+        gameState: emptyGameState
+      };
+
+      render(<LandscapeMobileLayout {...propsWithEmptyState} />);
       
-      // Should render without crashing
-      expect(document.body).toBeInTheDocument();
+      // Should render without crashing even with empty state
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
   });
 
@@ -126,7 +155,7 @@ describe('LandscapeMobileLayout Component', () => {
         
         render(<LandscapeMobileLayout {...mockProps} />);
         
-        expect(screen.getByTestId('test-child')).toBeInTheDocument();
+        expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
         
         // Clean up for next iteration
         document.body.innerHTML = '';
@@ -144,7 +173,7 @@ describe('LandscapeMobileLayout Component', () => {
       Object.defineProperty(window, 'innerWidth', { value: 667 });
       Object.defineProperty(window, 'innerHeight', { value: 375 });
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
   });
 
@@ -159,26 +188,30 @@ describe('LandscapeMobileLayout Component', () => {
       
       // Should render quickly
       expect(renderTime).toBeLessThan(100);
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
-    it('should handle complex layouts efficiently', () => {
-      const complexChild = (
-        <div data-testid="complex-landscape-child">
-          <div style={{ display: 'flex', width: '100%' }}>
-            <div style={{ flex: 1 }}>Left Panel</div>
-            <div style={{ flex: 2 }}>Center Content</div>
-            <div style={{ flex: 1 }}>Right Panel</div>
-          </div>
-        </div>
-      );
+    it('should handle complex game state efficiently', () => {
+      // Test with a game state that has many cards
+      const gameStateWithCards = {
+        ...mockGameState,
+        stockPile: Array.from({ length: 52 }, (_, i) => ({
+          id: `card-${i}`,
+          suit: 'hearts' as const,
+          rank: (i % 13) + 1,
+          faceUp: false
+        }))
+      };
 
-      render(<LandscapeMobileLayout>{complexChild}</LandscapeMobileLayout>);
+      const propsWithCards = {
+        ...mockProps,
+        gameState: gameStateWithCards
+      };
+
+      render(<LandscapeMobileLayout {...propsWithCards} />);
       
-      expect(screen.getByTestId('complex-landscape-child')).toBeInTheDocument();
-      expect(screen.getByText('Left Panel')).toBeInTheDocument();
-      expect(screen.getByText('Center Content')).toBeInTheDocument();
-      expect(screen.getByText('Right Panel')).toBeInTheDocument();
+      // When stock pile has cards, the aria-label changes
+      expect(screen.getByLabelText(/Stock pile with \d+ cards/)).toBeInTheDocument();
     });
   });
 
@@ -189,7 +222,7 @@ describe('LandscapeMobileLayout Component', () => {
       
       render(<LandscapeMobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
     it('should handle narrow landscape screens', () => {
@@ -198,26 +231,30 @@ describe('LandscapeMobileLayout Component', () => {
       
       render(<LandscapeMobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
     });
 
-    it('should handle dynamic content changes', () => {
-      const DynamicContent = () => {
-        const [expanded, setExpanded] = React.useState(false);
-        return (
-          <div data-testid="dynamic-landscape-content">
-            <button onClick={() => setExpanded(!expanded)}>
-              {expanded ? 'Collapse' : 'Expand'}
-            </button>
-            {expanded && <div>Expanded content for landscape view</div>}
-          </div>
-        );
-      };
-
-      render(<LandscapeMobileLayout><DynamicContent /></LandscapeMobileLayout>);
+    it('should handle dynamic content', () => {
+      // Test with changing game state
+      const { rerender } = render(<LandscapeMobileLayout {...mockProps} />);
       
-      expect(screen.getByTestId('dynamic-landscape-content')).toBeInTheDocument();
-      expect(screen.getByText('Expand')).toBeInTheDocument();
+      expect(screen.getByLabelText('Empty stock pile')).toBeInTheDocument();
+      
+      // Change game state
+      const newGameState = {
+        ...mockGameState,
+        stockPile: [{ id: 'card-1', suit: 'hearts' as const, rank: 1, faceUp: true }]
+      };
+      
+      const newProps = {
+        ...mockProps,
+        gameState: newGameState
+      };
+      
+      rerender(<LandscapeMobileLayout {...newProps} />);
+      
+      // When stock pile has cards, the aria-label changes
+      expect(screen.getByLabelText(/Stock pile with \d+ cards/)).toBeInTheDocument();
     });
   });
 });

@@ -102,7 +102,7 @@ describe('useGameTimer Hook', () => {
       
       // Start game
       rerender({ gameStarted: true, isGameWon: false });
-      jest.advanceTimersByTime(500);
+      jest.advanceTimersByTime(1000); // Wait for full second
       
       // Pause game
       rerender({ gameStarted: false, isGameWon: false });
@@ -110,14 +110,14 @@ describe('useGameTimer Hook', () => {
       
       // Resume game
       rerender({ gameStarted: true, isGameWon: false });
-      jest.advanceTimersByTime(500);
+      jest.advanceTimersByTime(1000); // Wait for full second
       
       // Win game
       rerender({ gameStarted: true, isGameWon: true });
-      jest.advanceTimersByTime(500);
+      jest.advanceTimersByTime(1000); // Wait for full second - should not increment
       
       // Only the first and third intervals should increment
-      expect(mockSetTimeElapsed).toHaveBeenCalledTimes(1);
+      expect(mockSetTimeElapsed).toHaveBeenCalledTimes(2);
     });
 
     it('should handle multiple game restarts', () => {
