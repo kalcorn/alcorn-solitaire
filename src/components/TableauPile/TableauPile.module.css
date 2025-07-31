@@ -41,10 +41,8 @@
 
 /* Drop zone active state */
 .dropZoneActive {
-  /* Visual feedback for drop zones - subtle enhancement */
-  border: 2px solid rgba(59, 130, 246, 0.3);
-  border-radius: 8px;
-  background: rgba(59, 130, 246, 0.05);
+  /* Drop zone functionality remains active but without visual indicators */
+  /* This prevents blue dot artifacts on empty tableau piles during drag */
 }
 
 /* Force card dimensions within tableau piles - Uses unified sizing */

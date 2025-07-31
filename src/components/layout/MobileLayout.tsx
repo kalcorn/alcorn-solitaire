@@ -13,7 +13,7 @@ interface MobileLayoutProps {
   isZoneHovered: (pileType: "tableau" | "foundation", pileIndex: number) => boolean;
   onStockFlip: () => void;
   onCardClick: (cardId: string, pileType: "tableau" | "foundation" | "waste", pileIndex: number, cardIndex: number) => void;
-  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
+  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
   startDrag: (cards: CardType[], position: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => CardType[];
   cardVisibility?: { [cardId: string]: boolean };

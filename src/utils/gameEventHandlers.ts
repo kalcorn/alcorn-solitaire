@@ -1,20 +1,14 @@
 import { Card, CardPosition } from '@/types';
+import { GameEngine } from '@/engine/GameEngine';
 
-export interface EventHandlers {
+export interface GameEventHandlers {
   handleCardClick: (cardId: string, pileType: 'tableau' | 'foundation' | 'waste', pileIndex: number, cardIndex: number) => void;
-  handleCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position?: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
+  handleCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
   getCardById: (cardId: string) => Card | null;
   getElementPosition: (selector: string) => { x: number; y: number } | null;
 }
 
-export function createEventHandlers(
-  gameState: any,
-  handleAutoMoveToFoundation: (card: Card) => { success: boolean },
-  selectCards: (position: CardPosition, cards: Card[]) => void,
-  getMovableCards: (position: CardPosition) => Card[],
-  startDrag: (cards: Card[], source: CardPosition, event: React.MouseEvent | React.TouchEvent) => void,
-  animateStockFlip: (card: Card, startPos: { x: number; y: number }, endPos: { x: number; y: number }, type: 'stockToWaste' | 'wasteToStock', isLandscapeMobile?: boolean) => void
-): EventHandlers {
+export function createGameEventHandlers(engine: GameEngine): GameEventHandlers {
   let lastClickTime = 0;
   let lastClickedCardId: string | null = null;
 
@@ -29,7 +23,7 @@ export function createEventHandlers(
       // Double-click to auto-move to foundation
       const card = getCardById(cardId);
       if (card) {
-        const result = handleAutoMoveToFoundation(card);
+        const result = engine.autoMoveToFoundation(card);
         if (result.success) {
           return;
         }
@@ -39,40 +33,34 @@ export function createEventHandlers(
     // Try auto-move to foundation on single click first
     const card = getCardById(cardId);
     if (card) {
-      const result = handleAutoMoveToFoundation(card);
+      const result = engine.autoMoveToFoundation(card);
       if (result.success) {
         return;
       }
     }
     
     // If auto-move failed, proceed with selection
-    const movableCards = getMovableCards({ pileType, pileIndex, cardIndex });
+    const position: CardPosition = { pileType, pileIndex, cardIndex };
+    const movableCards = engine.getMovableCards(position);
     if (movableCards.length > 0) {
-      selectCards({ pileType, pileIndex, cardIndex }, movableCards);
+      engine.selectCard(card!, position);
     }
   };
 
-  const handleCardDragStart = (cardId: string, event: React.MouseEvent | React.TouchEvent, position?: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => {
+  const handleCardDragStart = (cardId: string, event: React.MouseEvent | React.TouchEvent) => {
     const card = getCardById(cardId);
     if (!card) return;
 
-    // If position is provided (from TableauPile), use it directly
-    if (position) {
-      const movableCards = getMovableCards(position);
-      if (movableCards.length > 0) {
-        startDrag(movableCards, position, event);
-      }
-      return;
-    }
-
-    // Find the card's position (fallback for other pile types)
+    // Find the card's position
     let pileType: 'tableau' | 'foundation' | 'waste' = 'waste';
     let pileIndex = 0;
     let cardIndex = -1;
 
+    const state = engine.getState();
+
     // Check tableau piles
-    for (let i = 0; i < gameState.tableauPiles.length; i++) {
-      const pile = gameState.tableauPiles[i];
+    for (let i = 0; i < state.tableauPiles.length; i++) {
+      const pile = state.tableauPiles[i];
       const foundIndex = pile.findIndex((c: Card) => c.id === cardId);
       if (foundIndex !== -1) {
         pileType = 'tableau';
@@ -84,8 +72,8 @@ export function createEventHandlers(
 
     // Check foundation piles
     if (cardIndex === -1) {
-      for (let i = 0; i < gameState.foundationPiles.length; i++) {
-        const pile = gameState.foundationPiles[i];
+      for (let i = 0; i < state.foundationPiles.length; i++) {
+        const pile = state.foundationPiles[i];
         const foundIndex = pile.findIndex((c: Card) => c.id === cardId);
         if (foundIndex !== -1) {
           pileType = 'foundation';
@@ -98,7 +86,7 @@ export function createEventHandlers(
 
     // Check waste pile
     if (cardIndex === -1) {
-      const foundIndex = gameState.wastePile.findIndex((c: Card) => c.id === cardId);
+      const foundIndex = state.wastePile.findIndex((c: Card) => c.id === cardId);
       if (foundIndex !== -1) {
         pileType = 'waste';
         pileIndex = 0;
@@ -107,35 +95,17 @@ export function createEventHandlers(
     }
 
     if (cardIndex !== -1) {
-      const movableCards = getMovableCards({ pileType, pileIndex, cardIndex });
+      const position: CardPosition = { pileType, pileIndex, cardIndex };
+      const movableCards = engine.getMovableCards(position);
       if (movableCards.length > 0) {
-        startDrag(movableCards, { pileType, pileIndex, cardIndex }, event);
+        // This will be handled by the drag and drop system
+        // The drag system should call engine.selectCard with the position
       }
     }
   };
 
   const getCardById = (cardId: string): Card | null => {
-    // Search in tableau piles
-    for (const pile of gameState.tableauPiles) {
-      const card = pile.find((c: Card) => c.id === cardId);
-      if (card) return card;
-    }
-
-    // Search in foundation piles
-    for (const pile of gameState.foundationPiles) {
-      const card = pile.find((c: Card) => c.id === cardId);
-      if (card) return card;
-    }
-
-    // Search in waste pile
-    const wasteCard = gameState.wastePile.find((c: Card) => c.id === cardId);
-    if (wasteCard) return wasteCard;
-
-    // Search in stock pile
-    const stockCard = gameState.stockPile.find((c: Card) => c.id === cardId);
-    if (stockCard) return stockCard;
-
-    return null;
+    return engine.getCardById(cardId);
   };
 
   const getElementPosition = (selector: string) => {

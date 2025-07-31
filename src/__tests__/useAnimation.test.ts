@@ -132,9 +132,9 @@ describe('useAnimation Hook', () => {
 
   describe('animateShuffle', () => {
     it('should call animateElement for shuffle animation', async () => {
-      const { animateElement } = require('../utils/animationEngine');
+      const { animateElementSequence } = require('../utils/animationEngine');
       const { result } = renderHook(() => useAnimation());
-      
+
       const cards = [
         { id: 'card1', suit: 'hearts' as const, rank: 1, faceUp: true },
         { id: 'card2', suit: 'diamonds' as const, rank: 2, faceUp: true }
@@ -147,7 +147,7 @@ describe('useAnimation Hook', () => {
       
       await result.current.animateShuffle(cards, fromElements, toElement);
       
-      expect(animateElement).toHaveBeenCalledTimes(2);
+      expect(animateElementSequence).toHaveBeenCalledTimes(1);
     });
 
     it('should handle empty elements array', async () => {
@@ -159,7 +159,7 @@ describe('useAnimation Hook', () => {
     });
 
     it('should handle shuffle with stagger delay', async () => {
-      const { animateElement } = require('../utils/animationEngine');
+      const { animateElementSequence } = require('../utils/animationEngine');
       const { result } = renderHook(() => useAnimation());
       
       const cards = [
@@ -174,7 +174,7 @@ describe('useAnimation Hook', () => {
       
       await result.current.animateShuffle(cards, fromElements, toElement);
       
-      expect(animateElement).toHaveBeenCalledTimes(2);
+      expect(animateElementSequence).toHaveBeenCalledTimes(1);
     });
 
     it('should handle null target element', async () => {

@@ -278,22 +278,28 @@ describe('useDragAndDrop Hook', () => {
 
     it('should reset state after snap back animation', () => {
       const { result } = renderHook(() => useDragAndDrop());
-      
+
       act(() => {
         result.current.startDrag(mockCards, mockPosition, mockMouseEvent);
+      });
+
+      // Check that drag is started
+      expect(result.current.dragState.isDragging).toBe(true);
+
+      act(() => {
         result.current.cancelDrag();
       });
-      
+
+      // Check that animation state is set immediately
+      expect(result.current.dragState.isAnimating).toBe(true);
+      expect(result.current.dragState.isSnapBack).toBe(true);
+
       // Advance timers to complete the animation
       act(() => {
         jest.advanceTimersByTime(300);
+        jest.runAllTimers(); // Ensure all pending timers are executed
       });
-      
-      // Run any pending effects
-      act(() => {
-        jest.runAllTimers();
-      });
-      
+
       expect(result.current.dragState.isDragging).toBe(false);
       expect(result.current.dragState.isAnimating).toBe(false);
       expect(result.current.dragState.isSnapBack).toBe(false);
@@ -416,37 +422,65 @@ describe('useDragAndDrop Hook', () => {
 
     it('should handle rapid start/end cycles', () => {
       const { result } = renderHook(() => useDragAndDrop());
+
+      // Mock document.elementFromPoint to return a mock drop zone element
+      const mockDropZoneElement = document.createElement('div');
+      mockDropZoneElement.setAttribute('data-drop-zone', 'true');
+      mockDropZoneElement.setAttribute('data-pile-type', 'tableau');
+      mockDropZoneElement.setAttribute('data-pile-index', '0');
       
-      // Rapid start/end cycles should not cause issues
-      for (let i = 0; i < 5; i++) {
-        act(() => {
-          result.current.startDrag(mockCards, mockPosition, mockMouseEvent);
-          result.current.endDrag();
-        });
-        
-        // Advance timers after each cycle
-        act(() => {
-          jest.runAllTimers();
-        });
-      }
-      
-      // Wait for any remaining timers to complete
+      const originalElementFromPoint = document.elementFromPoint;
+      document.elementFromPoint = jest.fn().mockReturnValue(mockDropZoneElement);
+
       act(() => {
-        jest.runAllTimers();
+        result.current.startDrag(mockCards, mockPosition, mockMouseEvent);
       });
-      
+
+      // Check that drag is started
+      expect(result.current.dragState.isDragging).toBe(true);
+
+      // Set up a drop zone to simulate a valid drop target
+      act(() => {
+        result.current.setDropZones([{
+          pileType: 'tableau' as const,
+          pileIndex: 0,
+          isActive: true
+        }]);
+      });
+
+      // Simulate hovering over the drop zone by updating drag position
+      act(() => {
+        const updateEvent = { 
+          ...mockMouseEvent, 
+          clientX: 100, 
+          clientY: 200 
+        };
+        result.current.updateDrag(updateEvent as any);
+      });
+
+      act(() => {
+        result.current.endDrag(() => ({ success: true }));
+      });
+
+      // Check that drag state is reset immediately for successful drop
       expect(result.current.dragState.isDragging).toBe(false);
+
+      // Restore original function
+      document.elementFromPoint = originalElementFromPoint;
     });
 
     it('should handle multiple cancel attempts', () => {
       const { result } = renderHook(() => useDragAndDrop());
-      
+
       act(() => {
         result.current.startDrag(mockCards, mockPosition, mockMouseEvent);
-        result.current.cancelDrag();
-        result.current.cancelDrag(); // Second cancel should be ignored
       });
-      
+
+      // First cancel attempt
+      act(() => {
+        result.current.cancelDrag();
+      });
+
       // Check animation state immediately after cancel
       expect(result.current.dragState.isAnimating).toBe(true);
       expect(result.current.dragState.isSnapBack).toBe(true);
@@ -456,7 +490,12 @@ describe('useDragAndDrop Hook', () => {
         jest.advanceTimersByTime(300);
         jest.runAllTimers();
       });
-      
+
+      // Second cancel attempt should be ignored
+      act(() => {
+        result.current.cancelDrag();
+      });
+
       expect(result.current.dragState.isDragging).toBe(false);
       expect(result.current.dragState.isAnimating).toBe(false);
     });

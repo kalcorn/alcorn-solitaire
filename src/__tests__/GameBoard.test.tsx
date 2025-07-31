@@ -28,10 +28,10 @@ jest.mock('../components/layout/LandscapeMobileLayout', () => {
   };
 });
 
-// Mock all required hooks and utilities
-jest.mock('../hooks/useGameState', () => ({
-  useGameState: () => ({
-    gameState: {
+// Mock the new useGameEngine hook
+jest.mock('../hooks/useGameEngine', () => ({
+  useGameEngine: () => ({
+    state: {
       stockPile: [],
       wastePile: [],
       foundationPiles: [[], [], [], []],
@@ -66,28 +66,56 @@ jest.mock('../hooks/useGameState', () => ({
       gameStartTime: Date.now()
     },
     timeElapsed: 0,
-    startNewGame: jest.fn(),
-    moveCards: jest.fn().mockReturnValue({ success: true }),
-    handleCardClick: jest.fn(),
-    handleCardDragStart: jest.fn(),
-    handleCardDrop: jest.fn(),
-    handleStockClick: jest.fn(),
-    handleNewGame: jest.fn(),
-    handleUndo: jest.fn(),
-    handleRedo: jest.fn(),
-    handleSettingsChange: jest.fn(),
-    handleHint: jest.fn(),
-    handleAutoMove: jest.fn(),
-    handleAutoMoveToFoundation: jest.fn(),
-    selectCards: jest.fn(),
-    getMovableCards: jest.fn().mockReturnValue([]),
-    updateSettings: jest.fn(),
-    undo: jest.fn(),
-    canUndo: jest.fn().mockReturnValue(false),
-    flipStock: jest.fn(),
-    moveCard: jest.fn(),
-    canMoveCard: jest.fn().mockReturnValue(false),
-    getValidMoves: jest.fn().mockReturnValue([])
+    gameStarted: false,
+    isHydrated: true,
+    actions: {
+      moveCards: jest.fn().mockReturnValue({ success: true }),
+      flipStock: jest.fn().mockReturnValue({ success: true }),
+      startNewGame: jest.fn(),
+      undo: jest.fn(),
+      autoMoveToFoundation: jest.fn(),
+      selectCards: jest.fn(),
+      deselectCards: jest.fn(),
+      updateSettings: jest.fn(),
+      getMovableCards: jest.fn().mockReturnValue([]),
+      canDropAtPosition: jest.fn().mockReturnValue(false),
+      getCardById: jest.fn(),
+      canUndo: jest.fn().mockReturnValue(false),
+      engine: {
+        getState: jest.fn(),
+        moveCards: jest.fn(),
+        flipStock: jest.fn(),
+        startNewGame: jest.fn(),
+        undo: jest.fn(),
+        autoMoveToFoundation: jest.fn(),
+        selectCard: jest.fn(),
+        deselectCards: jest.fn(),
+        updateSettings: jest.fn(),
+        getMovableCards: jest.fn(),
+        canDropAtPosition: jest.fn(),
+        getCardById: jest.fn(),
+        getStateManager: jest.fn().mockReturnValue({
+          canUndo: jest.fn().mockReturnValue(false)
+        })
+      }
+    },
+    engine: {
+      getState: jest.fn(),
+      moveCards: jest.fn(),
+      flipStock: jest.fn(),
+      startNewGame: jest.fn(),
+      undo: jest.fn(),
+      autoMoveToFoundation: jest.fn(),
+      selectCard: jest.fn(),
+      deselectCards: jest.fn(),
+      updateSettings: jest.fn(),
+      getMovableCards: jest.fn(),
+      canDropAtPosition: jest.fn(),
+      getCardById: jest.fn(),
+      getStateManager: jest.fn().mockReturnValue({
+        canUndo: jest.fn().mockReturnValue(false)
+      })
+    }
   })
 }));
 
@@ -97,20 +125,19 @@ jest.mock('../hooks/useDragAndDrop', () => ({
       isDragging: false,
       draggedCards: [],
       dragSource: null,
-      dragOffset: { x: 0, y: 0 }
+      dragOffset: { x: 0, y: 0 },
+      dragPosition: { x: 0, y: 0 },
+      isAnimating: false,
+      isSnapBack: false
     },
     startDrag: jest.fn(),
-    endDrag: jest.fn(),
     updateDrag: jest.fn(),
+    endDrag: jest.fn(),
     cancelDrag: jest.fn(),
     isZoneHovered: jest.fn().mockReturnValue(false),
     isCardBeingDragged: jest.fn().mockReturnValue(false),
     getDragPreviewStyle: jest.fn().mockReturnValue({}),
-    hoveredZone: null,
-    handleDragStart: jest.fn(),
-    handleDragEnd: jest.fn(),
-    handleDragOver: jest.fn(),
-    handleDrop: jest.fn()
+    hoveredZone: null
   })
 }));
 
@@ -121,38 +148,16 @@ jest.mock('../hooks/useGameAnimations', () => ({
     isWinAnimating: false,
     triggerShuffleAnimation: jest.fn(),
     resetShuffleAnimation: jest.fn(),
-    animateStockFlip: jest.fn(),
-    isAnimating: false,
-    animationQueue: [],
-    addAnimation: jest.fn(),
-    clearAnimations: jest.fn(),
-    animateCardMove: jest.fn()
+    animateStockFlip: jest.fn()
   })
 }));
 
-jest.mock('../hooks/useGameTimer', () => ({
-  useGameTimer: () => ({
-    elapsedTime: 0,
-    isRunning: false,
-    startTimer: jest.fn(),
-    stopTimer: jest.fn(),
-    resetTimer: jest.fn()
-  })
-}));
-
-jest.mock('../hooks/useUndo', () => ({
-  useUndo: () => ({
-    canUndo: false,
-    canRedo: false,
-    undo: jest.fn(),
-    redo: jest.fn()
-  })
-}));
-
-jest.mock('../hooks/useGameHydration', () => ({
-  useGameHydration: () => ({
-    isHydrated: true,
-    shouldRender: true
+jest.mock('../utils/gameEventHandlers', () => ({
+  createGameEventHandlers: () => ({
+    handleCardClick: jest.fn(),
+    handleCardDragStart: jest.fn(),
+    getCardById: jest.fn(),
+    getElementPosition: jest.fn()
   })
 }));
 
@@ -161,119 +166,68 @@ jest.mock('../utils/hydrationUtils', () => ({
 }));
 
 jest.mock('../utils/soundUtils', () => ({
-  playSoundEffect: jest.fn()
+  playSoundEffect: {
+    shuffle: jest.fn(),
+    cardFlip: jest.fn(),
+    cardMove: jest.fn(),
+    cardDrop: jest.fn(),
+    win: jest.fn(),
+    error: jest.fn()
+  }
 }));
 
-jest.mock('../utils/animationEngine', () => ({
-  animateElement: jest.fn()
-}));
-
-jest.mock('../utils/eventHandlers', () => ({
-  createEventHandlers: () => ({
-    handleKeyDown: jest.fn(),
-    handleMouseMove: jest.fn(),
-    handleMouseUp: jest.fn()
-  })
-}));
-
-jest.mock('../utils/cardDimensions', () => ({
-  getCardDimensions: () => ({
-    width: 52,
-    height: 72,
-    widthPx: '52px',
-    heightPx: '72px',
-    aspectRatio: 52 / 72
-  })
-}));
-
-// Mock all child components to prevent complex rendering
-jest.mock('../components/StockPile/StockPile', () => {
-  return function MockStockPile() {
-    return <div data-testid="stock-pile">StockPile</div>;
-  };
-});
-
-jest.mock('../components/WastePile/WastePile', () => {
-  return function MockWastePile() {
-    return <div data-testid="waste-pile">WastePile</div>;
-  };
-});
-
-jest.mock('../components/FoundationPile/FoundationPile', () => {
-  return function MockFoundationPile() {
-    return <div data-testid="foundation-pile">FoundationPile</div>;
-  };
-});
-
-jest.mock('../components/TableauPile/TableauPile', () => {
-  return function MockTableauPile() {
-    return <div data-testid="tableau-pile">TableauPile</div>;
+// Mock all the component dependencies
+jest.mock('../components/GameLayout', () => {
+  return function MockGameLayout(props: any) {
+    return <div data-testid="game-layout" {...props} />;
   };
 });
 
 jest.mock('../components/DragPreview/DragPreview', () => {
   return function MockDragPreview() {
-    return <div data-testid="drag-preview">DragPreview</div>;
+    return <div data-testid="drag-preview" />;
   };
 });
 
 jest.mock('../components/WinOverlay', () => {
   return function MockWinOverlay() {
-    return <div data-testid="win-overlay">WinOverlay</div>;
+    return <div data-testid="win-overlay" />;
   };
 });
 
 jest.mock('../components/ParticleEffects', () => {
   return function MockParticleEffects() {
-    return <div data-testid="particle-effects">ParticleEffects</div>;
+    return <div data-testid="particle-effects" />;
   };
 });
 
 jest.mock('../components/Header/Header', () => {
   return function MockHeader() {
-    return <div data-testid="header">Header</div>;
+    return <div data-testid="header" />;
   };
 });
 
 jest.mock('../components/SettingsPanel', () => {
   return function MockSettingsPanel() {
-    return <div data-testid="settings-panel">SettingsPanel</div>;
+    return <div data-testid="settings-panel" />;
   };
 });
 
 jest.mock('../components/HintsPanel', () => {
   return function MockHintsPanel() {
-    return <div data-testid="hints-panel">HintsPanel</div>;
+    return <div data-testid="hints-panel" />;
   };
 });
 
 jest.mock('../components/UndoRedoButtons', () => {
   return function MockUndoRedoButtons() {
-    return <div data-testid="undo-redo-buttons">UndoRedoButtons</div>;
+    return <div data-testid="undo-redo-buttons" />;
   };
 });
 
 jest.mock('../components/SubtleHints', () => {
   return function MockSubtleHints() {
-    return <div data-testid="subtle-hints">SubtleHints</div>;
-  };
-});
-
-jest.mock('../components/AnimatedCard/AnimatedCard', () => {
-  return function MockAnimatedCard() {
-    return <div data-testid="animated-card">AnimatedCard</div>;
-  };
-});
-
-jest.mock('../components/FlyingCards/FlyingCards', () => {
-  return function MockFlyingCards() {
-    return <div data-testid="flying-cards">FlyingCards</div>;
-  };
-});
-
-jest.mock('../components/BridgeCards', () => {
-  return function MockBridgeCards() {
-    return <div data-testid="bridge-cards">BridgeCards</div>;
+    return <div data-testid="subtle-hints" />;
   };
 });
 
@@ -330,31 +284,25 @@ describe('GameBoard', () => {
   });
 
   describe('Layout rendering', () => {
-    it('should render desktop layout for wide screens', () => {
+    it('should render game layout', () => {
       window.innerWidth = 1024;
       window.innerHeight = 768;
       
       render(<GameBoard />);
       
-      expect(screen.getByTestId('desktop-layout')).toBeInTheDocument();
+      expect(screen.getByTestId('game-layout')).toBeInTheDocument();
     });
 
-    it('should render mobile layout for narrow screens', () => {
-      window.innerWidth = 375;
-      window.innerHeight = 667;
-      
+    it('should render all required components', () => {
       render(<GameBoard />);
       
-      expect(screen.getByTestId('mobile-layout')).toBeInTheDocument();
-    });
-
-    it('should render landscape mobile layout for landscape orientation', () => {
-      window.innerWidth = 667;
-      window.innerHeight = 375;
-      
-      render(<GameBoard />);
-      
-      expect(screen.getByTestId('landscape-mobile-layout')).toBeInTheDocument();
+      expect(screen.getByTestId('header')).toBeInTheDocument();
+      expect(screen.getByTestId('game-layout')).toBeInTheDocument();
+      expect(screen.getByTestId('drag-preview')).toBeInTheDocument();
+      expect(screen.getByTestId('particle-effects')).toBeInTheDocument();
+      expect(screen.getByTestId('subtle-hints')).toBeInTheDocument();
+      expect(screen.getByTestId('undo-redo-buttons')).toBeInTheDocument();
+      expect(screen.getByTestId('win-overlay')).toBeInTheDocument();
     });
   });
 
@@ -363,17 +311,17 @@ describe('GameBoard', () => {
       render(<GameBoard />);
       
       // Component should render successfully
-      expect(screen.getByTestId('desktop-layout')).toBeInTheDocument();
+      expect(screen.getByTestId('game-layout')).toBeInTheDocument();
     });
 
     it('should pass game state to layout components', () => {
       render(<GameBoard />);
       
-      const layout = screen.getByTestId('desktop-layout');
+      const layout = screen.getByTestId('game-layout');
       expect(layout).toBeInTheDocument();
       
       // Layout should receive game state and handlers as props
-      expect(layout).toHaveAttribute('data-testid', 'desktop-layout');
+      expect(layout).toHaveAttribute('data-testid', 'game-layout');
     });
   });
 
@@ -381,17 +329,17 @@ describe('GameBoard', () => {
     it('should handle window resize', () => {
       render(<GameBoard />);
       
-      // Initially desktop layout
-      expect(screen.getByTestId('desktop-layout')).toBeInTheDocument();
+      // Initially game layout
+      expect(screen.getByTestId('game-layout')).toBeInTheDocument();
       
       // Simulate window resize to mobile
       window.innerWidth = 375;
       window.innerHeight = 667;
       fireEvent.resize(window);
       
-      // Should still show desktop layout since component doesn't re-render on resize
+      // Should still show game layout since component doesn't re-render on resize
       // This is expected behavior as layout is determined on initial render
-      expect(screen.getByTestId('desktop-layout')).toBeInTheDocument();
+      expect(screen.getByTestId('game-layout')).toBeInTheDocument();
     });
   });
 
@@ -400,7 +348,7 @@ describe('GameBoard', () => {
       // Component should render even with minimal setup
       render(<GameBoard />);
       
-      expect(screen.getByTestId('desktop-layout')).toBeInTheDocument();
+      expect(screen.getByTestId('game-layout')).toBeInTheDocument();
     });
   });
 });

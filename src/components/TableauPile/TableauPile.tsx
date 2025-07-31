@@ -11,7 +11,7 @@ interface TableauPileProps {
   cards: CardType[];
   index: number; // Add index prop for pile identification
   onCardClick?: (cardId: string) => void;
-  onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
+  onCardDragStart?: (cardId: string, event: React.MouseEvent | React.TouchEvent, position: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
   isDropZone?: boolean;
   isCardBeingDragged?: (cardId: string) => boolean;
 }
@@ -140,8 +140,8 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, index, onCardClick, on
             cardId={card.id}
             isBeingDragged={isCardBeingDragged ? isCardBeingDragged(card.id) : false}
             onClick={() => onCardClick && onCardClick(card.id)}
-            onMouseDown={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e)}
-            onTouchStart={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e)}
+            onMouseDown={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e, { pileType: 'tableau' as const, pileIndex: index, cardIndex })}
+            onTouchStart={(e) => card.draggable && onCardDragStart && onCardDragStart(card.id, e, { pileType: 'tableau' as const, pileIndex: index, cardIndex })}
           />
         </div>
         ))

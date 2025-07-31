@@ -7,7 +7,7 @@ interface TableauSectionProps {
   isCardBeingDragged: (cardId: string) => boolean;
   isZoneHovered: (pileType: 'tableau', pileIndex: number) => boolean;
   onCardClick: (cardId: string, pileType: 'tableau', pileIndex: number, cardIndex: number) => void;
-  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
+  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
   startDrag: (cards: Card[], source: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => Card[];
 }
@@ -41,13 +41,10 @@ const TableauSection: React.FC<TableauSectionProps> = ({
                 onCardClick(cardId, 'tableau', i, cardIndex);
               }
             }}
-            onCardDragStart={(cardId, event) => {
-              const cardIndex = pile.findIndex(c => c.id === cardId);
-              if (cardIndex !== -1) {
-                const movableCards = getMovableCards({ pileType: 'tableau', pileIndex: i, cardIndex });
-                if (movableCards.length > 0) {
-                  startDrag(movableCards, { pileType: 'tableau', pileIndex: i, cardIndex }, event);
-                }
+            onCardDragStart={(cardId, event, position) => {
+              const movableCards = getMovableCards(position);
+              if (movableCards.length > 0) {
+                startDrag(movableCards, position, event);
               }
             }}
             isCardBeingDragged={isCardBeingDragged}

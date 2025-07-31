@@ -174,31 +174,45 @@ export function useDragAndDrop() {
   }, [dragState.isDragging]);
 
   /**
-   * Ends drag operation
+   * Ends drag operation and attempts to drop cards
    */
-  const endDrag = useCallback((onDrop?: (source: CardPosition, target: CardPosition, cards: Card[]) => { success: boolean; error?: string }) => {
+  const endDrag = useCallback((onMoveCards?: (from: CardPosition, to: CardPosition, cards: Card[]) => any) => {
     if (!dragState.isDragging) return null;
 
-    const result = {
-      source: dragState.dragSource!,
-      target: hoveredZone ? {
-        pileType: hoveredZone.pileType,
-        pileIndex: hoveredZone.pileIndex,
-        cardIndex: 0
-      } as CardPosition : null,
-      cards: dragState.draggedCards
-    };
+    // If no hovered zone, treat as failed drop
+    if (!hoveredZone) {
+      setDragState(prev => ({
+        ...prev,
+        isSnapBack: true,
+        isAnimating: true
+      }));
 
-    let dropSuccessful = false;
-
-    // Call drop handler if provided and we have a valid target
-    if (onDrop && result.target) {
-      const dropResult = onDrop(result.source, result.target, result.cards);
-      dropSuccessful = dropResult.success;
+      // After snap-back animation, reset state
+      setTimeout(() => {
+        setDragState({
+          isDragging: false,
+          draggedCards: [],
+          dragSource: null,
+          dragOffset: { x: 0, y: 0 },
+          dragPosition: { x: 0, y: 0 },
+          isAnimating: false,
+          isSnapBack: false
+        });
+        setDropZones([]);
+        setHoveredZone(null);
+      }, 300); // Match animation duration
+      
+      return { success: false };
     }
 
+    const result = onMoveCards?.(dragState.dragSource!, {
+      pileType: hoveredZone.pileType,
+      pileIndex: hoveredZone.pileIndex,
+      cardIndex: 0
+    }, dragState.draggedCards) || { success: false };
+
     // If drop failed or no valid target, trigger snap-back animation
-    if (!dropSuccessful) {
+    if (!result.success) {
       // Immediately clear hover zone to remove green border
       setHoveredZone(null);
       
@@ -254,8 +268,7 @@ export function useDragAndDrop() {
 
     // After snap-back animation, reset state
     setTimeout(() => {
-      setDragState(prev => ({
-        ...prev,
+      setDragState({
         isDragging: false,
         draggedCards: [],
         dragSource: null,
@@ -263,7 +276,7 @@ export function useDragAndDrop() {
         dragPosition: { x: 0, y: 0 },
         isAnimating: false,
         isSnapBack: false
-      }));
+      });
       setDropZones([]);
       setHoveredZone(null);
     }, 300); // Match animation duration

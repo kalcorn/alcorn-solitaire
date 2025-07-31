@@ -2,12 +2,13 @@ import { renderHook, act } from '@testing-library/react';
 import { useGameAnimations } from '../hooks/useGameAnimations';
 
 // Mock dependencies
+const mockAnimateStockFlip = jest.fn(() => Promise.resolve());
 jest.mock('../hooks/useAnimation', () => ({
   useAnimation: () => ({
     animateMove: jest.fn(() => Promise.resolve()),
     animateFlip: jest.fn(() => Promise.resolve()),
     animateShuffle: jest.fn(() => Promise.resolve()),
-    animateStockFlip: jest.fn(() => Promise.resolve())
+    animateStockFlip: mockAnimateStockFlip
   })
 }));
 
@@ -25,6 +26,17 @@ jest.mock('../utils/soundUtils', () => ({
     click: jest.fn()
   },
   initializeSoundSystem: jest.fn()
+}));
+
+// Mock the pile registration hook
+jest.mock('../hooks/usePileRegistration', () => ({
+  usePileElements: () => ({
+    getPileElement: jest.fn((pileId: string) => {
+      // Return null to force the fallback path that calls newAnimateStockFlip
+      return null;
+    }),
+    getAllPileElements: jest.fn(() => new Map())
+  })
 }));
 
 describe('useGameAnimations Hook', () => {
@@ -142,8 +154,6 @@ describe('useGameAnimations Hook', () => {
 
   describe('animateStockFlip', () => {
     it('should execute stock flip animation', async () => {
-      const { useAnimation } = require('../hooks/useAnimation');
-      const animationMocks = useAnimation();
       const { result } = renderHook(() => useGameAnimations(mockGameState));
       const mockCard = { id: 'test-card', suit: 'hearts' as const, rank: 1, faceUp: true };
       
@@ -151,7 +161,13 @@ describe('useGameAnimations Hook', () => {
         await result.current.animateStockFlip(mockCard);
       });
       
-      expect(animationMocks.animateStockFlip).toHaveBeenCalled();
+      // The function should be called with mock elements since pile elements are not found
+      // Note: animateStockFlip is destructured as newAnimateStockFlip in useGameAnimations
+      expect(mockAnimateStockFlip).toHaveBeenCalledWith(
+        mockCard,
+        expect.any(HTMLElement), // mockStockElement
+        expect.any(HTMLElement)  // mockWasteElement
+      );
     });
 
     it('should handle null elements gracefully', async () => {
@@ -311,18 +327,23 @@ describe('useGameAnimations Hook', () => {
 
   describe('Error handling', () => {
     it('should handle animation errors gracefully', async () => {
-      const { useAnimation } = require('../hooks/useAnimation');
-      useAnimation().animateStockFlip.mockRejectedValueOnce(new Error('Animation failed'));
-      
+      mockAnimateStockFlip.mockRejectedValueOnce(new Error('Animation failed'));
       const { result } = renderHook(() => useGameAnimations(mockGameState));
-      
       const mockCard = { id: 'test-card', suit: 'hearts' as const, rank: 1, faceUp: true };
-      
+
       await act(async () => {
         await expect(
           result.current.animateStockFlip(mockCard)
         ).rejects.toThrow('Animation failed');
       });
+      
+      // The function should be called with mock elements since pile elements are not found
+      // Note: animateStockFlip is destructured as newAnimateStockFlip in useGameAnimations
+      expect(mockAnimateStockFlip).toHaveBeenCalledWith(
+        mockCard,
+        expect.any(HTMLElement), // mockStockElement
+        expect.any(HTMLElement)  // mockWasteElement
+      );
     });
 
     it('should handle invalid elements', async () => {
