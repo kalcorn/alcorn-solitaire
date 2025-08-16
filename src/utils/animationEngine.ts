@@ -10,6 +10,7 @@ export interface AnimationConfig {
   type: 'move' | 'flip' | 'shuffle';
   duration: number;
   initialRotation?: string;
+  card?: Card;
   onComplete?: () => void;
 }
 
@@ -139,12 +140,12 @@ function createAnimationElement(
       faceUpSide.classList.add('Card_faceUp___BDaO');
       
       // Create proper face-up card structure matching the Card component
-      const card = { 
+      const card = options.card || { 
         id: 'flip-card',
         rank: 1, 
         suit: 'spades', 
         faceUp: false 
-      } as Card; // Assuming a default Card structure for now
+      } as Card;
       const displayRank = card.rank === 1 ? 'A' : card.rank === 11 ? 'J' : card.rank === 12 ? 'Q' : card.rank === 13 ? 'K' : card.rank.toString();
       const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
       const suitColor = isRed ? 'text-red-600' : 'text-black';

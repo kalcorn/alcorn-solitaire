@@ -101,6 +101,7 @@ export function useAnimation(): AnimationHook {
     return animateElement(stockElement, wasteElement, {
       type: 'flip',
       duration: 600,
+      card,
       onComplete
     });
   }, []);

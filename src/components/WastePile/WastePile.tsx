@@ -36,13 +36,11 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
     >
       {hasVisibleCards ? (
         <>
-          {/* Full DOM approach: render all cards, apply visual offsets only to top 3 */}
-          {cards.map((card, index) => {
+          {/* Render only the top 3 cards to prevent shadow stacking */}
+          {cards.slice(-3).map((card, sliceIndex) => {
+            const index = cards.length - 3 + sliceIndex; // Calculate original index
             const isTopCard = index === cards.length - 1;
-            // Only apply visual offsets to the top 3 cards (last 3 in the array)
-            // Cards beyond the top 3 should be positioned at the same location
-            const isInTopThree = index >= cards.length - 3;
-            const visualIndex = isInTopThree ? (cards.length - 1 - index) : 0; // 0, 1, 2 for top 3, 0 for rest
+            const visualIndex = 2 - sliceIndex; // 2, 1, 0 for proper stacking order
             
             // Default to visible if cardVisibility is not explicitly set for this card
             // This ensures waste pile cards are visible by default
@@ -54,9 +52,9 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
                 className={isTopCard ? 'visible-card' : 'hidden-card'}
                 style={{
                   position: 'absolute',
-                  left: visualIndex * -1, // 1px offset for visual stacking up-left (only top 3)
-                  top: visualIndex * -1,  // 1px offset for visual stacking up-left (only top 3)
-                  zIndex: index + 1,
+                  left: visualIndex * -1, // 1px offset for visual stacking up-left
+                  top: visualIndex * -1,  // 1px offset for visual stacking up-left
+                  zIndex: sliceIndex + 1, // Simple z-index based on slice position
                   transform: 'translateZ(0)', // GPU acceleration
                   willChange: 'transform'
                 }}

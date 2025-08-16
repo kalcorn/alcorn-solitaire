@@ -103,18 +103,9 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
       }
 
       if (stockElement && wasteElement) {
-        // Use the new animation system if available
-        if (typeof window !== 'undefined') {
-          await animateElement(stockElement, wasteElement, {
-            type: 'flip',
-            duration: 600,
-            onComplete
-          });
-        } else {
-          // Fallback to element-based animation
-          await newAnimateStockFlip(card, stockElement, wasteElement);
-          onComplete?.();
-        }
+        // Use element-based animation that properly handles the card parameter
+        await newAnimateStockFlip(card, stockElement, wasteElement);
+        onComplete?.();
       } else {
         console.warn('Animation elements not found - stock:', !!stockElement, 'waste:', !!wasteElement);
         // For testing purposes, still call the animation function with mock elements

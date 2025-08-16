@@ -46,7 +46,13 @@
       "Bash(wsl ls:*)",
       "Bash(wsl sudo ls:*)",
       "Bash(Get-Date -Format \"yyyy-MM-dd HH:mm:ss\")",
-      "Bash(gemini:*)"
+      "Bash(gemini:*)",
+      "Bash(git push:*)",
+      "Bash(git log:*)",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(git restore:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

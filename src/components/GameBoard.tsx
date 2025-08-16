@@ -63,18 +63,24 @@ const GameBoard: React.FC = () => {
     return result;
   }, [actions, triggerShuffleAnimation]);
 
-  // Simplified stock flip handler
+  // Stock flip handler  
   const handleStockFlip = useCallback(async (event?: React.MouseEvent) => {
-    const result = actions.flipStock(false); // Pass skipSound parameter
+    if (!event) return;
     
-    if (result.success) {
-      // Handle animation if needed
-      if (event) {
-        // Simple animation trigger - the actual animation logic is in useGameAnimations
-        triggerShuffleAnimation();
-      }
+    // First get the card that would be flipped without updating state yet
+    const stockCard = state.stockPile[state.stockPile.length - 1];
+    if (!stockCard) {
+      // Handle empty stock case (recycling) - just call the action
+      actions.flipStock(false);
+      return;
     }
-  }, [actions, triggerShuffleAnimation]);
+    
+    // Start animation first, then update state when animation completes
+    await animateStockFlip(stockCard, undefined, undefined, () => {
+      // Update game state after animation completes
+      actions.flipStock(false);
+    });
+  }, [actions, animateStockFlip, state.stockPile]);
 
   // Simplified new game handler
   const handleNewGame = useCallback(() => {
