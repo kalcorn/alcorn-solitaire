@@ -103,15 +103,15 @@ export function useGameAnimations(gameState?: GameState): GameAnimationHook {
       }
 
       if (stockElement && wasteElement) {
-        // Use element-based animation that properly handles the card parameter
-        await newAnimateStockFlip(card, stockElement, wasteElement);
+        // Use element-based animation that properly handles the card parameter and positions
+        await newAnimateStockFlip(card, stockElement, wasteElement, stockPosition, wastePosition);
         onComplete?.();
       } else {
         console.warn('Animation elements not found - stock:', !!stockElement, 'waste:', !!wasteElement);
         // For testing purposes, still call the animation function with mock elements
         const mockStockElement = document.createElement('div');
         const mockWasteElement = document.createElement('div');
-        await newAnimateStockFlip(card, mockStockElement, mockWasteElement);
+        await newAnimateStockFlip(card, mockStockElement, mockWasteElement, stockPosition, wastePosition);
         onComplete?.();
       }
     } catch (error) {

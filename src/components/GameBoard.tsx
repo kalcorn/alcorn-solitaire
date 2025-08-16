@@ -75,12 +75,54 @@ const GameBoard: React.FC = () => {
       return;
     }
     
+    // Calculate actual top card positions for animation
+    const stockElement = document.querySelector('[data-pile-type="stock"]') as HTMLElement;
+    const wasteElement = document.querySelector('[data-pile-type="waste"]') as HTMLElement;
+    
+    let stockPosition = null;
+    let wastePosition = null;
+    
+    if (stockElement && wasteElement) {
+      const stockRect = stockElement.getBoundingClientRect();
+      const wasteRect = wasteElement.getBoundingClientRect();
+      
+      // Calculate stock pile top card position (matches StockPile.tsx logic)
+      const stockStackOffset = Math.min(4, state.stockPile.length - 1);
+      stockPosition = {
+        x: stockRect.left + stockRect.width / 2 - stockStackOffset,
+        y: stockRect.top + stockRect.height / 2 - stockStackOffset
+      };
+      
+      // Calculate waste pile position where new card should land
+      const currentWasteCount = state.wastePile.length;
+      
+      if (currentWasteCount === 0) {
+        // Empty waste pile: move to placeholder position (final adjustment)
+        wastePosition = {
+          x: wasteRect.left + 20, // 1px more to the left
+          y: wasteRect.top + 34   // Keep y position
+        };
+      } else {
+        // Waste pile has cards: calculate where the NEW card will be positioned
+        // After adding the new card, what will be its position?
+        const newWasteCount = currentWasteCount + 1;
+        const cardsShown = Math.min(3, newWasteCount);
+        const newCardSliceIndex = cardsShown - 1; // New card will be the last in slice
+        const newCardVisualIndex = 2 - newCardSliceIndex;
+        
+        wastePosition = {
+          x: wasteRect.left + 22 + (newCardVisualIndex * -1), // Apply offset where new card will land
+          y: wasteRect.top + 36 + (newCardVisualIndex * -1)   // Apply offset where new card will land
+        };
+      }
+    }
+    
     // Start animation first, then update state when animation completes
-    await animateStockFlip(stockCard, undefined, undefined, () => {
+    await animateStockFlip(stockCard, stockPosition, wastePosition, () => {
       // Update game state after animation completes
       actions.flipStock(false);
     });
-  }, [actions, animateStockFlip, state.stockPile]);
+  }, [actions, animateStockFlip, state.stockPile, state.wastePile]);
 
   // Simplified new game handler
   const handleNewGame = useCallback(() => {

@@ -95,6 +95,8 @@ export function useAnimation(): AnimationHook {
     card: Card,
     stockElement: HTMLElement,
     wasteElement: HTMLElement,
+    fromPosition?: { x: number; y: number } | null,
+    toPosition?: { x: number; y: number } | null,
     onComplete?: () => void,
     onError?: (error: string) => void
   ): Promise<void> => {
@@ -102,6 +104,8 @@ export function useAnimation(): AnimationHook {
       type: 'flip',
       duration: 600,
       card,
+      fromPosition: fromPosition || undefined,
+      toPosition: toPosition || undefined,
       onComplete
     });
   }, []);

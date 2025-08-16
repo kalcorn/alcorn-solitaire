@@ -11,6 +11,8 @@ export interface AnimationConfig {
   duration: number;
   initialRotation?: string;
   card?: Card;
+  fromPosition?: { x: number; y: number };
+  toPosition?: { x: number; y: number };
   onComplete?: () => void;
 }
 
@@ -380,12 +382,12 @@ export async function animateElement(
     
     // Step 1: Get reliable positions (use overrides if provided)
     let positions;
-    if (options.type === 'move' && options.duration) { // Only use overrides for move if duration is provided
+    if (options.fromPosition && options.toPosition) {
       // Use position overrides for precise positioning
       positions = {
         from: {
-          x: 0, // Placeholder, will be replaced by actual fromElement position
-          y: 0, // Placeholder, will be replaced by actual fromElement position
+          x: options.fromPosition.x,
+          y: options.fromPosition.y,
           width: 52, // Standard card width
           height: 72, // Standard card height
           visible: true,
@@ -393,8 +395,8 @@ export async function animateElement(
           source: 'measured' as const
         },
         to: {
-          x: 0, // Placeholder, will be replaced by actual toElement position
-          y: 0, // Placeholder, will be replaced by actual toElement position
+          x: options.toPosition.x,
+          y: options.toPosition.y,
           width: 52,
           height: 72,
           visible: true,
