@@ -45,8 +45,10 @@
       "Bash(wsl redis-server:*)",
       "Bash(wsl ls:*)",
       "Bash(wsl sudo ls:*)",
-      "Bash(Get-Date -Format \"yyyy-MM-dd HH:mm:ss\")"
+      "Bash(Get-Date -Format \"yyyy-MM-dd HH:mm:ss\")",
+      "Bash(gemini:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

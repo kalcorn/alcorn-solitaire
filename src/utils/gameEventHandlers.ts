@@ -3,12 +3,15 @@ import { GameEngine } from '@/engine/GameEngine';
 
 export interface GameEventHandlers {
   handleCardClick: (cardId: string, pileType: 'tableau' | 'foundation' | 'waste', pileIndex: number, cardIndex: number) => void;
-  handleCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent) => void;
+  handleCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position?: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
   getCardById: (cardId: string) => Card | null;
   getElementPosition: (selector: string) => { x: number; y: number } | null;
 }
 
-export function createGameEventHandlers(engine: GameEngine): GameEventHandlers {
+export function createGameEventHandlers(
+  engine: GameEngine,
+  startDrag: (cards: Card[], source: CardPosition, event: React.MouseEvent | React.TouchEvent) => void
+): GameEventHandlers {
   let lastClickTime = 0;
   let lastClickedCardId: string | null = null;
 
@@ -47,11 +50,20 @@ export function createGameEventHandlers(engine: GameEngine): GameEventHandlers {
     }
   };
 
-  const handleCardDragStart = (cardId: string, event: React.MouseEvent | React.TouchEvent) => {
+  const handleCardDragStart = (cardId: string, event: React.MouseEvent | React.TouchEvent, position?: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => {
     const card = getCardById(cardId);
     if (!card) return;
 
-    // Find the card's position
+    // If position is provided (from TableauPile), use it directly for optimization
+    if (position) {
+      const movableCards = engine.getMovableCards(position);
+      if (movableCards.length > 0) {
+        startDrag(movableCards, position, event);
+      }
+      return;
+    }
+
+    // Find the card's position (fallback for other pile types)
     let pileType: 'tableau' | 'foundation' | 'waste' = 'waste';
     let pileIndex = 0;
     let cardIndex = -1;
@@ -98,8 +110,7 @@ export function createGameEventHandlers(engine: GameEngine): GameEventHandlers {
       const position: CardPosition = { pileType, pileIndex, cardIndex };
       const movableCards = engine.getMovableCards(position);
       if (movableCards.length > 0) {
-        // This will be handled by the drag and drop system
-        // The drag system should call engine.selectCard with the position
+        startDrag(movableCards, position, event);
       }
     }
   };

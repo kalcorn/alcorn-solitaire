@@ -13,7 +13,7 @@ interface MobileLayoutProps {
   isZoneHovered: (pileType: "tableau" | "foundation", pileIndex: number) => boolean;
   onStockFlip: () => void;
   onCardClick: (cardId: string, pileType: "tableau" | "foundation" | "waste", pileIndex: number, cardIndex: number) => void;
-  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
+  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position?: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
   startDrag: (cards: CardType[], position: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => CardType[];
   cardVisibility?: { [cardId: string]: boolean };
@@ -38,7 +38,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
       <div className="flex flex-col gap-4 w-full">
         {/* Mobile Top Piles Section - Full Width */}
         <div className="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 bg-opacity-90 py-3 shadow-lg border-y border-slate-600/30">
-          <div className="flex flex-row items-center justify-between w-full px-4">
+          <div className="flex flex-row items-center justify-between w-full px-2">
             <div className="flex flex-row items-center gap-3">
               <StockPile 
                 cards={gameState.stockPile} 
@@ -110,7 +110,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
         </div>
         
         {/* Mobile Tableau Section */}
-        <div className="px-4">
+        <div className="px-2">
           <TableauSection
             tableauPiles={gameState.tableauPiles}
             isCardBeingDragged={isCardBeingDragged}

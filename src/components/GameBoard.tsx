@@ -51,7 +51,7 @@ const GameBoard: React.FC = () => {
   } = useDragAndDrop();
 
   // Create event handlers using the game engine
-  const eventHandlers = createGameEventHandlers(actions.engine);
+  const eventHandlers = createGameEventHandlers(actions.engine, startDrag);
 
   // Enhanced move cards with particle effects
   const handleMoveCards = useCallback((from: CardPosition, to: CardPosition, cards: any[]) => {

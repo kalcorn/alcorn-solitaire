@@ -85,10 +85,7 @@
 /* Face-up card styling */
 .card.faceUp {
   background-color: #ffffff !important;
-  background-image:
-    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.06) 0%, transparent 50%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%);
+  background-image: none;
   color: #f9fafb;
   border-width: 1px;
   border-color: #374151;

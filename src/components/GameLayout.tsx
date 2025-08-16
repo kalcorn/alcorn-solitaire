@@ -10,10 +10,10 @@ interface GameLayoutProps {
   isShuffling: boolean;
   isWinAnimating: boolean;
   isCardBeingDragged: (cardId: string) => boolean;
-  isZoneHovered: (zoneId: string) => boolean;
+  isZoneHovered: (pileType: "tableau" | "foundation", pileIndex: number) => boolean;
   onStockFlip: (event?: React.MouseEvent) => void;
   onCardClick: (cardId: string, pileType: 'tableau' | 'foundation' | 'waste', pileIndex: number, cardIndex: number) => void;
-  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
+  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position?: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
   startDrag: (cards: any[], source: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => any[];
   cardVisibility?: { [cardId: string]: boolean };

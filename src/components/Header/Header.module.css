@@ -15,7 +15,7 @@
   width: 100%;
   max-width: 1152px; /* max-w-6xl */
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 0.5rem; /* 8px margins for mobile alignment */
 }
 
 .headerContent {

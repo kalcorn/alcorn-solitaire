@@ -108,6 +108,12 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, index, onCardClick, on
   };
 
   const cardSpacing = calculateCardSpacing();
+  const { height: cardHeight } = getCardDimensions();
+
+  // Check if all cards are visually hidden due to drag (but still in DOM for drag handling)
+  const allCardsVisuallyHidden = cards.length > 0 && cards.every(card => 
+    isCardBeingDragged ? isCardBeingDragged(card.id) : false
+  );
 
   return (
     <div 
@@ -120,17 +126,21 @@ const TableauPile: React.FC<TableauPileProps> = ({ cards, index, onCardClick, on
       role="list" 
       aria-label="Play pile"
     >
-      {cards.length === 0 ? (
+      {/* Show empty placeholder when pile is actually empty OR all cards are being dragged */}
+      {(cards.length === 0 || allCardsVisuallyHidden) && (
         <div className={styles.tableauEmptyPlaceholder} />
-      ) : (
+      )}
+      
+      {/* Always render cards to maintain drag event handlers */}
+      {cards.length > 0 && (
         cards.map((card, cardIndex) => (
           <div
             key={card.id}
             className={styles.tableauCardPosition}
             style={{ 
               '--card-index': cardIndex,
-              '--dynamic-spacing': `${cardSpacing}px`,
-              top: `${cardIndex * cardSpacing}px`
+              zIndex: cardIndex,
+              marginTop: cardIndex === 0 ? 0 : `${cardSpacing - cardHeight}px`
             } as React.CSSProperties}
           >
           <Card

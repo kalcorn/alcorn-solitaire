@@ -7,9 +7,9 @@
   border-radius: 8px;
   border: 2px dashed rgba(255, 255, 255, 0.3);
   position: relative;
-  overflow: hidden;
   background: transparent;
-  padding: 8px;
+  /* Removed overflow: hidden to allow cards to render at full 49x72px size */
+  /* Removed padding: 8px to allow cards to fill container and cover border */
 }
 
 /* Drop zone styling */

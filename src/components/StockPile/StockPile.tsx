@@ -28,31 +28,35 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
     style={{ position: 'relative', zIndex: 1 }}
     data-pile-type="stock"
   >
-    {/* Dynamic card stack effect based on card count */}
-    {Array.from({ length: Math.min(5, cards.length - 1) }, (_, i) => (
-      <div 
-        key={i}
-        style={{ 
-          position: 'absolute', 
-          left: `${(i + 1) * 1}px`, 
-          top: `${(i + 1) * 1}px`,
-          zIndex: i + 1,
-          opacity: Math.max(0.1, 0.4 - (i * 0.08)),
-          animationDelay: isShuffling ? `${i * 0.08}s` : '0s',
-          pointerEvents: 'none'
-        }}
-        className={isShuffling ? styles.stockShuffleCascade : ''}
-      >
-        <Card
-          suit="hearts"
-          rank={1}
-          faceUp={false}
-          cardId={`stock-stack-${i}`}
-          isBeingDragged={false}
-        />
-      </div>
-    ))}
-    {/* Top card */}
+    {/* Dynamic card stack effect based on card count - bottom cards stay stationary */}
+    {Array.from({ length: Math.min(5, cards.length - 1) }, (_, i) => {
+      // Position cards from bottom up - bottom card at 0,0, then stack upward
+      const stackPosition = i;
+      return (
+        <div 
+          key={i}
+          style={{ 
+            position: 'absolute', 
+            left: `${stackPosition * -1}px`, 
+            top: `${stackPosition * -1}px`,
+            zIndex: i + 1,
+            opacity: Math.max(0.1, 0.4 - (i * 0.08)),
+            animationDelay: isShuffling ? `${i * 0.08}s` : '0s',
+            pointerEvents: 'none'
+          }}
+          className={isShuffling ? styles.stockShuffleCascade : ''}
+        >
+          <Card
+            suit="hearts"
+            rank={1}
+            faceUp={false}
+            cardId={`stock-stack-${i}`}
+            isBeingDragged={false}
+          />
+        </div>
+      );
+    })}
+    {/* Top card - positioned at stack height */}
     {cards.length > 0 ? (
       <div
         role="button"
@@ -61,8 +65,8 @@ const StockPile: React.FC<StockPileProps> = ({ cards, onClick, cyclesRemaining, 
         aria-disabled={!canCycle}
         style={{ 
           position: 'absolute', 
-          top: 0, 
-          left: 0, 
+          top: `${Math.min(4, cards.length - 1) * -1}px`, 
+          left: `${Math.min(4, cards.length - 1) * -1}px`, 
           zIndex: 10,
           animationDelay: isShuffling ? '0.4s' : '0s',
           cursor: canCycle ? 'pointer' : 'not-allowed',

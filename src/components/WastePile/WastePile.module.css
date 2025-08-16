@@ -7,8 +7,8 @@
   border-radius: 8px;
   border: 2px dashed rgba(255, 255, 255, 0.3);
   position: relative;
-  overflow: hidden;
   background: transparent;
+  /* Removed overflow: hidden to match foundation pile strategy */
 }
 
 /* Responsive waste pile container */

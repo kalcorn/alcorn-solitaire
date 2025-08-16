@@ -7,7 +7,7 @@ interface TableauSectionProps {
   isCardBeingDragged: (cardId: string) => boolean;
   isZoneHovered: (pileType: 'tableau', pileIndex: number) => boolean;
   onCardClick: (cardId: string, pileType: 'tableau', pileIndex: number, cardIndex: number) => void;
-  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
+  onCardDragStart: (cardId: string, event: React.MouseEvent | React.TouchEvent, position?: { pileType: 'tableau'; pileIndex: number; cardIndex: number }) => void;
   startDrag: (cards: Card[], source: CardPosition, event: React.MouseEvent | React.TouchEvent) => void;
   getMovableCards: (position: CardPosition) => Card[];
 }
@@ -22,7 +22,7 @@ const TableauSection: React.FC<TableauSectionProps> = ({
   getMovableCards,
 }) => {
   return (
-    <div className="flex flex-row justify-between w-full gap-1">
+    <div className="flex flex-row justify-between w-full gap-px">
       {tableauPiles.map((pile, i) => (
         <div 
           key={i} 

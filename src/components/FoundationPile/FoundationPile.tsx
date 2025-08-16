@@ -53,7 +53,7 @@ const FoundationPile: React.FC<FoundationPileProps> = ({ cards, index, onCardCli
               style={{ 
                 top: '50%',
                 left: '50%',
-                transform: `translate(-50%, -50%) translateY(${stackIndex * -1}px) translateX(${stackIndex * 0.5}px)`,
+                transform: `translate(-50%, -50%) translateY(${stackIndex * -1}px) translateX(${stackIndex * -1}px)`,
                 zIndex: stackIndex + 1
               }}
             >

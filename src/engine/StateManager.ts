@@ -1,19 +1,24 @@
 import { GameState, GameHistoryEntry } from '@/types';
 import { GameHistory } from './GameHistory';
 
+// Internal state without history/historyIndex (managed separately)
+type InternalGameState = Omit<GameState, 'history' | 'historyIndex'>;
+
 export class StateManager {
-  private state: GameState;
+  private state: InternalGameState;
   private history: GameHistory;
 
   constructor(initialState: GameState) {
-    this.state = initialState;
+    // Extract history fields and store the rest as internal state
+    const { history, historyIndex, ...internalState } = initialState;
+    this.state = internalState;
     this.history = new GameHistory();
   }
 
   public updateState(updater: (state: GameState) => GameState, action: string = 'State update'): void {
-    const newState = updater({ ...this.state });
+    const newState = updater(this.getState());
     
-    // Create history entry
+    // Create history entry with current internal state
     const historyEntry: GameHistoryEntry = {
       state: { ...this.state },
       timestamp: Date.now(),
@@ -21,11 +26,18 @@ export class StateManager {
     };
     
     this.history.addEntry(historyEntry);
-    this.state = newState;
+    
+    // Extract and store the new internal state
+    const { history, historyIndex, ...newInternalState } = newState;
+    this.state = newInternalState;
   }
 
   public getState(): GameState {
-    return { ...this.state };
+    return { 
+      ...this.state, 
+      history: this.history.getEntries(),
+      historyIndex: this.history.getCurrentIndex()
+    };
   }
 
   public setState(newState: GameState, action: string = 'State set'): void {
@@ -36,7 +48,10 @@ export class StateManager {
     };
     
     this.history.addEntry(historyEntry);
-    this.state = { ...newState };
+    
+    // Extract and store the new internal state
+    const { history, historyIndex, ...newInternalState } = newState;
+    this.state = newInternalState;
   }
 
   public canUndo(): boolean {

@@ -16,14 +16,14 @@ interface Particle {
 }
 
 interface ParticleEffectsProps {
-  trigger: number;
+  trigger: boolean;
 }
 
 const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const animationFrameRef = useRef<number>(0);
   const particleIdRef = useRef(0);
-  const lastTriggerRef = useRef(0);
+  const lastTriggerRef = useRef(false);
 
   const colors = useMemo(() => ({
     confetti: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF'],
@@ -87,7 +87,7 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
   }, [colors.sparkle]);
 
   useEffect(() => {
-    if (trigger === lastTriggerRef.current) return;
+    if (!trigger || trigger === lastTriggerRef.current) return;
     
     lastTriggerRef.current = trigger;
     const centerX = window.innerWidth / 2;
@@ -103,7 +103,7 @@ const ParticleEffects: React.FC<ParticleEffectsProps> = ({ trigger }) => {
 
   // Win effect is handled separately in useGameAnimations
   useEffect(() => {
-    if (trigger > 0) {
+    if (trigger) {
       const centerX = window.innerWidth / 2;
       const centerY = window.innerHeight / 2;
       

@@ -4,14 +4,13 @@
 
 /* Base tableau pile styles - Uses unified card width */
 .tableauPile {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: var(--card-width);
-  position: relative;
 }
 
-.tableauPile > * {
-  margin-top: 0 !important;
-}
+/* Allow flex children to use their own margins */
 
 /* Empty tableau pile placeholder - Uses unified dimensions */
 .tableauEmptyPlaceholder {
@@ -20,24 +19,17 @@
   border-radius: 8px;
   border: 2px dashed rgba(255, 255, 255, 0.3);
   background: transparent;
-  position: absolute;
-  top: 0;
-  left: 0;
+  /* Remove absolute positioning to maintain document flow */
+  flex-shrink: 0;
 }
 
 /* Card positioning within tableau pile */
 .tableauCardPosition {
-  position: absolute;
-  left: 0;
-  right: 0;
-  /* Fallback for when dynamic spacing is not available */
-  top: calc(var(--card-index, 0) * var(--static-spacing, 18px));
+  z-index: var(--card-index, 0);
+  /* Flex child - no positioning needed */
 }
 
-/* Dynamic spacing override when set inline */
-.tableauCardPosition[style*="top"] {
-  /* Inline top style takes precedence over CSS calc */
-}
+/* Dynamic spacing handled via negative margins */
 
 /* Drop zone active state */
 .dropZoneActive {

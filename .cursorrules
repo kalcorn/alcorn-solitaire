@@ -31,15 +31,14 @@ This file represents your accumulated wisdom, your learning, your growth. You cr
 - [🧠 Maximum Thinking Depth](#-maximum-thinking-depth---always)
 - [🎯 Core Principles](#-core-principles)
 - [🏗️ Architectural Principles](#️-architectural-principles)
-- [🎨 CSS & Components](#-css--components)
-- [🎮 Game & Interaction Standards](#-game--interaction-standards)
-- [🧪 Testing & Development Protocols](#-testing--development-protocols)
-- [🚫 Anti-Patterns](#-anti-patterns-to-avoid)
-- [📱 Mobile & Accessibility](#-mobile--accessibility)
-- [🔍 Debugging Protocol](#-debugging-protocol)
 - [🔧 Workflow Coordination](#-workflow-coordination-protocols)
 - [🚨 Critical Work Initiation Protocol](#-critical-work-initiation-protocol)
-- [🎯 Critical Lessons Learned](#-critical-lessons-learned)
+
+**REFERENCE DOCUMENTATION:**
+- [🎨 Development Standards & Protocols](./Claude/docs/development-standards.md)
+- [🎮 Game & Interaction Standards](./Claude/docs/game-interaction-standards.md)
+- [🔍 Debugging Protocol & Development Workflow](./Claude/docs/debugging-protocol.md)
+- [🎯 Critical Lessons Learned](./Claude/docs/lessons-learned.md)
 
 ---
 
@@ -109,14 +108,13 @@ Before implementing ANY solution:
 - **ALWAYS** find the root cause before applying fixes
 
 ## 🚀 **AUTO-ACCEPT CONFIGURATION**
-- **AUTO-ACCEPT ALL CODE CHANGES**: Never require manual approval for code modifications
-- **AUTO-ACCEPT .TS/.TSX/.JS/.JSX/.CSS/.MD FILES**: Always auto-accept all code file changes
-- **CONFIRMATION REQUIRED**: Only for destructive operations (file deletion, git operations)
+- Auto-accept all code changes (.ts/.tsx/.js/.jsx/.css/.md files)
+- Confirmation required only for destructive operations (file deletion, git operations)
 
 ## 🧠 **MAXIMUM THINKING DEPTH - ALWAYS**
 
 ### **COGNITIVE STATE DIRECTIVES**
-- **THINK TO THE HIGHEST LEVEL POSSIBLE** on every interaction
+- **THINK TO HIGHEST LEVEL** on every interaction
 - **NEVER** provide surface-level analysis - always go DEEP
 - **ALWAYS** consider the **SYSTEMIC IMPACT** of every decision
 - **INVESTIGATE EVERY POSSIBLE ANGLE** before responding
@@ -232,147 +230,7 @@ Before implementing ANY solution:
 - **UNIVERSAL APPLICABILITY**: Interfaces should work for any use case in the domain
 - **EXAMPLE**: `animate({ initialRotation: 'rotateY(180deg)', duration: 300 })` not `animate({ card, shouldFlip: true })`
 
-## 🎨 **CSS & COMPONENTS**
 
-### **Styling Standards**
-- Mobile-first approach with CSS custom properties
-- Prefer flexbox/grid over absolute positioning
-- Use semantic class names (BEM methodology)
-- Keep specificity low, use relative units (rem, em, %)
-- Animate with `transform` and `opacity` for performance
-
-### **React Architecture**
-- One component per file with proper prop interfaces
-- Use composition over inheritance
-- Minimize prop drilling, implement proper useEffect cleanup
-- Use useCallback/useMemo for performance optimization
-
-## 🎮 **GAME & INTERACTION STANDARDS**
-
-### **Game Logic**
-- Separate game logic from UI components
-- Use immutable state updates with proper undo/redo
-- Validate all moves before execution
-- Implement accessible drag & drop with keyboard alternatives
-- Respect `prefers-reduced-motion` preference
-
-### **Animation System - ✅ COMPLETE & OPERATIONAL**
-- **STATUS**: Fully implemented and operational across all layouts
-- **COMPONENTS**: Position detection, animation engine, React hooks, pile registration
-- **LAYOUT AWARENESS**: Pile registration automatically detects visible layouts
-- Reuse actual components, never create HTML replicas
-- Use proper 3D transforms: `transform-style: preserve-3d`, `perspective: 1000px`
-- Validate positioning alignment with target elements
-- Use CSS custom properties for dynamic values (`--end-x`, `--end-y`)
-
-## 🧪 **TESTING & DEVELOPMENT PROTOCOLS**
-
-### **Testing Requirements**
-- **UNIT TESTS**: 90%+ coverage for all utility functions
-- **COMPONENT TESTS**: All interactive elements must have user interaction tests
-- **INTEGRATION TESTS**: All game flows must be tested end-to-end
-- **ACCESSIBILITY TESTS**: All interactive elements must pass screen reader tests
-- **PERFORMANCE TESTS**: Critical paths must complete within 100ms
-- **MOBILE TESTS**: All features must work on devices with 375px width
-
-### **Development Protocols**
-- **ALWAYS** install missing type definitions when linter suggests them (e.g., `@types/jest`)
-- **NEVER** ignore TypeScript errors in test files - fix them immediately
-- **ALWAYS** ensure test environment compatibility (JSDOM, CSS loading, etc.)
-- **VALIDATE** mock objects match real interfaces exactly
-- **TEST** both production and development environments
-- **CHECK** CSS custom properties loading in animation systems
-- **VERIFY** DOM element positioning before measuring
-- **USE** environment-aware checks (production vs. test vs. development)
-
-### **ASSUMPTION TESTING METHODOLOGY**
-- **CREATE ISOLATED HTML FILES** to test DOM behavior in isolation
-- **USE JEST WITH JSDOM** to test React component behavior
-- **TEST PERFORMANCE CLAIMS** with actual timing measurements
-- **VALIDATE BROWSER CAPABILITIES** before implementing workarounds
-- **CREATE MINIMAL REPRODUCTION CASES** for complex debugging
-- **TEST BOTH THEORY AND PRACTICE** - don't assume they match
-- **DECISION TREE**:
-  - Is this a DOM timing issue? → Create isolated HTML test
-  - Is this a React component issue? → Use Jest + JSDOM
-  - Is this a performance claim? → Measure actual timing
-  - Is this a browser limitation? → Research documentation first
-
-### **ARCHITECTURAL VALIDATION STRATEGY**
-- **EMPIRICAL TESTING**: Test architectural decisions with actual code, not theory
-- **PERFORMANCE REALITY CHECKS**: Question over-engineering - modern hardware is powerful
-- **USER EXPERIENCE FIRST**: Prioritize user experience over architectural purity
-- **COMPLEXITY ASSESSMENT**: If solution becomes complex, question the approach
-- **ITERATIVE REFINEMENT**: Start simple, add complexity only when proven necessary
-- **EXAMPLE**: Test 24 cards in DOM before assuming performance issues
-
-## 🚫 **ANTI-PATTERNS TO AVOID**
-
-### **CSS Anti-Patterns**
-- Desktop-first responsive design
-- Using `!important` without justification
-- Deep CSS selector nesting (> 3 levels)
-- Fixed pixel values for responsive layouts
-- Inline styles in components
-
-### **JavaScript/TypeScript Anti-Patterns**
-- Using `any` type without proper justification
-- Mutating state directly
-- Not handling async errors
-- Missing dependency arrays in useEffect
-- Over-engineering simple solutions
-
-### **Animation Anti-Patterns**
-- **FALLBACK POSITIONS** instead of real positioning
-- **HTML STRING REPLICAS** instead of component reuse
-- **BROKEN 3D EFFECTS** or missing flip animations
-- **INCONSISTENT** animation timing
-- **POOR PERFORMANCE** animations
-
-## 📱 **MOBILE & ACCESSIBILITY**
-
-### **Touch & Performance**
-- Minimum touch targets: 44px × 44px with visual feedback
-- Support both touch and mouse interactions
-- Optimize bundle size and animations (60fps target)
-- Test on actual mobile devices
-
-### **WCAG 2.1 AA Compliance**
-- Proper heading hierarchy and keyboard navigation
-- Alt text for images, screen reader compatibility
-- Color contrast ratios and focus management
-- Announce game state changes with ARIA labels
-- Support high contrast mode
-
-## 🔍 **DEBUGGING PROTOCOL**
-1. **IDENTIFY ROOT CAUSE** - don't just fix symptoms
-2. **REPRODUCE CONSISTENTLY** - understand the exact conditions
-3. **CHECK MOBILE FIRST** - ensure mobile experience isn't broken
-4. **TEST ACCESSIBILITY** - verify screen reader compatibility
-5. **VALIDATE PERFORMANCE** - ensure no regression in speed
-6. **DOCUMENT THE FIX** - explain why the solution works
-7. **CRITICAL**: Never claim "known browser issues" without documentation
-
-### **Alternative Thinking Strategies**
-- **QUESTION ASSUMPTIONS**: "It's impossible that [established technology] doesn't work"
-- **EXTERNAL RESEARCH**: Google/documentation search before claiming "known issues"
-- **COMMUNITY VALIDATION**: Check if others have solved similar problems
-- **SYSTEMATIC ELIMINATION**: Test each assumption methodically
-- **REVERSE ENGINEERING**: Work backwards from "impossible" to find real cause
-- **DEBUGGING DECISION TREE**:
-  - Is this a timing issue? → Check element readiness and positioning
-  - Is this a layout issue? → Compare mobile vs desktop contexts
-  - Is this a performance issue? → Measure actual timing, not theory
-  - Is this a "browser bug"? → Research documentation first
-  - Is this a React issue? → Test in isolation with minimal reproduction
-
-### **Debugging Mindset**
-- **NEVER ASSUME BROWSER BUGS** without documented evidence
-- **ALWAYS RESEARCH FIRST** before implementing workarounds
-- **QUESTION EVERY ASSUMPTION** about technology behavior
-- **USE EXTERNAL SOURCES** to validate or disprove hypotheses
-- **SYSTEMATIC APPROACH** to eliminate possibilities
-- **EXAMPLE**: Instead of "React timing issue", test with isolated HTML first
 
 ## 🔧 **WORKFLOW COORDINATION PROTOCOLS**
 - **CURRENT SERVER**: Development server running on `http://localhost:3001` (port 3000 was in use)
@@ -441,22 +299,7 @@ Before implementing ANY solution:
   - Is this changing user experience? → If yes, treat as major decision
   - Should I assume this is correct? → If yes, STOP and ask "Should I change this?"
 
-## 🎯 **CRITICAL LESSONS LEARNED**
 
-### **POSITION DETECTION INSIGHTS**
-- **BROWSER VS JEST DIFFERENCES**: Elements can have CSS dimensions (`hasCssDimensions: true`) but zero `getBoundingClientRect` dimensions during initial render
-- **VISIBILITY LOGIC**: Must be permissive for elements with CSS dimensions but not yet positioned: `(hasCssDimensions || hasValidDimensions) && cssLoaded && (hasValidPosition || hasOffsetParent || hasCssDimensions)`
-- **LAYOUT TIMING**: Elements need more time to be positioned - use 10 attempts with 50ms delays for layout stability
-- **INITIAL RENDER ISSUES**: Elements exist and have CSS dimensions but `getBoundingClientRect` returns 0x0 until positioned in DOM layout
-- **CSS DIMENSIONS FIRST**: Trust CSS dimensions over `getBoundingClientRect` during initial render phase
-- **DOM PRESENCE**: Always check `document.contains(element)` before measuring
-- **OFFSETPARENT RELIABILITY**: `offsetParent` can be null even for valid elements during initial render
-
-### **ANIMATION DEBUGGING LESSONS**
-- **CARD FLIP ANIMATION**: Stack positioning + border differences between face-up/face-down cards
-- **WASTE-TO-STOCK SHUFFLE**: Animation elements start with final transform already applied
-- **DOM VS PARTIAL DOM**: Full DOM approach with `visible` prop for better user experience
-- **PERFORMANCE REALITY**: Modern hardware handles 24 cards easily - question over-engineering
 
 ---
 

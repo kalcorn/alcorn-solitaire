@@ -10,9 +10,9 @@
 
 :root {
   /* Mobile (default - up to 639px) */
-  --card-width: 52px;
+  --card-width: 49px;
   --card-height: 72px;
-  --card-aspect-ratio: 0.722; /* 52/72 = 0.722 (5:7 ratio) */
+  --card-aspect-ratio: 0.681; /* 49/72 = 0.681 (49:72 ratio) */
   
   /* Font sizes for card content */
   --card-font-size: 0.9rem;

@@ -54,8 +54,8 @@ const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragSta
                 className={isTopCard ? 'visible-card' : 'hidden-card'}
                 style={{
                   position: 'absolute',
-                  left: visualIndex * 1, // 1px offset for visual stacking (only top 3)
-                  top: visualIndex * 1,  // 1px offset for visual stacking (only top 3)
+                  left: visualIndex * -1, // 1px offset for visual stacking up-left (only top 3)
+                  top: visualIndex * -1,  // 1px offset for visual stacking up-left (only top 3)
                   zIndex: index + 1,
                   transform: 'translateZ(0)', // GPU acceleration
                   willChange: 'transform'

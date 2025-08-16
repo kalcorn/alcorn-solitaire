@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import { animateElement, animateElementSequence, AnimationOptions, SequenceOptions } from '@/utils/animationEngine';
+import { animateElement, animateElementSequence, AnimationConfig, SequenceOptions } from '@/utils/animationEngine';
 import { Card } from '@/types';
 
 export interface AnimationHook {
@@ -12,14 +12,14 @@ export interface AnimationHook {
   animateCard: (
     fromElement: HTMLElement,
     toElement: HTMLElement,
-    options: AnimationOptions
+    options: AnimationConfig
   ) => Promise<void>;
   
   animateSequence: (
     animations: Array<{
       fromElement: HTMLElement;
       toElement: HTMLElement;
-      options: AnimationOptions;
+      options: AnimationConfig;
     }>,
     sequenceOptions: SequenceOptions
   ) => Promise<void>;
@@ -53,7 +53,7 @@ export interface AnimationHook {
     animations: Array<{
       fromElement: HTMLElement;
       toElement: HTMLElement;
-      options: AnimationOptions;
+      options: AnimationConfig;
     }>,
     sequenceOptions: SequenceOptions
   ) => Promise<void>;
@@ -62,12 +62,12 @@ export interface AnimationHook {
   animateMove: (
     fromElement: HTMLElement | null,
     toElement: HTMLElement | null,
-    options?: Partial<AnimationOptions>
+    options?: Partial<AnimationConfig>
   ) => Promise<void>;
   
   animateFlip: (
     element: HTMLElement | null,
-    options?: Partial<AnimationOptions>
+    options?: Partial<AnimationConfig>
   ) => Promise<void>;
 }
 
@@ -75,7 +75,7 @@ export function useAnimation(): AnimationHook {
   const animateCard = useCallback(async (
     fromElement: HTMLElement,
     toElement: HTMLElement,
-    options: AnimationOptions
+    options: AnimationConfig
   ): Promise<void> => {
     return animateElement(fromElement, toElement, options);
   }, []);
@@ -84,7 +84,7 @@ export function useAnimation(): AnimationHook {
     animations: Array<{
       fromElement: HTMLElement;
       toElement: HTMLElement;
-      options: AnimationOptions;
+      options: AnimationConfig;
     }>,
     sequenceOptions: SequenceOptions
   ): Promise<void> => {
@@ -101,9 +101,7 @@ export function useAnimation(): AnimationHook {
     return animateElement(stockElement, wasteElement, {
       type: 'flip',
       duration: 600,
-      card,
-      onComplete,
-      onError
+      onComplete
     });
   }, []);
 
@@ -117,8 +115,7 @@ export function useAnimation(): AnimationHook {
     return animateElement(fromElement, toElement, {
       type: 'move',
       duration: 300,
-      onComplete,
-      onError
+      onComplete
     });
   }, []);
 
@@ -160,8 +157,7 @@ export function useAnimation(): AnimationHook {
     return animateElementSequence(animations, {
       staggerDelay,
       totalDuration,
-      onComplete,
-      onError
+      onComplete
     });
   }, []);
 
@@ -169,7 +165,7 @@ export function useAnimation(): AnimationHook {
     animations: Array<{
       fromElement: HTMLElement;
       toElement: HTMLElement;
-      options: AnimationOptions;
+      options: AnimationConfig;
     }>,
     sequenceOptions: SequenceOptions
   ): Promise<void> => {
@@ -180,7 +176,7 @@ export function useAnimation(): AnimationHook {
   const animateMove = useCallback(async (
     fromElement: HTMLElement | null,
     toElement: HTMLElement | null,
-    options: Partial<AnimationOptions> = {}
+    options: Partial<AnimationConfig> = {}
   ): Promise<void> => {
     if (!fromElement || !toElement) {
       return;
@@ -195,7 +191,7 @@ export function useAnimation(): AnimationHook {
 
   const animateFlip = useCallback(async (
     element: HTMLElement | null,
-    options: Partial<AnimationOptions> = {}
+    options: Partial<AnimationConfig> = {}
   ): Promise<void> => {
     if (!element) {
       return;

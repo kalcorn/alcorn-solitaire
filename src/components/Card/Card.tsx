@@ -5,6 +5,20 @@ import { BsSuitHeartFill, BsSuitDiamondFill, BsSuitClubFill, BsSuitSpadeFill } f
 import { cn } from '@/utils/cssUtils';
 import cardStyles from './Card.module.css';
 
+// Import all face card images for bundling
+import jackHearts from '/public/cards/jack-hearts.svg';
+import jackDiamonds from '/public/cards/jack-diamonds.svg';
+import jackClubs from '/public/cards/jack-clubs.svg';
+import jackSpades from '/public/cards/jack-spades.svg';
+import queenHearts from '/public/cards/queen-hearts.svg';
+import queenDiamonds from '/public/cards/queen-diamonds.svg';
+import queenClubs from '/public/cards/queen-clubs.svg';
+import queenSpades from '/public/cards/queen-spades.svg';
+import kingHearts from '/public/cards/king-hearts.svg';
+import kingDiamonds from '/public/cards/king-diamonds.svg';
+import kingClubs from '/public/cards/king-clubs.svg';
+import kingSpades from '/public/cards/king-spades.svg';
+
 interface CardProps {
   suit: Suit;
   rank: number;
@@ -27,6 +41,22 @@ const suitIcons = {
   spades: BsSuitSpadeFill,
 };
 
+// Face card image mapping
+const faceCardImages = {
+  'jack-hearts': jackHearts,
+  'jack-diamonds': jackDiamonds,
+  'jack-clubs': jackClubs,
+  'jack-spades': jackSpades,
+  'queen-hearts': queenHearts,
+  'queen-diamonds': queenDiamonds,
+  'queen-clubs': queenClubs,
+  'queen-spades': queenSpades,
+  'king-hearts': kingHearts,
+  'king-diamonds': kingDiamonds,
+  'king-clubs': kingClubs,
+  'king-spades': kingSpades,
+};
+
 const rankMap = {
   1: "A", 11: "J", 12: "Q", 13: "K"
 };
@@ -42,12 +72,13 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId,
   // Check if this is a face card
   const isFaceCard = rank === 11 || rank === 12 || rank === 13; // Jack, Queen, King
   
-  // Get the appropriate SVG path for face cards
-  const getFaceCardSvg = () => {
+  // Get the appropriate imported image for face cards
+  const getFaceCardImage = () => {
     if (!isFaceCard) return null;
     const cardNames = { 11: 'jack', 12: 'queen', 13: 'king' };
     const cardName = cardNames[rank as keyof typeof cardNames];
-    return `/cards/${cardName}-${suit}.svg`;
+    const imageKey = `${cardName}-${suit}` as keyof typeof faceCardImages;
+    return faceCardImages[imageKey];
   };
 
   const handleMouseDown = (event: React.MouseEvent) => {
@@ -176,12 +207,12 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId,
       }}
     >
       {faceUp ? (
-        <div className="relative w-full h-full bg-gradient-to-br from-white to-blue-50 border border-blue-200 rounded-lg shadow-lg overflow-hidden">
+        <div className="relative w-full h-full bg-white border border-blue-200 rounded-lg shadow-lg overflow-hidden">
           {isFaceCard ? (
             /* Face Card SVG Display */
             <div className="relative w-full h-full overflow-hidden rounded-lg flex flex-col justify-end">
               <Image 
-                src={getFaceCardSvg()!} 
+                src={getFaceCardImage()!} 
                 alt={`${displayRank} of ${suit}`}
                 width={120}
                 height={168}
@@ -219,13 +250,10 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId,
                     {/* Left half of the icon */}
                     <div className="absolute inset-0 overflow-hidden" style={{ clipPath: 'polygon(0 0, 50% 0, 50% 100%, 0 100%)' }}>
                       <SuitIcon 
-                        className={`${suit === 'hearts' || suit === 'diamonds' ? 'text-red-500' : 'text-gray-700'} drop-shadow-lg`}
+                        className={`${suit === 'hearts' || suit === 'diamonds' ? 'text-red-500' : 'text-gray-700'}`}
                         style={{
                           width: 'clamp(1.2rem, 4vw, 4rem)',
-                          height: 'clamp(1.2rem, 4vw, 4rem)',
-                          filter: suit === 'hearts' || suit === 'diamonds' 
-                            ? 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.3)) drop-shadow(0 2px 4px rgba(220, 38, 38, 0.4))'
-                            : 'drop-shadow(0 0 8px rgba(55, 65, 81, 0.3)) drop-shadow(0 2px 4px rgba(31, 41, 55, 0.4))'
+                          height: 'clamp(1.2rem, 4vw, 4rem)'
                         }} 
                       />
                     </div>
@@ -235,10 +263,7 @@ const Card: React.FC<CardProps> = ({ suit, rank, faceUp, visible = true, cardId,
                         className={suit === 'hearts' || suit === 'diamonds' ? 'text-red-400' : 'text-gray-600'}
                         style={{
                           width: 'clamp(1.2rem, 4vw, 4rem)',
-                          height: 'clamp(1.2rem, 4vw, 4rem)',
-                          filter: suit === 'hearts' || suit === 'diamonds' 
-                            ? 'drop-shadow(0 0 6px rgba(248, 113, 113, 0.4)) drop-shadow(0 2px 4px rgba(239, 68, 68, 0.3))'
-                            : 'drop-shadow(0 0 6px rgba(75, 85, 99, 0.4)) drop-shadow(0 2px 4px rgba(55, 65, 81, 0.3))'
+                          height: 'clamp(1.2rem, 4vw, 4rem)'
                         }} 
                       />
                     </div>
