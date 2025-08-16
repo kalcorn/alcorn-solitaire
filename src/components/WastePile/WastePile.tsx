@@ -15,8 +15,8 @@ interface WastePileProps {
 }
 
 const WastePile: React.FC<WastePileProps> = ({ cards, onCardClick, onCardDragStart, isCardBeingDragged, cardVisibility, isShuffling = false }) => {
-  // Don't show empty state during shuffle animation, even if no cards remain
-  const hasVisibleCards = cards.length > 0 || isShuffling;
+  // Show placeholder when no cards are present
+  const hasVisibleCards = cards.length > 0;
 
   // Register this pile with the animation system
   // Register this pile with the new animation system

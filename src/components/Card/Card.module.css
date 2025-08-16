@@ -56,12 +56,14 @@
 
 /* Stock and waste pile cards should not have hover effects */
 .stockPile .card:hover,
-.wastePile .card:hover {
-  transform: none;
+.wastePile .card:hover,
+[data-pile-type="stock"] .card:hover,
+[data-pile-type="waste"] .card:hover {
+  transform: none !important;
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.35),
     0 4px 8px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Playable card state */
