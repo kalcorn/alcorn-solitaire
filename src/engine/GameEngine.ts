@@ -48,6 +48,14 @@ export class GameEngine {
     return this.actions.executeStockFlip();
   }
 
+  public flipStockOnly(): MoveResult {
+    return this.actions.executeStockOnly();
+  }
+
+  public addToWaste(card: Card): MoveResult {
+    return this.actions.executeWasteAdd(card);
+  }
+
   public startNewGame(seed?: number): void {
     this.actions.executeNewGame(seed);
   }

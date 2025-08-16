@@ -49,6 +49,76 @@ export class GameActions {
   }
 
   /**
+   * Executes stock flip - removes card from stock pile only
+   */
+  public executeStockOnly(): MoveResult {
+    const currentState = this.engine.getState();
+    
+    if (currentState.stockPile.length === 0) {
+      return { success: false, error: 'No cards in stock pile' };
+    }
+
+    const drawCount = currentState.settings.drawCount;
+    const cardsToFlip = Math.min(drawCount, currentState.stockPile.length);
+    
+    if (cardsToFlip === 0) {
+      return { success: false, error: 'No cards to flip' };
+    }
+
+    const newState = { ...currentState };
+    // Remove cards from stock pile only
+    newState.stockPile = newState.stockPile.slice(0, -cardsToFlip);
+
+    this.engine.getStateManager().setState(newState, 'Remove cards from stock');
+    
+    this.engine.emit({
+      type: GameEventType.STATE_CHANGED,
+      payload: { state: newState },
+      timestamp: Date.now()
+    });
+
+    return { 
+      success: true, 
+      newGameState: newState 
+    };
+  }
+
+  /**
+   * Adds card to waste pile only
+   */
+  public executeWasteAdd(card: Card): MoveResult {
+    const currentState = this.engine.getState();
+    
+    const newState = { ...currentState };
+    const flippedCard = {
+      ...card,
+      faceUp: true,
+      draggable: true
+    };
+    
+    newState.wastePile = [...newState.wastePile, flippedCard];
+
+    this.engine.getStateManager().setState(newState, 'Add card to waste');
+    
+    this.engine.emit({
+      type: GameEventType.STOCK_FLIPPED,
+      payload: { action: 'flip', state: newState },
+      timestamp: Date.now()
+    });
+
+    this.engine.emit({
+      type: GameEventType.STATE_CHANGED,
+      payload: { state: newState },
+      timestamp: Date.now()
+    });
+
+    return { 
+      success: true, 
+      newGameState: newState 
+    };
+  }
+
+  /**
    * Executes stock flip
    */
   public executeStockFlip(): MoveResult {

@@ -67,7 +67,7 @@ const GameBoard: React.FC = () => {
   const handleStockFlip = useCallback(async (event?: React.MouseEvent) => {
     if (!event) return;
     
-    // First get the card that would be flipped without updating state yet
+    // Get the card that will be flipped
     const stockCard = state.stockPile[state.stockPile.length - 1];
     if (!stockCard) {
       // Handle empty stock case (recycling) - just call the action
@@ -97,30 +97,29 @@ const GameBoard: React.FC = () => {
       const currentWasteCount = state.wastePile.length;
       
       if (currentWasteCount === 0) {
-        // Empty waste pile: move to placeholder position (final adjustment)
-        wastePosition = {
-          x: wasteRect.left + 20, // 1px more to the left
-          y: wasteRect.top + 34   // Keep y position
+        // First card special position
+        wastePosition = { 
+          x: wasteRect.left + 20, 
+          y: wasteRect.top + 34 
         };
       } else {
-        // Waste pile has cards: calculate where the NEW card will be positioned
-        // After adding the new card, what will be its position?
+        // Cards 2+ follow a simple pattern: move up/left by 1px per "level"
         const newWasteCount = currentWasteCount + 1;
-        const cardsShown = Math.min(3, newWasteCount);
-        const newCardSliceIndex = cardsShown - 1; // New card will be the last in slice
-        const newCardVisualIndex = 2 - newCardSliceIndex;
-        
+        const offset = Math.max(0, 3 - newWasteCount); // 2,1,0 for counts 1,2,3+
         wastePosition = {
-          x: wasteRect.left + 22 + (newCardVisualIndex * -1), // Apply offset where new card will land
-          y: wasteRect.top + 36 + (newCardVisualIndex * -1)   // Apply offset where new card will land
+          x: wasteRect.left + 22 - offset,
+          y: wasteRect.top + 36 - offset
         };
       }
     }
     
-    // Start animation first, then update state when animation completes
+    // Update stock pile immediately, then start animation
+    actions.flipStockOnly();
+    
+    // Start animation, then add card to waste when animation completes
     await animateStockFlip(stockCard, stockPosition, wastePosition, () => {
-      // Update game state after animation completes
-      actions.flipStock(false);
+      // Add card to waste pile after animation completes
+      actions.addToWaste(stockCard);
     });
   }, [actions, animateStockFlip, state.stockPile, state.wastePile]);
 

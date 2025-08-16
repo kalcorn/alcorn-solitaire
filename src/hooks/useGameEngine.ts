@@ -166,6 +166,15 @@ export function useGameEngine() {
     return engine.flipStock();
   }, [engine, gameStarted]);
 
+  const flipStockOnly = useCallback((): MoveResult => {
+    if (!gameStarted) setGameStarted(true);
+    return engine.flipStockOnly();
+  }, [engine, gameStarted]);
+
+  const addToWaste = useCallback((card: Card): MoveResult => {
+    return engine.addToWaste(card);
+  }, [engine]);
+
   const startNewGame = useCallback((seed?: number) => {
     engine.startNewGame(seed);
   }, [engine]);
@@ -219,6 +228,8 @@ export function useGameEngine() {
   const actions = useMemo(() => ({
     moveCards,
     flipStock,
+    flipStockOnly,
+    addToWaste,
     startNewGame,
     undo,
     autoMoveToFoundation,
@@ -233,6 +244,8 @@ export function useGameEngine() {
   }), [
     moveCards,
     flipStock,
+    flipStockOnly,
+    addToWaste,
     startNewGame,
     undo,
     autoMoveToFoundation,
